@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{49E9CB98-76D1-495A-8953-068A88538075}</ProjectGuid>
+    <ProjectGuid>{5C56475F-F797-4C69-83F5-D5920C204E4A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SquareEngine</RootNamespace>
-    <AssemblyName>SquareEngine</AssemblyName>
+    <RootNamespace>Square_Engine</RootNamespace>
+    <AssemblyName>Square Engine</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

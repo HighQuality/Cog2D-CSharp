@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SquareEngine")]
+[assembly: AssemblyTitle("Square Engine")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SquareEngine")]
+[assembly: AssemblyProduct("Square Engine")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("70d9ae08-40e1-43a1-8c95-f2d4235be9a3")]
+[assembly: Guid("465cd6c0-d9fa-4b37-8196-b6ff5ea16dff")]
 
 // Version information for an assembly consists of the following four values:
 //

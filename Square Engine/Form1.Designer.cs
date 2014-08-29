@@ -1,4 +1,4 @@
-﻿namespace SquareEngine
+﻿namespace Square_Engine
 {
     partial class Form1
     {

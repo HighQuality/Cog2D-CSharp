@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SquareEngine
+namespace Square_Engine
 {
     public partial class Form1 : Form
     {
