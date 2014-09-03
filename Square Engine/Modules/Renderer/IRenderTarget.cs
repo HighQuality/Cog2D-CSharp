@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.Renderer
 {
-    public interface ITexture
+    public interface IRenderTarget
     {
+        void RenderTexture(ITexture texture, Vector2 screenCoords);
     }
 }

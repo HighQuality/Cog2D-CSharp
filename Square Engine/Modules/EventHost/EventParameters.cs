@@ -8,6 +8,12 @@ namespace Square.Modules.EventHost
 {
     public class EventParameters
     {
-        public Object Sender;
+        public Object Sender { get; private set; }
+        public bool Intercept;
+
+        public EventParameters(Object sender)
+        {
+            this.Sender = sender;
+        }
     }
 }

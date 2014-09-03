@@ -32,6 +32,11 @@ namespace Square.Modules.Renderer
         bool VerticalSynchronization { get; set; }
 
         /// <summary>
+        /// Gets the current render target
+        /// </summary>
+        IRenderTarget RenderTarget { get; }
+
+        /// <summary>
         /// Commands the window to dispatch it's queued events
         /// </summary>
         void DispatchEvents();

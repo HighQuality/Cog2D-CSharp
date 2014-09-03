@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Square.Modules.Renderer
+namespace Square.Modules.EventHost
 {
-    public interface ITexture
+    public struct EventIdentifier
     {
+        public string UniqueIdentifier;
+        public Type Type;
     }
 }

@@ -13,5 +13,10 @@ namespace Square.SfmlRenderer
         {
             return new SfmlWindow(title, width, height, style);
         }
+
+        public ITexture LoadTexture(string filename)
+        {
+            return new SfmlTexture(filename);
+        }
     }
 }

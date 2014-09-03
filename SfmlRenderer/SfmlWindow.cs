@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Square.SfmlRenderer
 {
-    public class SfmlWindow : IWindow
+    public class SfmlWindow : IWindow, IRenderTarget
     {
         internal RenderWindow InnerWindow;
 
@@ -24,6 +24,8 @@ namespace Square.SfmlRenderer
         public bool VerticalSynchronization { get { return _vsync; } set { _vsync = value; InnerWindow.SetVerticalSyncEnabled(_vsync); } }
 
         internal IEventHostModule Events;
+
+        public IRenderTarget RenderTarget { get { return this; } }
 
         public SfmlWindow(string title, int width, int height, WindowStyle style)
         {
@@ -53,15 +55,9 @@ namespace Square.SfmlRenderer
 
         void InnerWindow_KeyPressed(object sender, SFML.Window.KeyEventArgs e)
         {
-            var keyEvent = Events.FindEvent(e.Code.ToString() + " pressed");
-            if (keyEvent != null)
-                keyEvent.Trigger();
         }
         void InnerWindow_KeyReleased(object sender, SFML.Window.KeyEventArgs e)
         {
-            var keyEvent = Events.FindEvent(e.Code.ToString() + " released");
-            if (keyEvent != null)
-                keyEvent.Trigger();
         }
 
         public void DispatchEvents()
@@ -98,6 +94,14 @@ namespace Square.SfmlRenderer
                 eventHost.CreateEvent(key + " up");
                 eventHost.CreateEvent(key + " pressed");
             }
+        }
+
+        public void RenderTexture(ITexture texture, Vector2 worldCoords)
+        {
+            Sprite sprite = new Sprite();
+            sprite.Position = new SFML.System.Vector2f(worldCoords.X, worldCoords.Y);
+            sprite.Texture = ((SfmlTexture)texture).Texture;
+            sprite.Draw(InnerWindow, new RenderStates());
         }
     }
 }
