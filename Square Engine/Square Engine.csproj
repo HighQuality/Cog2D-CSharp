@@ -95,6 +95,7 @@
     <Compile Include="Modules\Content\LinearPhysicsComponent.cs" />
     <Compile Include="Modules\Content\SpriteComponent.cs" />
     <Compile Include="Modules\EventHost\CloseButtonEvent.cs" />
+    <Compile Include="Modules\EventHost\ComponentEventAttribute.cs" />
     <Compile Include="Modules\EventHost\Event.cs" />
     <Compile Include="Modules\EventHost\EventIdentifier.cs" />
     <Compile Include="Modules\EventHost\EventList.cs" />

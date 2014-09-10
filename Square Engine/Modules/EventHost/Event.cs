@@ -67,7 +67,7 @@ namespace Square.Modules.EventHost
             if (!listeners.TryGetValue(priority, out listenerList))
             {
                 listenerList = new List<EventListener<T>>();
-                listeners.Add(priority, listenerList);
+                listeners.Add(-priority, listenerList);
             }
             listenerList.Add(listener);
             return listener;

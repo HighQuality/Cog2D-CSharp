@@ -17,24 +17,33 @@ namespace TestGame
         {
             Engine.Initialize<SfmlRenderer>();
 
-            ITexture texture = null;
+            GameObject gameObject = null;
 
             Engine.EventHost.RegisterEvent<LoadContentEvent>(1, e =>
             {
-                texture = Engine.Renderer.LoadTexture("texture.png");
-
                 var menuScene = Engine.SceneHost.CurrentScene;
 
-                var obj = new GameObject(menuScene);
-                obj.AddComponenet<MovementComponent>();
-                var spriteComponent = obj.AddComponenet<SpriteComponent>();
-                spriteComponent.Texture = texture;
+                gameObject = new GameObject(menuScene);
+                gameObject.AddComponenet<MovementComponent>();
+                var spriteComponent = gameObject.AddComponenet<SpriteComponent>();
+                spriteComponent.Texture = Engine.Renderer.LoadTexture("texture.png");
                 //spriteComponent.CoordOffset = texture.Size / 2f;
             });
 
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
 
+            });
+
+            Engine.EventHost.RegisterEvent<CloseButtonEvent>(100, e =>
+            {
+                if (gameObject != null)
+                {
+                    gameObject.Remove();
+                    gameObject = null;
+
+                    e.Intercept = true;
+                }
             });
             
             Engine.StartGame("Test Game", 640, 480, WindowStyle.Default);

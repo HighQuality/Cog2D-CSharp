@@ -14,10 +14,12 @@ namespace Square.Modules.Content
         public Vector2 WorldCoord { get; set; }
         public Dictionary<Type, GameComponent> Components = new Dictionary<Type, GameComponent>();
         public Scene Scene { get; private set; }
+        public bool DoRemove { get; private set; }
 
         public GameObject(Scene scene)
         {
             this.Scene = scene;
+            this.Scene.AddObject(this);
         }
 
         public T AddComponenet<T>()
@@ -31,30 +33,29 @@ namespace Square.Modules.Content
             typeof(T).GetConstructor(new Type[0]).Invoke((object)component, new object[0]);
             Components.Add(typeof(T), component);
 
-            var currentType = typeof(T);
-
-            do
-            {
-                foreach (var method in currentType.GetMethods())
-                {
-                    if (method.DeclaringType != currentType)
-                        continue;
-                    var baseDefinition = method.GetBaseDefinition();
-                    if (baseDefinition == null || baseDefinition.DeclaringType != typeof(GameComponent))
-                        continue;
-                    component.RegisterFunction(method.Name);
-                }
-                currentType = currentType.BaseType;
-            }
-            while (currentType != typeof(GameComponent));
+            component.RegisterFunctions(Scene.EventModule);
 
             return component;
         }
 
         public void RemoveComponent<T>()
+            where T : GameComponent
         {
-            Components.Remove(typeof(T));
-            throw new NotImplementedException();
+            GameComponent comp;
+            if (Components.TryGetValue(typeof(T), out comp))
+            {
+                comp.ObjectRemoved();
+                Components.Remove(typeof(T));
+            }
+        }
+        
+        public void Remove()
+        {
+            foreach (var component in Components)
+                component.Value.ObjectRemoved();
+            Components.Clear();
+
+            DoRemove = true;
         }
     }
 }

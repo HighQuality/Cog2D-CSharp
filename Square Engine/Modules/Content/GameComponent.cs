@@ -19,11 +19,15 @@ namespace Square.Modules.Content
         {
         }
 
+        [ComponentEvent(true)]
         public virtual void KeyDown(Keyboard.Key key) { }
         public virtual void KeyUp(Keyboard.Key key) { }
+        [ComponentEvent(true)]
         public virtual void Update(float deltaTime) { }
+        [ComponentEvent(true)]
         public virtual void Draw(IRenderTarget renderTarget) { }
-        
+
+        [ComponentEvent(false)]
         public virtual void ObjectRemoved()
         {
             // Cancel registered event listeners
@@ -32,20 +36,50 @@ namespace Square.Modules.Content
             registeredFunctions.Clear();
         }
 
-        internal void RegisterFunction(string functionName)
+        private void RegisterFunction(string functionName)
         {
             // Don't do anything if the function is already registered
             if (registeredFunctions.ContainsKey(functionName))
                 return;
 
+            IEventListener listener = null;
             if (functionName == "Update")
-                registeredFunctions.Add(functionName, GameObject.Scene.EventModule.RegisterEvent<UpdateEvent>(0, e => Update(e.DeltaTime)));
+                listener = GameObject.Scene.EventModule.RegisterEvent<UpdateEvent>(0, e => Update(e.DeltaTime));
             else if (functionName == "Draw")
-                registeredFunctions.Add(functionName, GameObject.Scene.EventModule.RegisterEvent<DrawEvent>(0, e => Draw(e.RenderTarget)));
+                listener = GameObject.Scene.EventModule.RegisterEvent<DrawEvent>(0, e => Draw(e.RenderTarget));
             else if (functionName == "KeyDown")
-                registeredFunctions.Add(functionName, GameObject.Scene.EventModule.RegisterEvent<KeyDownEvent>(0, e => { KeyDown(e.Key); e.KeyUpEvent = () => KeyUp(e.Key); e.Intercept = true; }));
+                listener = GameObject.Scene.EventModule.RegisterEvent<KeyDownEvent>(0, e => { KeyDown(e.Key); e.KeyUpEvent = () => KeyUp(e.Key); e.Intercept = true; });
             else
                 Console.WriteLine("Tried to register function with no registration handler: " + functionName);
+
+            if (listener != null)
+                registeredFunctions.Add(functionName, listener);
+        }
+
+        internal void RegisterFunctions(EventModule events)
+        {
+            var currentType = GetType();
+
+            do
+            {
+                foreach (var method in currentType.GetMethods())
+                {
+                    if (method.DeclaringType != currentType)
+                        continue;
+                    var eventAttribute = (ComponentEventAttribute)method.GetCustomAttributes(typeof(ComponentEventAttribute), true).FirstOrDefault();
+                    if (eventAttribute == null)
+                        continue;
+                    if (eventAttribute.RequireOverride)
+                    {
+                        var baseDefinition = method.GetBaseDefinition();
+                        if (baseDefinition == null || baseDefinition.DeclaringType != typeof(GameComponent))
+                            continue;
+                    }
+                    RegisterFunction(method.Name);
+                }
+                currentType = currentType.BaseType;
+            }
+            while (currentType != typeof(GameComponent));
         }
     }
 }

@@ -54,6 +54,8 @@ namespace Square
             window.VerticalSynchronization = true;
 
             EventHost.GetEvent<LoadContentEvent>().Trigger(new LoadContentEvent(null));
+            EventHost.RegisterEvent<ExitEvent>(-999, e => { window.Close(); e.Intercept = true; });
+            EventHost.RegisterEvent<CloseButtonEvent>(-999, e => { EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null)); e.Intercept = true; });
 
             Stopwatch watch = Stopwatch.StartNew();
             while (window.IsOpen)
