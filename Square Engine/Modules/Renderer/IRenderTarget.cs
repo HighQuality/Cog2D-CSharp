@@ -8,6 +8,6 @@ namespace Square.Modules.Renderer
 {
     public interface IRenderTarget
     {
-        void RenderTexture(ITexture texture, Vector2 screenCoords);
+        void RenderTexture(ITexture texture, Vector2 windowCoords);
     }
 }

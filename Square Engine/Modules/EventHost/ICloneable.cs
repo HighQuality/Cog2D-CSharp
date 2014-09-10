@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.EventHost
 {
-    public struct EventIdentifier
+    public interface ICloneable<T>
     {
-        public int UniqueIdentifier;
-        public Type Type;
+        T Clone();
     }
 }

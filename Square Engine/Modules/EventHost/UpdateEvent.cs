@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.EventHost
 {
-    public class UpdateEvent : EventParameters
+    public class UpdateEvent : EventParameters, ICloneable<UpdateEvent>
     {
         /// <summary>
         /// The time that has elapsed since the last frame
@@ -17,6 +17,16 @@ namespace Square.Modules.EventHost
             : base(sender)
         {
             this.DeltaTime = deltaTime;
+        }
+
+        public UpdateEvent(UpdateEvent clone)
+            : this(clone.Sender, clone.DeltaTime)
+        {
+        }
+
+        public UpdateEvent Clone()
+        {
+            return new UpdateEvent(this);
         }
     }
 }

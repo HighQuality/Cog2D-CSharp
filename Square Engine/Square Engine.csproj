@@ -87,14 +87,25 @@
   <ItemGroup>
     <Compile Include="Color.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Keyboard.cs" />
+    <Compile Include="Modules\Content\GameComponent.cs" />
+    <Compile Include="Modules\Content\GameObject.cs" />
     <Compile Include="Modules\Content\IContentModule.cs" />
+    <Compile Include="Modules\Content\MovementComponent.cs" />
+    <Compile Include="Modules\Content\LinearPhysicsComponent.cs" />
+    <Compile Include="Modules\Content\SpriteComponent.cs" />
+    <Compile Include="Modules\EventHost\CloseButtonEvent.cs" />
     <Compile Include="Modules\EventHost\Event.cs" />
     <Compile Include="Modules\EventHost\EventIdentifier.cs" />
+    <Compile Include="Modules\EventHost\EventList.cs" />
+    <Compile Include="Modules\EventHost\EventListener.cs" />
     <Compile Include="Modules\EventHost\EventModule.cs" />
     <Compile Include="Modules\EventHost\EventParameters.cs" />
+    <Compile Include="Modules\EventHost\ExitEvent.cs" />
+    <Compile Include="Modules\EventHost\ICloneable.cs" />
     <Compile Include="Modules\EventHost\IEvent.cs" />
-    <Compile Include="Modules\EventHost\IEventHostModule.cs" />
     <Compile Include="Modules\EventHost\IEventListener.cs" />
+    <Compile Include="Modules\EventHost\KeyDownEvent.cs" />
     <Compile Include="Modules\EventHost\LoadContentEvent.cs" />
     <Compile Include="Modules\EventHost\UpdateEvent.cs" />
     <Compile Include="Modules\Renderer\DrawEvent.cs" />
@@ -104,6 +115,8 @@
     <Compile Include="Modules\Renderer\IWindow.cs" />
     <Compile Include="Modules\Renderer\WindowStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenes\Scene.cs" />
+    <Compile Include="Scenes\SceneManager.cs" />
     <Compile Include="Vector2.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

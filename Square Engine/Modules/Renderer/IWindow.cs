@@ -59,11 +59,5 @@ namespace Square.Modules.Renderer
         /// Depending on the renderer, changes may be applied before this method is called.
         /// </summary>
         void ApplyChanges();
-
-        /// <summary>
-        /// Creates events for input from this window
-        /// </summary>
-        /// <param name="eventModule">The Event Host Module to create the events in</param>
-        void CreateInputEvents(IEventHostModule eventHost);
     }
 }

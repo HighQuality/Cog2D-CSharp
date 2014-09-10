@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.Renderer
 {
-    public class DrawEvent : EventParameters
+    public class DrawEvent : EventParameters, ICloneable<DrawEvent>
     {
         public IRenderTarget RenderTarget { get; private set; }
 
@@ -15,6 +15,16 @@ namespace Square.Modules.Renderer
             : base(sender)
         {
             this.RenderTarget = renderTarget;
+        }
+
+        public DrawEvent(DrawEvent clone)
+            : this(clone.Sender, clone.RenderTarget)
+        {
+        }
+
+        public DrawEvent Clone()
+        {
+            return new DrawEvent(this);
         }
     }
 }

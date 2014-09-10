@@ -10,6 +10,7 @@ using System.IO;
 using Square.Modules.Renderer;
 using Square.Modules.EventHost;
 using System.Diagnostics;
+using Square.Scenes;
 
 namespace Square
 {
@@ -26,6 +27,10 @@ namespace Square
         /// The current event host
         /// </summary>
         public static EventModule EventHost { get; private set; }
+        /// <summary>
+        /// The current scene manager
+        /// </summary>
+        public static SceneManager SceneHost { get; private set; }
 
         /// <summary>
         /// Initializes Square Engine making it's modules available for use
@@ -35,6 +40,7 @@ namespace Square
             where TRenderer : IRenderModule, new()
         {
             EventHost = new EventModule();
+            SceneHost = new SceneManager();
             Renderer = new TRenderer();
         }
 
@@ -44,7 +50,7 @@ namespace Square
         /// </summary>
         public static void StartGame(string title, int width, int height, WindowStyle style)
         {
-            var window = Renderer.CreateWindow(title, width, height, style);
+            var window = Renderer.CreateWindow(title, width, height, style, EventHost);
             window.VerticalSynchronization = true;
 
             EventHost.GetEvent<LoadContentEvent>().Trigger(new LoadContentEvent(null));

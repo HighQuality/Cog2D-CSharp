@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.EventHost
 {
-    public interface IEventHostModule
+    public class CloseButtonEvent : EventParameters
     {
-        IEvent CreateEvent(string name);
-        IEvent FindEvent(string name);
-        IEvent DestroyEvent(string name);
+        public CloseButtonEvent(Object sender)
+            : base(sender)
+        {
+        }
     }
 }

@@ -7,6 +7,7 @@ using Square;
 using Square.SfmlRenderer;
 using Square.Modules.Renderer;
 using Square.Modules.EventHost;
+using Square.Modules.Content;
 
 namespace TestGame
 {
@@ -21,13 +22,21 @@ namespace TestGame
             Engine.EventHost.RegisterEvent<LoadContentEvent>(1, e =>
             {
                 texture = Engine.Renderer.LoadTexture("texture.png");
+
+                var menuScene = Engine.SceneHost.CurrentScene;
+
+                var obj = new GameObject(menuScene);
+                obj.AddComponenet<MovementComponent>();
+                var spriteComponent = obj.AddComponenet<SpriteComponent>();
+                spriteComponent.Texture = texture;
+                //spriteComponent.CoordOffset = texture.Size / 2f;
             });
 
-            Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>
+            Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
-                e.RenderTarget.RenderTexture(texture, new Vector2(0f, 0f));
-            });
 
+            });
+            
             Engine.StartGame("Test Game", 640, 480, WindowStyle.Default);
         }
     }

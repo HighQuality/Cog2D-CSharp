@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.EventHost
 {
-    public struct EventIdentifier
+    public class ExitEvent : EventParameters
     {
-        public int UniqueIdentifier;
-        public Type Type;
+        public ExitEvent(Object sender)
+            : base(sender)
+        {
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace Square.Modules.Renderer
         /// <param name="height">The Inner Height in pixels</param>
         /// <param name="style">The style of the window</param>
         /// <returns>Instantiated Window</returns>
-        IWindow CreateWindow(string title, int width, int height, WindowStyle style);
+        IWindow CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost);
 
         /// <summary>
         /// Loads a texture from the specified filename.

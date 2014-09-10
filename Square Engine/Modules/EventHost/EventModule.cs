@@ -14,24 +14,24 @@ namespace Square.Modules.EventHost
         {
         }
 
-        public void RegisterEvent<T>(string uniqueIdentifier, int priority, Action<T> action)
+        public EventListener<T> RegisterEvent<T>(object uniqueIdentifier, int priority, Action<T> action)
             where T : EventParameters
         {
-            GetEvent<T>(uniqueIdentifier).Register(priority, action);
+            return GetEvent<T>(uniqueIdentifier).Register(priority, action);
         }
 
-        public void RegisterEvent<T>(int priority, Action<T> action)
+        public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)
             where T : EventParameters
         {
-            RegisterEvent<T>(null, priority, action);
+            return RegisterEvent<T>(null, priority, action);
         }
 
-        public Event<T> GetEvent<T>(string uniqueIdentifier)
+        public Event<T> GetEvent<T>(Object uniqueIdentifier)
             where T : EventParameters
         {
             EventIdentifier identifier;
             identifier.Type = typeof(T);
-            identifier.UniqueIdentifier = uniqueIdentifier;
+            identifier.UniqueIdentifier = uniqueIdentifier == null ? "".GetHashCode() : uniqueIdentifier.GetHashCode();
 
             IEvent eventObject;
             if (!events.TryGetValue(identifier, out eventObject))

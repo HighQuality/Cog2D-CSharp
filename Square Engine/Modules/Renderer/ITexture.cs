@@ -8,5 +8,6 @@ namespace Square.Modules.Renderer
 {
     public interface ITexture
     {
+        Vector2 Size { get; }
     }
 }
