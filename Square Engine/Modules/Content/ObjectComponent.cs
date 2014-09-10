@@ -20,7 +20,7 @@ namespace Square.Modules.Content
         }
 
         [ComponentEvent(true)]
-        public virtual void KeyDown(Keyboard.Key key) { }
+        public virtual bool KeyDown(Keyboard.Key key) { return false; }
         public virtual void KeyUp(Keyboard.Key key) { }
         [ComponentEvent(true)]
         public virtual void Update(float deltaTime) { }
@@ -48,7 +48,7 @@ namespace Square.Modules.Content
             else if (functionName == "Draw")
                 listener = GameObject.Scene.EventModule.RegisterEvent<DrawEvent>(0, e => Draw(e.RenderTarget));
             else if (functionName == "KeyDown")
-                listener = GameObject.Scene.EventModule.RegisterEvent<KeyDownEvent>(0, e => { KeyDown(e.Key); e.KeyUpEvent = () => KeyUp(e.Key); e.Intercept = true; });
+                listener = GameObject.Scene.EventModule.RegisterEvent<KeyDownEvent>(0, e => { if (KeyDown(e.Key)) { e.KeyUpEvent = () => KeyUp(e.Key); e.Intercept = true; } });
             else
                 Console.WriteLine("Tried to register function with no registration handler: " + functionName);
 
@@ -58,28 +58,25 @@ namespace Square.Modules.Content
 
         internal void RegisterFunctions(EventModule events)
         {
-            var currentType = GetType();
-
-            do
+            foreach (var method in GetType().GetMethods())
             {
-                foreach (var method in currentType.GetMethods())
+                // Only register each method once (Derived types can override it multiple times)
+                if (registeredFunctions.ContainsKey(method.Name))
+                    continue;
+                //Require a ComponentEventAttribute to register the method
+                var eventAttribute = (ComponentEventAttribute)method.GetCustomAttributes(typeof(ComponentEventAttribute), true).FirstOrDefault();
+                if (eventAttribute == null)
+                    continue;
+                // If it requires an overload to register, enforce it
+                if (eventAttribute.RequireOverride)
                 {
-                    if (method.DeclaringType != currentType)
+                    if (method.GetBaseDefinition() == null)
                         continue;
-                    var eventAttribute = (ComponentEventAttribute)method.GetCustomAttributes(typeof(ComponentEventAttribute), true).FirstOrDefault();
-                    if (eventAttribute == null)
-                        continue;
-                    if (eventAttribute.RequireOverride)
-                    {
-                        var baseDefinition = method.GetBaseDefinition();
-                        if (baseDefinition == null || baseDefinition.DeclaringType != typeof(ObjectComponent))
-                            continue;
-                    }
-                    RegisterFunction(method.Name);
                 }
-                currentType = currentType.BaseType;
+                // All tests were passed, register the method
+                RegisterFunction(method.Name);
+                Console.WriteLine(method.Name + " in " + GetType());
             }
-            while (currentType != typeof(ObjectComponent));
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Square.Modules.EventHost
     public class Event<T> : IEvent
         where T : EventParameters
     {
-        private SortedList<int, List<EventListener<T>>> listeners = new SortedList<int, List<EventListener<T>>>();
+        public SortedList<int, List<EventListener<T>>> Listeners = new SortedList<int, List<EventListener<T>>>();
         private Stack<int> toBeRemoved = new Stack<int>();
 
         public Event()
@@ -26,7 +26,7 @@ namespace Square.Modules.EventHost
         {
             bool breakOut = false;
             bool returnValue = false;
-            foreach (var listenerList in listeners.Values)
+            foreach (var listenerList in Listeners.Values)
             {
                 for (int i = listenerList.Count - 1; i >= 0; i--)
                 {
@@ -55,19 +55,19 @@ namespace Square.Modules.EventHost
             }
 
             while (toBeRemoved.Count > 0)
-                listeners.Remove(toBeRemoved.Pop());
+                Listeners.Remove(toBeRemoved.Pop());
 
             return returnValue;
         }
 
         public EventListener<T> Register(int priority, Action<T> action)
         {
-            var listener = new EventListener<T>(action);
+            var listener = new EventListener<T>(this, action);
             List<EventListener<T>> listenerList;
-            if (!listeners.TryGetValue(priority, out listenerList))
+            if (!Listeners.TryGetValue(priority, out listenerList))
             {
                 listenerList = new List<EventListener<T>>();
-                listeners.Add(-priority, listenerList);
+                Listeners.Add(-priority, listenerList);
             }
             listenerList.Add(listener);
             return listener;

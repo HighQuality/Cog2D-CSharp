@@ -13,7 +13,7 @@ namespace Square.Modules.Content
             base.Update(deltaTime);
         }
 
-        public override void KeyDown(Keyboard.Key key)
+        public override bool KeyDown(Keyboard.Key key)
         {
             if (key == Keyboard.Key.Right)
                 Speed.X += 100f;
@@ -23,7 +23,8 @@ namespace Square.Modules.Content
                 Speed.Y -= 100f;
             else if (key == Keyboard.Key.Down)
                 Speed.Y += 100f;
-            base.KeyDown(key);
+
+            return true;
         }
         public override void KeyUp(Keyboard.Key key)
         {
