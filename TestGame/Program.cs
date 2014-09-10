@@ -27,7 +27,7 @@ namespace TestGame
                 gameObject.AddComponenet<MovementComponent>();
                 var spriteComponent = gameObject.AddComponenet<SpriteComponent>();
                 spriteComponent.Texture = Engine.Renderer.LoadTexture("texture.png");
-                //spriteComponent.CoordOffset = texture.Size / 2f;
+                spriteComponent.CoordOffset = spriteComponent.Texture.Size / 2f;
             });
 
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.Content
 {
-    public class LinearPhysicsComponent : GameComponent
+    public class LinearPhysicsComponent : ObjectComponent
     {
         public Vector2 Speed;
 

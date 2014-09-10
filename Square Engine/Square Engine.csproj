@@ -88,7 +88,7 @@
     <Compile Include="Color.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Keyboard.cs" />
-    <Compile Include="Modules\Content\GameComponent.cs" />
+    <Compile Include="Modules\Content\ObjectComponent.cs" />
     <Compile Include="Modules\Content\GameObject.cs" />
     <Compile Include="Modules\Content\IContentModule.cs" />
     <Compile Include="Modules\Content\MovementComponent.cs" />

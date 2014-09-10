@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.Content
 {
-    public class SpriteComponent : GameComponent
+    public class SpriteComponent : ObjectComponent
     {
         public ITexture Texture;
         public Vector2 CoordOffset;

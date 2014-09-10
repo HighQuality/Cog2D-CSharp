@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.Content
 {
-    public abstract class GameComponent
+    public abstract class ObjectComponent
     {
         private Dictionary<string, IEventListener> registeredFunctions = new Dictionary<string, IEventListener>();
         
         public GameObject GameObject { get; internal set; }
         public Vector2 WorldCoord { get { return GameObject.WorldCoord; } set { GameObject.WorldCoord = value; } }
 
-        public GameComponent()
+        public ObjectComponent()
         {
         }
 
@@ -72,14 +72,14 @@ namespace Square.Modules.Content
                     if (eventAttribute.RequireOverride)
                     {
                         var baseDefinition = method.GetBaseDefinition();
-                        if (baseDefinition == null || baseDefinition.DeclaringType != typeof(GameComponent))
+                        if (baseDefinition == null || baseDefinition.DeclaringType != typeof(ObjectComponent))
                             continue;
                     }
                     RegisterFunction(method.Name);
                 }
                 currentType = currentType.BaseType;
             }
-            while (currentType != typeof(GameComponent));
+            while (currentType != typeof(ObjectComponent));
         }
     }
 }

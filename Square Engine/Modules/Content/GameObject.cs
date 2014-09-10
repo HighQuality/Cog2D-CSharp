@@ -12,7 +12,7 @@ namespace Square.Modules.Content
     {
         public string ObjectName;
         public Vector2 WorldCoord { get; set; }
-        public Dictionary<Type, GameComponent> Components = new Dictionary<Type, GameComponent>();
+        public Dictionary<Type, ObjectComponent> Components = new Dictionary<Type, ObjectComponent>();
         public Scene Scene { get; private set; }
         public bool DoRemove { get; private set; }
 
@@ -23,7 +23,7 @@ namespace Square.Modules.Content
         }
 
         public T AddComponenet<T>()
-            where T : GameComponent, new()
+            where T : ObjectComponent, new()
         {
             if (Components.ContainsKey(typeof(T)))
                 throw new InvalidOperationException("The Game Object \"" + ObjectName + "\" already contains a \"" + typeof(T).FullName + "\" component");
@@ -39,9 +39,9 @@ namespace Square.Modules.Content
         }
 
         public void RemoveComponent<T>()
-            where T : GameComponent
+            where T : ObjectComponent
         {
-            GameComponent comp;
+            ObjectComponent comp;
             if (Components.TryGetValue(typeof(T), out comp))
             {
                 comp.ObjectRemoved();
