@@ -10,7 +10,7 @@ namespace Square.Modules.Content
 {
     public abstract class ObjectComponent
     {
-        private Dictionary<string, IEventListener> registeredFunctions = new Dictionary<string, IEventListener>();
+        private Dictionary<string, IEventListener> registeredFunctions;
         
         public GameObject GameObject { get; internal set; }
         public Vector2 WorldCoord { get { return GameObject.WorldCoord; } set { GameObject.WorldCoord = value; } }
@@ -27,8 +27,10 @@ namespace Square.Modules.Content
         [ComponentEvent(true)]
         public virtual void Draw(IRenderTarget renderTarget) { }
 
-        [ComponentEvent(false)]
-        public virtual void ObjectRemoved()
+        public virtual void ObjectRemoved() { }
+        public virtual void ComponentRemoved() { }
+
+        internal void DeregisterFunctions()
         {
             // Cancel registered event listeners
             foreach (var listener in registeredFunctions.Values)
@@ -58,11 +60,10 @@ namespace Square.Modules.Content
 
         internal void RegisterFunctions(EventModule events)
         {
+            Console.WriteLine("Registering events for " + GetType().FullName);
+
             foreach (var method in GetType().GetMethods())
             {
-                // Only register each method once (Derived types can override it multiple times)
-                if (registeredFunctions.ContainsKey(method.Name))
-                    continue;
                 //Require a ComponentEventAttribute to register the method
                 var eventAttribute = (ComponentEventAttribute)method.GetCustomAttributes(typeof(ComponentEventAttribute), true).FirstOrDefault();
                 if (eventAttribute == null)
@@ -70,12 +71,20 @@ namespace Square.Modules.Content
                 // If it requires an overload to register, enforce it
                 if (eventAttribute.RequireOverride)
                 {
-                    if (method.GetBaseDefinition() == null)
+                    var baseDef = method.GetBaseDefinition();
+                    if (baseDef == null || baseDef == method || baseDef.DeclaringType == method.DeclaringType)
                         continue;
                 }
+                
+                // Check if it's already registered (Multiple overrides) / create a dictionary for registered functions
+                if (registeredFunctions == null)
+                    registeredFunctions = new Dictionary<string, IEventListener>();
+                else if (registeredFunctions.ContainsKey(method.Name))
+                    continue;
+
                 // All tests were passed, register the method
                 RegisterFunction(method.Name);
-                Console.WriteLine(method.Name + " in " + GetType());
+                Console.WriteLine("\t" + method.Name);
             }
         }
     }
