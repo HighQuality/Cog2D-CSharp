@@ -76,7 +76,7 @@ namespace Square.SfmlRenderer
             { SFML.Window.Keyboard.Key.LAlt, Keyboard.Key.LAlt },
             { SFML.Window.Keyboard.Key.RAlt, Keyboard.Key.RAlt },
             { SFML.Window.Keyboard.Key.Escape, Keyboard.Key.Escape },
-            { SFML.Window.Keyboard.Key.Tab, Keyboard.Key.Tab }
+            { SFML.Window.Keyboard.Key.Tab, Keyboard.Key.Tab },
 
             { SFML.Window.Keyboard.Key.A, Keyboard.Key.A },
             { SFML.Window.Keyboard.Key.B, Keyboard.Key.B },
