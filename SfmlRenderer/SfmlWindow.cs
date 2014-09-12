@@ -76,6 +76,7 @@ namespace Square.SfmlRenderer
             { SFML.Window.Keyboard.Key.LAlt, Keyboard.Key.LAlt },
             { SFML.Window.Keyboard.Key.RAlt, Keyboard.Key.RAlt },
             { SFML.Window.Keyboard.Key.Escape, Keyboard.Key.Escape },
+            { SFML.Window.Keyboard.Key.Tab, Keyboard.Key.Tab }
 
             { SFML.Window.Keyboard.Key.A, Keyboard.Key.A },
             { SFML.Window.Keyboard.Key.B, Keyboard.Key.B },
@@ -102,7 +103,31 @@ namespace Square.SfmlRenderer
             { SFML.Window.Keyboard.Key.W, Keyboard.Key.W },
             { SFML.Window.Keyboard.Key.X, Keyboard.Key.X },
             { SFML.Window.Keyboard.Key.Y, Keyboard.Key.Y },
-            { SFML.Window.Keyboard.Key.Z, Keyboard.Key.Z }
+            { SFML.Window.Keyboard.Key.Z, Keyboard.Key.Z },
+            
+            { SFML.Window.Keyboard.Key.F1, Keyboard.Key.F1 },
+            { SFML.Window.Keyboard.Key.F2, Keyboard.Key.F2 },
+            { SFML.Window.Keyboard.Key.F3, Keyboard.Key.F3 },
+            { SFML.Window.Keyboard.Key.F4, Keyboard.Key.F4 },
+            { SFML.Window.Keyboard.Key.F5, Keyboard.Key.F5 },
+            { SFML.Window.Keyboard.Key.F6, Keyboard.Key.F6 },
+            { SFML.Window.Keyboard.Key.F7, Keyboard.Key.F7 },
+            { SFML.Window.Keyboard.Key.F8, Keyboard.Key.F8 },
+            { SFML.Window.Keyboard.Key.F9, Keyboard.Key.F9 },
+            { SFML.Window.Keyboard.Key.F10, Keyboard.Key.F10 },
+            { SFML.Window.Keyboard.Key.F11, Keyboard.Key.F11 },
+            { SFML.Window.Keyboard.Key.F12, Keyboard.Key.F12 },
+            
+            { SFML.Window.Keyboard.Key.Num0, Keyboard.Key.Num0 },
+            { SFML.Window.Keyboard.Key.Num1, Keyboard.Key.Num1 },
+            { SFML.Window.Keyboard.Key.Num2, Keyboard.Key.Num2 },
+            { SFML.Window.Keyboard.Key.Num3, Keyboard.Key.Num3 },
+            { SFML.Window.Keyboard.Key.Num4, Keyboard.Key.Num4 },
+            { SFML.Window.Keyboard.Key.Num5, Keyboard.Key.Num5 },
+            { SFML.Window.Keyboard.Key.Num6, Keyboard.Key.Num6 },
+            { SFML.Window.Keyboard.Key.Num7, Keyboard.Key.Num7 },
+            { SFML.Window.Keyboard.Key.Num8, Keyboard.Key.Num8 },
+            { SFML.Window.Keyboard.Key.Num9, Keyboard.Key.Num9 },
         };
 
         private Keyboard.Key SfmlKeyToSquare(SFML.Window.Keyboard.Key key)

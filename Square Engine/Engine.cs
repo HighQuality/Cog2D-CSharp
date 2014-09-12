@@ -18,6 +18,7 @@ namespace Square
     {
         public const int VersionNumber = 1;
         public const string EngineVersion = "Square Engine v1 (Pre-Production)";
+        private static Random random;
 
         /// <summary>
         /// The current render engine
@@ -39,6 +40,8 @@ namespace Square
         public static void Initialize<TRenderer>()
             where TRenderer : IRenderModule, new()
         {
+            random = new Random();
+
             EventHost = new EventModule();
             SceneHost = new SceneManager();
             Renderer = new TRenderer();
@@ -72,6 +75,15 @@ namespace Square
 
                 window.Display();
             }
+        }
+
+        /// <summary>
+        /// Returns a random floating-point value ranging from 0 - 1
+        /// </summary>
+        /// <returns>A random value in the range of 0 - 1</returns>
+        public static float RandomFloat()
+        {
+            return (float)random.NextDouble();
         }
     }
 }

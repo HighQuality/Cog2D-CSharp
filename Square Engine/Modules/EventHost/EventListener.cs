@@ -9,14 +9,15 @@ namespace Square.Modules.EventHost
     public class EventListener<T> : IEventListener
         where T : EventParameters
     {
-        private Event<T> eventHost;
+        public IEvent IEvent { get { return Event; } }
+        public Event<T> Event { get; private set; }
         public int Priority { get; private set; }
         public Action<T> Action { get; private set; }
         public bool IsCancelled { get; private set; }
 
         public EventListener(Event<T> eventHost, Action<T> action)
         {
-            this.eventHost = eventHost;
+            this.Event = eventHost;
             this.Action = action;
         }
 
@@ -27,21 +28,21 @@ namespace Square.Modules.EventHost
 
         public void SetPriority(int value)
         {
-            List<EventListener<T>> list = eventHost.Listeners[-Priority];
+            List<EventListener<T>> list = Event.Listeners[-Priority];
             list.Remove(this);
             if (list.Count == 0)
-                eventHost.Listeners.Remove(-Priority);
+                Event.Listeners.Remove(-Priority);
 
             Priority = value;
 
             List<EventListener<T>> newList;
-            if (!eventHost.Listeners.TryGetValue(-Priority, out newList))
+            if (!Event.Listeners.TryGetValue(-Priority, out newList))
             {
                 if (list.Count == 0)
                     newList = list;
                 else
                     newList = new List<EventListener<T>>();
-                eventHost.Listeners.Add(-Priority, newList);
+                Event.Listeners.Add(-Priority, newList);
             }
 
             newList.Add(this);

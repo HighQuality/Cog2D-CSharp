@@ -50,5 +50,10 @@ namespace Square
         {
             return new Vector2(first.X / second, first.Y / second);
         }
+
+        public static Vector2 operator *(Vector2 first, float second)
+        {
+            return new Vector2(first.X * second, first.Y * second);
+        }
     }
 }

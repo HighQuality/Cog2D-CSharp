@@ -8,6 +8,7 @@ using Square.SfmlRenderer;
 using Square.Modules.Renderer;
 using Square.Modules.EventHost;
 using Square.Modules.Content;
+using System.Diagnostics;
 
 namespace TestGame
 {
@@ -22,30 +23,29 @@ namespace TestGame
             Engine.EventHost.RegisterEvent<LoadContentEvent>(1, e =>
             {
                 var menuScene = Engine.SceneHost.CurrentScene;
+                var texture = Engine.Renderer.LoadTexture("texture.png");
 
-                gameObject = new GameObject(menuScene);
-                gameObject.AddComponenet<MovementComponent>();
-                var spriteComponent = gameObject.AddComponenet<SpriteComponent>();
-                spriteComponent.Texture = Engine.Renderer.LoadTexture("texture.png");
-                spriteComponent.CoordOffset = spriteComponent.Texture.Size / 2f;
+                Stopwatch watch = Stopwatch.StartNew();
+
+                for (int i = 0; i < 5; i++)
+                {
+                    gameObject = new GameObject(menuScene);
+                    gameObject.WorldCoord = new Vector2(32f + i * 32f, 32f + i * 32f);
+                    gameObject.AddComponenet<MovementComponent>();
+                    var spriteComponent = gameObject.AddComponenet<SpriteComponent>();
+                    spriteComponent.Texture = texture;
+                    spriteComponent.CoordOffset = spriteComponent.Texture.Size / 2f;
+                    Console.WriteLine("Object #{0}: {1}ms", i + 1, watch.Elapsed.TotalMilliseconds);
+
+                    watch.Restart();
+                }
             });
 
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
 
             });
-
-            Engine.EventHost.RegisterEvent<CloseButtonEvent>(100, e =>
-            {
-                if (gameObject != null)
-                {
-                    gameObject.Remove();
-                    gameObject = null;
-
-                    e.Intercept = true;
-                }
-            });
-            
+                        
             Engine.StartGame("Test Game", 640, 480, WindowStyle.Default);
         }
     }

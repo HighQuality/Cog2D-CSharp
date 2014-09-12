@@ -35,7 +35,7 @@ namespace Square.Modules.EventHost
                     {
                         listenerList.RemoveAt(i);
                         if (listenerList.Count == 0)
-                            toBeRemoved.Push(i);
+                            toBeRemoved.Push(-listener.Priority);
                     }
                     else
                     {
@@ -64,7 +64,7 @@ namespace Square.Modules.EventHost
         {
             var listener = new EventListener<T>(this, action);
             List<EventListener<T>> listenerList;
-            if (!Listeners.TryGetValue(priority, out listenerList))
+            if (!Listeners.TryGetValue(-priority, out listenerList))
             {
                 listenerList = new List<EventListener<T>>();
                 Listeners.Add(-priority, listenerList);

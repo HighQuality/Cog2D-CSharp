@@ -13,28 +13,60 @@ namespace Square.Scenes
     {
         public LinkedList<GameObject> Objects = new LinkedList<GameObject>();
         public EventModule EventModule = new EventModule();
+        private Dictionary<Type, List<IEventListener>> eventStrength = new Dictionary<Type,List<IEventListener>>();
+        private Dictionary<Type, IEventListener> globalListeners = new Dictionary<Type, IEventListener>();
+        private List<Type> toBeRemoved = new List<Type>();
+        private float eventStrengthUpdateTimer = 0f;
 
         internal Scene()
         {
+            // Randomize an offset for the event strength update timer
+            eventStrengthUpdateTimer = Engine.RandomFloat();
+
+            AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Update(e); }));
         }
 
         public void Update(UpdateEvent args)
         {
             var current = Objects.First;
-            do
+            
+            while (current != null)
             {
                 if (current.Value.DoRemove)
                     Objects.Remove(current);
                 current = current.Next;
             }
-            while (current != null);
 
-            EventModule.GetEvent<UpdateEvent>().Trigger(new UpdateEvent(args));
-        }
+            eventStrengthUpdateTimer += args.DeltaTime;
+            while(eventStrengthUpdateTimer >= 1f)
+            {
+                foreach (var pair in eventStrength)
+                {
+                    var list = pair.Value;
 
-        public void Draw(DrawEvent args)
-        {
-            EventModule.GetEvent<DrawEvent>().Trigger(new DrawEvent(args));
+                    for (int i = list.Count - 1; i >= 0; i--)
+                        if (list[i].IsCancelled)
+                            list.RemoveAt(i);
+
+                    if (list.Count == 0)
+                        toBeRemoved.Add(pair.Key);
+                }
+
+                for (int i = toBeRemoved.Count - 1; i >= 0; i--)
+                {
+                    Console.WriteLine("Stopped listening for " + globalListeners[toBeRemoved[i]].IEvent.GetType().GenericTypeArguments[0].Name + " events");
+
+                    // Cancel and remove the global listener (Engine.EventModule -> this scene's event module)
+                    globalListeners[toBeRemoved[i]].Cancel();
+                    globalListeners.Remove(toBeRemoved[i]);
+
+                    // No longer monitor this event strength
+                    eventStrength.Remove(toBeRemoved[i]);
+                }
+                toBeRemoved.Clear();
+
+                eventStrengthUpdateTimer -= 1f;
+            }
         }
 
         public void AddObject(GameObject obj)
@@ -58,6 +90,23 @@ namespace Square.Scenes
             while (current != null);
 
             Objects.Clear();
+        }
+
+        public void AddEventStrength<T>(EventListener<T> listener)
+            where T : EventParameters
+        {
+            List<IEventListener> listenerList;
+
+            if (!eventStrength.TryGetValue(listener.GetType(), out listenerList))
+            {
+                listenerList = new List<IEventListener>();
+                eventStrength.Add(listener.GetType(), listenerList);
+
+                // TODO: Move event registration to SceneManager
+                globalListeners.Add(listener.GetType(), Engine.EventHost.RegisterEvent<T>(0, e => { if (Engine.SceneHost.CurrentScene == this) EventModule.GetEvent<T>().Trigger(e); }));
+            }
+
+            listenerList.Add(listener);
         }
     }
 }

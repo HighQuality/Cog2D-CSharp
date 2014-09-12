@@ -17,11 +17,18 @@ namespace Square.Scenes
         {
             Push(new Scene());
 
-            Engine.EventHost.GetEvent<UpdateEvent>().Register(0, RerouteEvent);
-            Engine.EventHost.GetEvent<DrawEvent>().Register(0, RerouteEvent);
-            Engine.EventHost.GetEvent<KeyDownEvent>().Register(0, RerouteEvent);
-            Engine.EventHost.GetEvent<CloseButtonEvent>().Register(0, RerouteEvent);
-            Engine.EventHost.GetEvent<ExitEvent>().Register(0, RerouteEvent);
+            // Register events for rerouting
+            Register<UpdateEvent>();
+            Register<DrawEvent>();
+            Register<KeyDownEvent>();
+            Register<CloseButtonEvent>();
+            Register<ExitEvent>();
+        }
+
+        private void Register<T>()
+            where T : EventParameters
+        {
+            Engine.EventHost.GetEvent<T>().Register(0, RerouteEvent);
         }
 
         private void RerouteEvent<T>(T args)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Square.Modules.EventHost;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,15 @@ namespace Square.Modules.Content
 {
     public class MovementComponent : LinearPhysicsComponent
     {
+        public MovementComponent()
+        {
+            RegisterEvent<CloseButtonEvent>(999, e =>
+            {
+                GameObject.Remove();
+                e.Intercept = true;
+            });
+        }
+
         public override void Update(float deltaTime)
         {
             base.Update(deltaTime);

@@ -8,6 +8,7 @@ namespace Square.Modules.EventHost
 {
     public interface IEventListener
     {
+        IEvent IEvent { get; }
         bool IsCancelled { get; }
         void Cancel();
     }
