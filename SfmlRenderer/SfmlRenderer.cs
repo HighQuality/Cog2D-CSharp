@@ -19,5 +19,10 @@ namespace Square.SfmlRenderer
         {
             return new SfmlTexture(filename);
         }
+
+        public ITexture TextureFromImage(Image image)
+        {
+            return new SfmlTexture(image);
+        }
     }
 }

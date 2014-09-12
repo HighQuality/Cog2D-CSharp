@@ -18,32 +18,51 @@ namespace TestGame
         {
             Engine.Initialize<SfmlRenderer>();
 
-            GameObject gameObject = null;
+            ITexture texture = null;
 
-            Engine.EventHost.RegisterEvent<LoadContentEvent>(1, e =>
+            Engine.EventHost.RegisterEvent<KeyDownEvent>(Keyboard.Key.Space, 1, e =>
             {
-                var menuScene = Engine.SceneHost.CurrentScene;
-                var texture = Engine.Renderer.LoadTexture("texture.png");
+                Image image = new Image(640, 480);
+                float zoom = 250f;
+                float xOffset = Engine.RandomFloat() * 100f,
+                    yOffset = Engine.RandomFloat() * 100f;
 
                 Stopwatch watch = Stopwatch.StartNew();
-
-                for (int i = 0; i < 5; i++)
+                for (int y=0; y<image.Height; y++)
                 {
-                    gameObject = new GameObject(menuScene);
-                    gameObject.WorldCoord = new Vector2(32f + i * 32f, 32f + i * 32f);
-                    gameObject.AddComponenet<MovementComponent>();
-                    var spriteComponent = gameObject.AddComponenet<SpriteComponent>();
-                    spriteComponent.Texture = texture;
-                    spriteComponent.CoordOffset = spriteComponent.Texture.Size / 2f;
-                    Console.WriteLine("Object #{0}: {1}ms", i + 1, watch.Elapsed.TotalMilliseconds);
+                    for (int x=0; x<image.Width; x++)
+                    {
+                        float distance = (float)Math.Sqrt(Math.Pow(640f / 2f - x, 2f) + Math.Pow(480f / 2f - y, 2f));
 
-                    watch.Restart();
+                        float val = (Noise.Generate((float)x / zoom + xOffset, (float)y / zoom + yOffset) + 1f) / 2f;
+                        //val *= (Noise.Generate((float)x / zoom + 100f + xOffset, (float)y / zoom + 100f + yOffset) + 1f) / 2f;
+                        val *= 1.5f - (distance / 200f);
+                        Color color = Color.White;
+
+                        if (val < 0.25f)
+                            color = Color.Blue;
+                        else if (val < 0.8f)
+                            color = Color.Green;
+                        else
+                            color = Color.Gray;
+
+                        image.SetColor(x, y, color);
+                    }
                 }
+
+                texture = Engine.Renderer.TextureFromImage(image);
+                Console.WriteLine(watch.Elapsed.TotalMilliseconds);
             });
 
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
 
+            });
+
+            Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>
+            {
+                if (texture != null)
+                    e.RenderTarget.RenderTexture(texture, new Vector2());
             });
                         
             Engine.StartGame("Test Game", 640, 480, WindowStyle.Default);

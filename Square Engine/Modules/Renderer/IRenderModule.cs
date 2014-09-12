@@ -26,5 +26,12 @@ namespace Square.Modules.Renderer
         /// <param name="filename">The filename of the texture to load</param>
         /// <returns>An interface to the texture</returns>
         ITexture LoadTexture(string filename);
+
+        /// <summary>
+        /// Generates a texture from the specified image.
+        /// </summary>
+        /// <param name="image">The image to generate a texture from</param>
+        /// <returns>A generated texture</returns>
+        ITexture TextureFromImage(Image image);
     }
 }

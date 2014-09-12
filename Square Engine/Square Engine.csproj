@@ -87,6 +87,7 @@
   <ItemGroup>
     <Compile Include="Color.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Image.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="Modules\Content\ObjectComponent.cs" />
     <Compile Include="Modules\Content\GameObject.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="Modules\Renderer\ITexture.cs" />
     <Compile Include="Modules\Renderer\IWindow.cs" />
     <Compile Include="Modules\Renderer\WindowStyle.cs" />
+    <Compile Include="Noise.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenes\Scene.cs" />
     <Compile Include="Scenes\SceneManager.cs" />
