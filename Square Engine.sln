@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Square Engine", "Square Engine\Square Engine.csproj", "{5C56475F-F797-4C69-83F5-D5920C204E4A}"
 EndProject
@@ -10,6 +10,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SfmlRenderer", "SfmlRenderer\SfmlRenderer.csproj", "{084372EB-5096-4AE6-BFED-4B10637CD216}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame", "TestGame\TestGame.csproj", "{87C9E067-93D0-4E2A-B3D9-E1250DAD0B05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGameServer", "TestGameServer\TestGameServer.csproj", "{E31B21E6-37D2-4674-A301-2EEE6FA443E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGameContent", "TestGameContent\TestGameContent.csproj", "{80127101-1B52-4C7F-AB65-E7B11C8F46F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,11 +91,32 @@ Global
 		{87C9E067-93D0-4E2A-B3D9-E1250DAD0B05}.Release|x64.Build.0 = Release|x64
 		{87C9E067-93D0-4E2A-B3D9-E1250DAD0B05}.Release|x86.ActiveCfg = Release|x86
 		{87C9E067-93D0-4E2A-B3D9-E1250DAD0B05}.Release|x86.Build.0 = Release|x86
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Release|x64.ActiveCfg = Release|Any CPU
+		{E31B21E6-37D2-4674-A301-2EEE6FA443E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Release|x64.ActiveCfg = Release|Any CPU
+		{80127101-1B52-4C7F-AB65-E7B11C8F46F6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace TestGame
 {
-    class GameScene : Scene
+    public class GameScene : Scene
     {
         public World World;
 

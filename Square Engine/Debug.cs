@@ -10,6 +10,7 @@ namespace Square
     {
         private const ConsoleColor outputInfoColor = ConsoleColor.White,
             successColor = ConsoleColor.DarkGreen,
+            errorColor = ConsoleColor.DarkRed,
             infoColor = ConsoleColor.DarkYellow;
 
         public static void Info(string message, params object[] parameters)
@@ -17,6 +18,15 @@ namespace Square
             var oldColor = Console.ForegroundColor;
             OutputInfo("Info");
             Console.ForegroundColor = infoColor;
+            Console.WriteLine(message, parameters);
+            Console.ForegroundColor = oldColor;
+        }
+
+        public static void Error(string message, params object[] parameters)
+        {
+            var oldColor = Console.ForegroundColor;
+            OutputInfo("Error");
+            Console.ForegroundColor = errorColor;
             Console.WriteLine(message, parameters);
             Console.ForegroundColor = oldColor;
         }

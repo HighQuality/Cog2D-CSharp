@@ -8,5 +8,7 @@ namespace Square.Modules.EventHost
 {
     public interface IEvent
     {
+        bool GenericTrigger(EventParameters p);
+        int Count { get; }
     }
 }

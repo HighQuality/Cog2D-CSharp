@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Square.Modules.Networking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,12 +9,16 @@ namespace Square.Modules.EventHost
 {
     public class EventParameters
     {
-        public Object Sender { get; private set; }
+        [NetworkIgnore()]
+        private Object _sender;
+        [NetworkIgnore()]
         public bool Intercept;
+
+        public Object Sender { get { return _sender; } }
 
         public EventParameters(Object sender)
         {
-            this.Sender = sender;
+            this._sender = sender;
         }
     }
 }

@@ -31,6 +31,11 @@ namespace Square
         {
             return new Angle(NormalizedDegree);
         }
+
+        public static Angle FromVector(Vector2 vector)
+        {
+            return new Angle(vector);
+        }
         
         public static Angle FromDegree(float degree)
         {

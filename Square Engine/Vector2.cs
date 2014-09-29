@@ -15,7 +15,6 @@ namespace Square
             Up = new Vector2(0f, -1f),
             Down = new Vector2(0f, 1f);
 
-
         /// <summary>
         /// The X-coordinate of the Vector
         /// </summary>
@@ -25,6 +24,14 @@ namespace Square
         /// The Y-coordinate of the Vector
         /// </summary>
         public float Y;
+
+        public float Length
+        {
+            get
+            {
+                return Mathf.Sqrt(Mathf.Pow(X, 2f) + Mathf.Pow(Y, 2f));
+            }
+        }
 
         /// <summary>
         /// Instantiates a Vector2 with the specified parameters

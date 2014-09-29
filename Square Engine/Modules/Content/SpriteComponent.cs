@@ -15,11 +15,6 @@ namespace Square.Modules.Content
 
         public SpriteComponent()
         {
-            RegisterEvent<KeyDownEvent>(Keyboard.Key.Right, 10, e =>
-            {
-                GameObject.Remove();
-                e.Intercept = true;
-            });
         }
 
         public override void Draw(IRenderTarget renderTarget)

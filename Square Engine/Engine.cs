@@ -12,6 +12,9 @@ using Square.Modules.EventHost;
 using System.Diagnostics;
 using Square.Scenes;
 using Square.Modules.Content;
+using System.Net.Sockets;
+using Square.Modules.Networking;
+using System.Threading;
 
 namespace Square
 {
@@ -36,6 +39,14 @@ namespace Square
         /// </summary>
         public static SceneManager SceneHost { get; private set; }
 
+        public static ClientModule ClientModule { get; private set; }
+        public static ServerModule ServerModule { get; private set; }
+
+        public static bool IsClient { get { return ClientModule != null; } }
+        public static bool IsServer { get { return ServerModule != null; } }
+
+        public static float PhysicsTimeStep;
+
         /// <summary>
         /// Initializes Square Engine making it's modules available for use
         /// </summary>
@@ -43,24 +54,35 @@ namespace Square
         public static void Initialize<TRenderer>()
             where TRenderer : IRenderModule, new()
         {
+            var entireLoadTime = Stopwatch.StartNew();
             random = new Random();
+            PhysicsTimeStep = 1f / 120f;
 
-            Debug.Info("Discovering Assemblies...");
+            Debug.Info("Loading Assemblies...");
             Stopwatch watch = Stopwatch.StartNew();
             loadedAssemblies = new Dictionary<string, Assembly>();
+            HashSet<string> loaded = new HashSet<string>();
+            Stack<AssemblyName> toLoad = new Stack<AssemblyName>(Assembly.GetEntryAssembly().GetReferencedAssemblies());
             var thisAssembly = Assembly.GetExecutingAssembly();
-            var thisAssemblyName = thisAssembly.GetName();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            do
             {
-                // Add assemblies that reference this assembly for caching
-                if (assembly.GetReferencedAssemblies().Where(o => o.FullName == thisAssembly.FullName).FirstOrDefault() != null || assembly == thisAssembly)
+                AssemblyName currentName = toLoad.Pop();
+                var assembly = AppDomain.CurrentDomain.Load(currentName);
+                loaded.Add(currentName.FullName);
+                bool referencesThis = false;
+                foreach (var name in assembly.GetReferencedAssemblies())
                 {
-                    Console.WriteLine("Game Assembly \"" + assembly.GetName().Name + "\" discovered!");
-                    loadedAssemblies.Add(assembly.FullName, assembly);
+                    if (name.FullName == thisAssembly.FullName || assembly == thisAssembly)
+                        referencesThis = true;
+                    if (!loaded.Contains(name.FullName))
+                        toLoad.Push(name);
                 }
+                if (referencesThis)
+                    loadedAssemblies[currentName.FullName] = assembly;
             }
-            Debug.Success("Discovered {0} Assemblies in {1}ms!", loadedAssemblies.Count, watch.Elapsed.TotalMilliseconds);
-            
+            while (toLoad.Count > 0);
+            Debug.Success("Finished Loading Assemblies! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+
             // Cache event registrators for Object Components
             ObjectComponent.RegistratorCache = new Dictionary<Type, Action<EventModule, ObjectComponent>>();
             Debug.Info("Pre-Caching Event Registrators...");
@@ -78,9 +100,36 @@ namespace Square
             }
             Debug.Success("Finished Pre-Caching Event Registrators! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
+            Debug.Info("Registrating Networking Type Handlers...");
+            watch.Restart();
+
+            NetworkEvent.RegisterCustomType<Int16>((v, w) => w.Write((Int16)v), r => r.ReadInt16());
+            NetworkEvent.RegisterCustomType<UInt16>((v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
+
+            NetworkEvent.RegisterCustomType<Int32>((v, w) => w.Write((Int32)v), r => r.ReadInt32());
+            NetworkEvent.RegisterCustomType<UInt32>((v, w) => w.Write((UInt32)v), r => r.ReadUInt32());
+
+            NetworkEvent.RegisterCustomType<Int64>((v, w) => w.Write((Int64)v), r => r.ReadInt64());
+            NetworkEvent.RegisterCustomType<UInt64>((v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
+
+            NetworkEvent.RegisterCustomType<Single>((v, w) => w.Write((Single)v), r => r.ReadSingle());
+            NetworkEvent.RegisterCustomType<Double>((v, w) => w.Write((Double)v), r => r.ReadDouble());
+            NetworkEvent.RegisterCustomType<Decimal>((v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
+            NetworkEvent.RegisterCustomType<Char>((v, w) => w.Write((Char)v), r => r.ReadChar());
+            NetworkEvent.RegisterCustomType<String>((v, w) => w.Write((String)v), r => r.ReadString());
+
+            Debug.Success("Finished Registrating Networking Type Handlers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+
+            Debug.Info("Caching Network Events...");
+            watch.Restart();
+            NetworkEvent.BuildCache(loadedAssemblies.Values);
+            Debug.Success("Finished Caching Network Events! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+
             EventHost = new EventModule();
             SceneHost = new SceneManager();
             Renderer = new TRenderer();
+
+            Debug.Success("Square Engine has been initialized! ({0}ms)", entireLoadTime.Elapsed.TotalMilliseconds);
         }
 
         /// <summary>
@@ -97,12 +146,19 @@ namespace Square
             EventHost.RegisterEvent<CloseButtonEvent>(-999, e => { EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null)); e.Intercept = true; });
 
             Stopwatch watch = Stopwatch.StartNew();
+            float accumulator = 0f;
             while (Window.IsOpen)
             {
                 float deltaTime = (float)watch.Elapsed.TotalSeconds;
                 watch.Restart();
                 Window.DispatchEvents();
 
+                accumulator += deltaTime;
+                while (accumulator >= PhysicsTimeStep)
+                {
+                    EventHost.GetEvent<PhysicsUpdateEvent>().Trigger(new PhysicsUpdateEvent(null, PhysicsTimeStep));
+                    accumulator -= PhysicsTimeStep;
+                }
                 EventHost.GetEvent<UpdateEvent>().Trigger(new UpdateEvent(null, deltaTime));
 
                 Window.Clear(Color.CornflowerBlue);
@@ -117,6 +173,52 @@ namespace Square
                 if (SceneHost.CurrentScene == null)
                     Window.Close();
             }
+        }
+
+        public static void StartServer(int port)
+        {
+            ServerModule = new ServerModule(port);
+
+            EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
+
+            Stopwatch watch = Stopwatch.StartNew();
+            float accumulator = 0f;
+            while (SceneHost.CurrentScene != null)
+            {
+                float deltaTime = (float)watch.Elapsed.TotalMilliseconds;
+                watch.Restart();
+
+                accumulator += deltaTime;
+                while(accumulator >= PhysicsTimeStep)
+                {
+                    EventHost.GetEvent<PhysicsUpdateEvent>().Trigger(new PhysicsUpdateEvent(null, PhysicsTimeStep));
+                    accumulator -= PhysicsTimeStep;
+                }
+                EventHost.GetEvent<UpdateEvent>().Trigger(new UpdateEvent(null, deltaTime));
+
+                Thread.Sleep(1);
+            }
+
+            EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null));
+            ServerModule.StopServer();
+        }
+
+        /// <summary>
+        /// Tries to connect to a Square Engine Server at the given hostname and port.
+        /// Returns null if the connection was successfull, otherwise an error message.
+        /// </summary>
+        public static string ConnectServer(string hostname, int port)
+        {
+            try
+            {
+                ClientModule = new Modules.Networking.ClientModule(hostname, port);
+            }
+            catch(SocketException e)
+            {
+                return e.Message;
+            }
+
+            return null;
         }
 
         /// <summary>

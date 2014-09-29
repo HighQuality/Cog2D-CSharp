@@ -26,6 +26,20 @@ namespace Square.Modules.EventHost
             return RegisterEvent<T>(null, priority, action);
         }
 
+        internal IEvent GetEvent(Type type, Object uniqueIdentifier)
+        {
+            if (!typeof(EventParameters).IsAssignableFrom(type))
+                throw new Exception("Type \"" + type.FullName + "\" is not an EventParameters!");
+            EventIdentifier identifier;
+            identifier.Type = type;
+            identifier.UniqueIdentifier = uniqueIdentifier == null ? "".GetHashCode() : uniqueIdentifier.GetHashCode();
+
+            IEvent eventObject;
+            if (events.TryGetValue(identifier, out eventObject))
+                return eventObject;
+            return null;
+        }
+
         public Event<T> GetEvent<T>(Object uniqueIdentifier)
             where T : EventParameters
         {

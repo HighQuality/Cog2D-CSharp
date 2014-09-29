@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace TestGame
 {
-    class PlayerObject : GameObject
+    public class PlayerObject : GameObject
     {
         public MovementComponent MovementComponent { get; private set; }
         public SpriteComponent SpriteComponent { get; private set; }

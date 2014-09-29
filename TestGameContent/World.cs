@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace TestGame
 {
-    class World : GameObject
+    public class World : GameObject
     {
         public World(Scene scene)
             : base(scene, Vector2.Zero)

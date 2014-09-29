@@ -13,6 +13,8 @@ namespace Square
         {
             get
             {
+                if (Engine.IsServer)
+                    return false;
                 return Engine.Window.IsKeyDown(index);
             }
         }

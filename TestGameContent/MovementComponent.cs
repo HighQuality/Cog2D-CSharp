@@ -8,26 +8,25 @@ using Square.Modules;
 
 namespace TestGame
 {
-    class MovementComponent : Square.Modules.Content.LinearPhysicsComponent
+    public class MovementComponent : Square.Modules.Content.LinearPhysicsComponent
     {
         public Keyboard.Key Left = Keyboard.Key.Left,
             Right = Keyboard.Key.Right,
             Down = Keyboard.Key.Down,
             Up = Keyboard.Key.Up;
-        public float MovementSpeed = 100f;
+        public float MovementForce = 100f,
+            MaxSpeed = 200f;
 
         public override void Update(float deltaTime)
         {
             if (Keys[Left])
-                Speed.X -= MovementSpeed * deltaTime;
+                Speed.X -= MovementForce * deltaTime;
             if (Keys[Right])
-                Speed.X += MovementSpeed * deltaTime;
+                Speed.X += MovementForce * deltaTime;
             if (Keys[Up])
-                Speed.Y -= MovementSpeed * deltaTime;
+                Speed.Y -= MovementForce * deltaTime;
             if (Keys[Down])
-                Speed.Y += MovementSpeed * deltaTime;
-
-            Speed *= Math.Max(0f, 1f - deltaTime);
+                Speed.Y += MovementForce * deltaTime;
 
             base.Update(deltaTime);
         }

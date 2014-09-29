@@ -96,12 +96,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameScene.cs" />
-    <Compile Include="MovementComponent.cs" />
-    <Compile Include="PlayerObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -114,6 +110,10 @@
     <ProjectReference Include="..\Square Engine\Square Engine.csproj">
       <Project>{5c56475f-f797-4c69-83f5-d5920c204e4a}</Project>
       <Name>Square Engine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestGameContent\TestGameContent.csproj">
+      <Project>{80127101-1b52-4c7f-ab65-e7b11c8f46f6}</Project>
+      <Name>TestGameContent</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

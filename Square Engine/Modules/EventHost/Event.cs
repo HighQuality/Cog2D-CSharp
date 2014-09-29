@@ -14,6 +14,7 @@ namespace Square.Modules.EventHost
         private Stack<int> toBeRemoved = new Stack<int>();
         public readonly EventIdentifier Identifier;
         public EventModule BaseModule { get; private set; }
+        public int Count { get; private set; }
 
         internal Event(EventModule baseModule, EventIdentifier identifier)
         {
@@ -38,6 +39,7 @@ namespace Square.Modules.EventHost
                     if (listener.IsCancelled)
                     {
                         listenerList.RemoveAt(i);
+                        Count--;
                         if (listenerList.Count == 0)
                             toBeRemoved.Push(-listener.Priority);
                     }
@@ -64,6 +66,13 @@ namespace Square.Modules.EventHost
             return returnValue;
         }
 
+        public bool GenericTrigger(EventParameters e)
+        {
+            if (!(e is T))
+                throw new Exception("Can't trigger \"" + typeof(T).FullName + "\" dynamically!\r\nWrong type: " + e.GetType().FullName);
+            return Trigger((T)e);
+        }
+
         public EventListener<T> Register(int priority, Action<T> action)
         {
             var listener = new EventListener<T>(this, action);
@@ -74,6 +83,7 @@ namespace Square.Modules.EventHost
                 Listeners.Add(-priority, listenerList);
             }
             listenerList.Add(listener);
+            Count++;
             return listener;
         }
     }
