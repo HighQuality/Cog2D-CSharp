@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.EventHost
 {
-    public class LoadContentEvent : EventParameters
+    public class InitializeEvent : EventParameters
     {
-        public LoadContentEvent(Object sender)
+        public InitializeEvent(Object sender)
             : base(sender)
         {
         }

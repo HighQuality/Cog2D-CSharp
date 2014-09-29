@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Square.Modules.EventHost;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,17 @@ using System.Threading.Tasks;
 
 namespace Square
 {
+    public struct Keys
+    {
+        public bool this[Keyboard.Key index]
+        {
+            get
+            {
+                return Engine.Window.IsKeyDown(index);
+            }
+        }
+    }
+
     public static class Keyboard
     {
         public enum Key
@@ -75,7 +87,8 @@ namespace Square
             F11,
             F12,
 
-            Unknown
+            Unknown,
+            Count
         }
     }
 }

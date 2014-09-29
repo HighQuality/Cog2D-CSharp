@@ -32,5 +32,20 @@ namespace Square
             this.B = b;
             this.A = a;
         }
+
+        public static Color operator*(Color first, float second)
+        {
+            return new Color(first.R, first.G, first.B, (int)((float)first.A * second));
+        }
+
+        public static Color operator+(Color first, Color second)
+        {
+            return new Color(first.R + second.R, first.G + second.G, first.B + second.B, first.A + second.A);
+        }
+
+        public static Color operator -(Color first, Color second)
+        {
+            return new Color(first.R - second.R, first.G - second.G, first.B - second.B, first.A - second.A);
+        }
     }
 }

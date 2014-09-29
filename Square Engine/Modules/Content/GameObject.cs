@@ -1,4 +1,5 @@
-﻿using Square.Scenes;
+﻿using Square.Modules.EventHost;
+using Square.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,19 @@ namespace Square.Modules.Content
     {
         public string ObjectName;
         public Vector2 WorldCoord { get; set; }
+        public Vector2 WorldSize { get; set; }
         public Dictionary<Type, ObjectComponent> Components = new Dictionary<Type, ObjectComponent>();
         public Scene Scene { get; private set; }
         public bool DoRemove { get; private set; }
+        public Keys Keys;
 
-        public GameObject(Scene scene)
+        private List<IEventListener> registeredEvents;
+
+        public GameObject(Scene scene, Vector2 worldCoord)
         {
             this.Scene = scene;
+            this.WorldCoord = worldCoord;
+            this.WorldSize = new Vector2(1f, 1f);
             this.Scene.AddObject(this);
         }
 
@@ -63,7 +70,25 @@ namespace Square.Modules.Content
             }
             Components.Clear();
 
+            if (registeredEvents != null)
+            {
+                for (int i = registeredEvents.Count - 1; i >= 0; i--)
+                    registeredEvents[i].Cancel();
+                registeredEvents = null;
+            }
+
             DoRemove = true;
+        }
+        
+        public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)
+            where T : EventParameters
+        {
+            var listener = Scene.EventModule.RegisterEvent(priority, action);
+            Scene.AddEventStrength<T>(listener);
+            if (registeredEvents == null)
+                registeredEvents = new List<IEventListener>();
+            registeredEvents.Add(listener);
+            return listener;
         }
     }
 }

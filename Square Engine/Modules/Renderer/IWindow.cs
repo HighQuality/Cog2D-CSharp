@@ -59,5 +59,10 @@ namespace Square.Modules.Renderer
         /// Depending on the renderer, changes may be applied before this method is called.
         /// </summary>
         void ApplyChanges();
+
+        /// <summary>
+        /// Checks whether a key is down or not.
+        /// </summary>
+        bool IsKeyDown(Keyboard.Key key);
     }
 }

@@ -9,7 +9,7 @@ namespace Square.Modules.EventHost
     public class EventModule
     {
         private Dictionary<EventIdentifier, IEvent> events = new Dictionary<EventIdentifier, IEvent>();
-
+        
         public EventModule()
         {
         }
@@ -36,7 +36,7 @@ namespace Square.Modules.EventHost
             IEvent eventObject;
             if (!events.TryGetValue(identifier, out eventObject))
             {
-                eventObject = new Event<T>();
+                eventObject = new Event<T>(this, identifier);
                 events.Add(identifier, eventObject);
             }
             else

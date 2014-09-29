@@ -11,14 +11,15 @@ namespace Square.Scenes
 {
     public class Scene
     {
+        public string Name { get; private set; }
         public LinkedList<GameObject> Objects = new LinkedList<GameObject>();
         public EventModule EventModule = new EventModule();
-        private Dictionary<Type, List<IEventListener>> eventStrength = new Dictionary<Type,List<IEventListener>>();
-        private Dictionary<Type, IEventListener> globalListeners = new Dictionary<Type, IEventListener>();
-        private List<Type> toBeRemoved = new List<Type>();
+        private Dictionary<EventIdentifier, List<IEventListener>> eventStrength = new Dictionary<EventIdentifier, List<IEventListener>>();
+        private Dictionary<EventIdentifier, IEventListener> globalListeners = new Dictionary<EventIdentifier, IEventListener>();
+        private List<EventIdentifier> toBeRemoved = new List<EventIdentifier>();
         private float eventStrengthUpdateTimer = 0f;
 
-        internal Scene()
+        public Scene(string name)
         {
             // Randomize an offset for the event strength update timer
             eventStrengthUpdateTimer = Engine.RandomFloat();
@@ -97,13 +98,13 @@ namespace Square.Scenes
         {
             List<IEventListener> listenerList;
 
-            if (!eventStrength.TryGetValue(listener.GetType(), out listenerList))
+            if (!eventStrength.TryGetValue(listener.Event.Identifier, out listenerList))
             {
                 listenerList = new List<IEventListener>();
-                eventStrength.Add(listener.GetType(), listenerList);
+                eventStrength.Add(listener.Event.Identifier, listenerList);
 
                 // TODO: Move event registration to SceneManager
-                globalListeners.Add(listener.GetType(), Engine.EventHost.RegisterEvent<T>(0, e => { if (Engine.SceneHost.CurrentScene == this) EventModule.GetEvent<T>().Trigger(e); }));
+                globalListeners.Add(listener.Event.Identifier, Engine.EventHost.RegisterEvent<T>(listener.Event.Identifier.UniqueIdentifier, 0, e => { if (Engine.SceneHost.CurrentScene == this) EventModule.GetEvent<T>(listener.Event.Identifier.UniqueIdentifier).Trigger(e); }));
             }
 
             listenerList.Add(listener);

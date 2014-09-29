@@ -12,16 +12,20 @@ namespace Square.Modules.EventHost
     {
         public SortedList<int, List<EventListener<T>>> Listeners = new SortedList<int, List<EventListener<T>>>();
         private Stack<int> toBeRemoved = new Stack<int>();
+        public readonly EventIdentifier Identifier;
+        public EventModule BaseModule { get; private set; }
 
-        public Event()
+        internal Event(EventModule baseModule, EventIdentifier identifier)
         {
+            this.BaseModule = baseModule;
+            this.Identifier = identifier;
         }
 
         /// <summary>
-        /// Triggers the event.
+        /// Executes functions registered to this event.
         /// </summary>
-        /// <param name="e">The Event Parameters</param>
-        /// <returns>Returns true if the event was intercepted</returns>
+        /// <param name="e">The parameters</param>
+        /// <returns>Whether or not the event was intercepted</returns>
         public bool Trigger(T e)
         {
             bool breakOut = false;

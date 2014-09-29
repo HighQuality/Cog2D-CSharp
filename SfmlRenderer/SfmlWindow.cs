@@ -31,6 +31,16 @@ namespace Square.SfmlRenderer
 
         public SfmlWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
         {
+            if (reverseKeyMap == null)
+            {
+                reverseKeyMap = new Dictionary<Keyboard.Key,SFML.Window.Keyboard.Key>();
+
+                foreach (var pair in keymap)
+                {
+                    reverseKeyMap[pair.Value] = pair.Key;
+                }
+            }
+
             SFML.Window.Styles sfmlStyle;
             switch(style)
             {
@@ -130,12 +140,22 @@ namespace Square.SfmlRenderer
             { SFML.Window.Keyboard.Key.Num9, Keyboard.Key.Num9 },
         };
 
+        private static Dictionary<Keyboard.Key, SFML.Window.Keyboard.Key> reverseKeyMap;
+
         private Keyboard.Key SfmlKeyToSquare(SFML.Window.Keyboard.Key key)
         {
             Keyboard.Key squareKey;
             if (keymap.TryGetValue(key, out squareKey))
                 return squareKey;
             return Keyboard.Key.Unknown;
+        }
+
+        private SFML.Window.Keyboard.Key SquareKeyToSfml(Keyboard.Key key)
+        {
+            SFML.Window.Keyboard.Key sfmlKey;
+            if (reverseKeyMap.TryGetValue(key, out sfmlKey))
+                return sfmlKey;
+            return SFML.Window.Keyboard.Key.Unknown;
         }
 
         void InnerWindow_KeyPressed(object sender, SFML.Window.KeyEventArgs e)
@@ -207,6 +227,11 @@ namespace Square.SfmlRenderer
             sprite.Texture = ((SfmlTexture)texture).Texture;
             sprite.Scale = new SFML.System.Vector2f(1f, 1f);
             InnerWindow.Draw(sprite);
+        }
+
+        public bool IsKeyDown(Keyboard.Key key)
+        {
+            return pressedKeys.Contains(SquareKeyToSfml(key));
         }
     }
 }

@@ -15,11 +15,10 @@ namespace Square.Scenes
 
         public SceneManager()
         {
-            Push(new Scene());
-
             // Register events for rerouting
             Register<UpdateEvent>();
             Register<DrawEvent>();
+            Register<DrawInterfaceEvent>();
             Register<KeyDownEvent>();
             Register<CloseButtonEvent>();
             Register<ExitEvent>();
