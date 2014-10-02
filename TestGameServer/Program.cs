@@ -14,9 +14,7 @@ namespace TestGameServer
         static void Main(string[] args)
         {
             Square.Engine.Initialize<DefaultRenderer>();
-
-            Square.Engine.EventHost.RegisterEvent<LeaveMessage>(0, e => Console.WriteLine(e.Message +  e.RandomizedNumber));
-
+            
             Square.Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
                 Square.Engine.SceneHost.Push(new GameScene());

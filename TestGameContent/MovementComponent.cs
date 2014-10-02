@@ -5,30 +5,42 @@ using System.Text;
 using System.Threading.Tasks;
 using Square;
 using Square.Modules;
+using Square.Modules.Content;
+using Square.Modules.EventHost;
 
 namespace TestGame
 {
     public class MovementComponent : Square.Modules.Content.LinearPhysicsComponent
     {
-        public Keyboard.Key Left = Keyboard.Key.Left,
-            Right = Keyboard.Key.Right,
-            Down = Keyboard.Key.Down,
-            Up = Keyboard.Key.Up;
-        public float MovementForce = 100f,
+        public KeyCapture Left,
+            Right,
+            Up,
+            Down;
+        public float MovementForce = 300f,
             MaxSpeed = 200f;
 
-        public override void Update(float deltaTime)
+        public MovementComponent()
         {
-            if (Keys[Left])
+            Left = CaptureKey(Keyboard.Key.Left, 1, Engine.IsNetworkGame ? CaptureRelayMode.ServerClientRelay : CaptureRelayMode.NoRelay);
+            Right = CaptureKey(Keyboard.Key.Right, 1, Engine.IsNetworkGame ? CaptureRelayMode.ServerClientRelay : CaptureRelayMode.NoRelay);
+            Up = CaptureKey(Keyboard.Key.Up, 1, Engine.IsNetworkGame ? CaptureRelayMode.ServerClientRelay : CaptureRelayMode.NoRelay);
+            Down = CaptureKey(Keyboard.Key.Down, 1, Engine.IsNetworkGame ? CaptureRelayMode.ServerClientRelay : CaptureRelayMode.NoRelay);
+        }
+
+        public override void PhysicsUpdate(float deltaTime)
+        {
+            if (Left.IsDown)
                 Speed.X -= MovementForce * deltaTime;
-            if (Keys[Right])
+            if (Right.IsDown)
                 Speed.X += MovementForce * deltaTime;
-            if (Keys[Up])
+            if (Up.IsDown)
                 Speed.Y -= MovementForce * deltaTime;
-            if (Keys[Down])
+            if (Down.IsDown)
                 Speed.Y += MovementForce * deltaTime;
 
-            base.Update(deltaTime);
+            Speed *= Mathf.Max(0f, 1f - deltaTime * 3f);
+
+            base.PhysicsUpdate(deltaTime);
         }
     }
 }

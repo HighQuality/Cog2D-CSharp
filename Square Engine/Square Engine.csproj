@@ -93,6 +93,8 @@
     <Compile Include="Image.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="Mathf.cs" />
+    <Compile Include="Modules\Content\CaptureRelayMode.cs" />
+    <Compile Include="Modules\Content\KeyCapture.cs" />
     <Compile Include="Modules\Content\ObjectComponent.cs" />
     <Compile Include="Modules\Content\GameObject.cs" />
     <Compile Include="Modules\Content\IContentModule.cs" />
@@ -114,9 +116,11 @@
     <Compile Include="Modules\EventHost\LoadContentEvent.cs" />
     <Compile Include="Modules\EventHost\PhysicsUpdateEvent.cs" />
     <Compile Include="Modules\EventHost\UpdateEvent.cs" />
-    <Compile Include="Modules\Networking\Client.cs" />
+    <Compile Include="Modules\Networking\TcpSocket.cs" />
     <Compile Include="Modules\Networking\ClientModule.cs" />
-    <Compile Include="Modules\Networking\NetworkEvent.cs" />
+    <Compile Include="Modules\Networking\NetworkHashMismatchException.cs" />
+    <Compile Include="Modules\Networking\InvalidVersionException.cs" />
+    <Compile Include="Modules\Networking\NetworkMessage.cs" />
     <Compile Include="Modules\Networking\NetworkIgnoreAttribute.cs" />
     <Compile Include="Modules\Networking\ServerModule.cs" />
     <Compile Include="Modules\Networking\TypeWriter.cs" />
@@ -128,9 +132,12 @@
     <Compile Include="Modules\Renderer\ITexture.cs" />
     <Compile Include="Modules\Renderer\IWindow.cs" />
     <Compile Include="Modules\Renderer\WindowStyle.cs" />
+    <Compile Include="Modules\SquareClient.cs" />
     <Compile Include="Noise.cs" />
     <Compile Include="Permissions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuadTree.cs" />
+    <Compile Include="Rectangle.cs" />
     <Compile Include="Scenes\Scene.cs" />
     <Compile Include="Scenes\SceneManager.cs" />
     <Compile Include="Transformation.cs" />

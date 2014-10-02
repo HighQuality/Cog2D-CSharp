@@ -24,17 +24,15 @@ namespace TestGame
                 if (message != null)
                     Debug.Error(message);
                 else
-                    Debug.Success("Successfully connected to server!");
+                    Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);
 
                 // Create and push the initial scene
                 Engine.SceneHost.Push(new GameScene());
             });
-
+            
             Engine.EventHost.RegisterEvent<KeyDownEvent>(Keyboard.Key.Space, 1, e =>
             {
-                System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-                Engine.ClientModule.Raise<LeaveMessage>(new LeaveMessage("Here's a random number: "));
-                Console.WriteLine(watch.Elapsed.TotalMilliseconds);
+                Engine.ClientModule.Raise<PingMessage>(new PingMessage());
             });
 
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>

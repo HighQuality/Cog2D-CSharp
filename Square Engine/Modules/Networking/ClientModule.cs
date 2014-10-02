@@ -11,15 +11,19 @@ namespace Square.Modules.Networking
 {
     public class ClientModule
     {
-        Client client;
+        TcpSocket client;
         private IEventListener updateListener;
+        public string Hostname { get; private set; }
+        public int Port { get; private set; }
 
         internal ClientModule(string hostname, int port)
         {
+            this.Hostname = hostname;
+            this.Port = port;
             var tcpClient = new TcpClient();
             tcpClient.Connect(hostname, port);
 
-            client = new Client(tcpClient);
+            client = new TcpSocket(tcpClient);
             updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue, Update);
         }
 
@@ -32,28 +36,18 @@ namespace Square.Modules.Networking
                 {
                     using (BinaryReader reader = new BinaryReader(stream))
                     {
-                        ushort messageType = reader.ReadUInt16();
-                        NetworkEvent parameters = NetworkEvent.ReadEvent(messageType, reader);
-
-                        var ev = Engine.EventHost.GetEvent(parameters.GetType(), null);
-                        if (ev != null)
-                        {
-                            if (ev.Count > 0)
-                                ev.GenericTrigger(parameters);
-                            else
-                                Console.WriteLine(parameters.GetType().FullName + " has no handler!");
-                        }
-                        else
-                            Console.WriteLine(parameters.GetType().FullName + " has no handler!");
+                        UInt16 messageType = reader.ReadUInt16();
+                        NetworkMessage receivedMessage = NetworkMessage.ReadEvent(client, messageType, reader);
+                        receivedMessage.Received();
                     }
                 }
             }
         }
-
+        
         public void Raise<T>(T data)
-            where T : NetworkEvent
+            where T : NetworkMessage
         {
-            var buffer = NetworkEvent.ToByteArray<T>(data);
+            var buffer = NetworkMessage.ToByteArray<T>(data);
             client.Writer.Write(buffer);
         }
 

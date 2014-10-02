@@ -71,6 +71,26 @@ namespace Square
             return new Vector2(first.X * second, first.Y * second);
         }
 
+        public static bool operator <(Vector2 first, Vector2 second)
+        {
+            return (first.X < second.X && first.Y < second.Y);
+        }
+
+        public static bool operator >(Vector2 first, Vector2 second)
+        {
+            return (first.X > second.X && first.Y > second.Y);
+        }
+
+        public static bool operator >=(Vector2 first, Vector2 second)
+        {
+            return (first.X >= second.X && first.Y >= second.Y);
+        }
+
+        public static bool operator <=(Vector2 first, Vector2 second)
+        {
+            return (first.X <= second.X && first.Y <= second.Y);
+        }
+
         public override string ToString()
         {
             return string.Format("[Vector2]{{ X : {0}; Y : {1} }}", X, Y);

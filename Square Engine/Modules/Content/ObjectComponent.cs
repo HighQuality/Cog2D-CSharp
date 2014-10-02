@@ -4,6 +4,7 @@ using Square.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,7 +18,6 @@ namespace Square.Modules.Content
         public GameObject GameObject { get; internal set; }
         public Scene Scene { get { return GameObject.Scene; } }
         public Vector2 WorldCoord { get { return GameObject.WorldCoord; } set { GameObject.WorldCoord = value; } }
-        public Keys Keys;
 
         public ObjectComponent()
         {
@@ -72,7 +72,6 @@ namespace Square.Modules.Content
                 alreadyRegistered.Add(method.Name);
 
                 // All tests were passed, add the method regitrator
-
                 string func = method.Name;
                 if (func == "Update")
                     registrator += (ev, comp) => comp.RegisterEvent<UpdateEvent>(0, e => comp.Update(e.DeltaTime));
@@ -93,7 +92,7 @@ namespace Square.Modules.Content
 
             return registrator;
         }
-
+        
         internal void RegisterFunctions(EventModule events)
         {
             Action<EventModule, ObjectComponent> registrator = null;
@@ -127,7 +126,7 @@ namespace Square.Modules.Content
         public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)
             where T : EventParameters
         {
-            return RegisterEvent<T>(null, priority, action);
+            return RegisterEvent<T>(EventModule.DefaultUniqueIdentifier, priority, action);
         }
 
         public EventListener<T> RegisterEvent<T>(object uniqueIdentifier, int priority, Action<T> action)
@@ -139,6 +138,13 @@ namespace Square.Modules.Content
                 registeredFunctions = new List<IEventListener>();
             registeredFunctions.Add(listener);
             return listener;
+        }
+
+        public KeyCapture CaptureKey(Keyboard.Key key, int priority, CaptureRelayMode relayMode)
+        {
+            if (relayMode != CaptureRelayMode.NoRelay && !Engine.IsNetworkGame)
+                throw new ArgumentOutOfRangeException("Only CaptureRelayMode.NoRelay may be used in non-multiplayer games!");
+            return new KeyCapture(GameObject, key, priority, relayMode);
         }
     }
 }

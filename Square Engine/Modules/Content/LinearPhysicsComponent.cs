@@ -10,7 +10,7 @@ namespace Square.Modules.Content
     {
         public Vector2 Speed;
 
-        public override void Update(float deltaTime)
+        public override void PhysicsUpdate(float deltaTime)
         {
             WorldCoord += new Vector2(Speed.X * deltaTime, Speed.Y * deltaTime);
 

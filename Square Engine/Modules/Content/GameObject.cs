@@ -1,4 +1,5 @@
 ﻿using Square.Modules.EventHost;
+using Square.Modules.Networking;
 using Square.Scenes;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,14 @@ namespace Square.Modules.Content
     public class GameObject
     {
         public string ObjectName;
-        public Vector2 WorldCoord { get; set; }
-        public Vector2 WorldSize { get; set; }
+        public GameObject Parent;
+        public Vector2 LocalCoord { get; set; }
+        public Vector2 WorldCoord { get { if (Parent != null) return Parent.WorldCoord + LocalCoord; return LocalCoord; } set { if (Parent != null) LocalCoord = value - Parent.WorldCoord; LocalCoord = value; } }
+        public Vector2 Size { get; set; }
         public Dictionary<Type, ObjectComponent> Components = new Dictionary<Type, ObjectComponent>();
         public Scene Scene { get; private set; }
         public bool DoRemove { get; private set; }
-        public Keys Keys;
+        public SquareClient Owner { get; private set; }
 
         private List<IEventListener> registeredEvents;
 
@@ -25,8 +28,23 @@ namespace Square.Modules.Content
         {
             this.Scene = scene;
             this.WorldCoord = worldCoord;
-            this.WorldSize = new Vector2(1f, 1f);
+            this.Size = new Vector2(1f, 1f);
             this.Scene.AddObject(this);
+        }
+
+        public GameObject(Scene scene, Vector2 worldCoord, SquareClient owner)
+            : this(scene, worldCoord)
+        {
+            this.Owner = owner;
+        }
+
+        public bool KeyIsDown(Keyboard.Key key)
+        {
+            if (Engine.IsClient)
+                return Engine.Window.IsKeyDown(key);
+            else if (Owner != null)
+                return Owner.IsKeyDown(key);
+            return false;
         }
 
         public T AddComponenet<T>()
@@ -83,7 +101,13 @@ namespace Square.Modules.Content
         public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)
             where T : EventParameters
         {
-            var listener = Scene.EventModule.RegisterEvent(priority, action);
+            return RegisterEvent<T>(null, priority, action);
+        }
+
+        public EventListener<T> RegisterEvent<T>(Object uniqueIdentifier, int priority, Action<T> action)
+            where T : EventParameters
+        {
+            var listener = Scene.EventModule.RegisterEvent(uniqueIdentifier, priority, action);
             Scene.AddEventStrength<T>(listener);
             if (registeredEvents == null)
                 registeredEvents = new List<IEventListener>();

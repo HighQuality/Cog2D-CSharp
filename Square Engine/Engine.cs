@@ -44,6 +44,7 @@ namespace Square
 
         public static bool IsClient { get { return ClientModule != null; } }
         public static bool IsServer { get { return ServerModule != null; } }
+        public static bool IsNetworkGame { get { return ClientModule != null || ServerModule != null; } }
 
         public static float PhysicsTimeStep;
 
@@ -58,7 +59,7 @@ namespace Square
             random = new Random();
             PhysicsTimeStep = 1f / 120f;
 
-            Debug.Info("Loading Assemblies...");
+            Debug.Event("Loading Assemblies...");
             Stopwatch watch = Stopwatch.StartNew();
             loadedAssemblies = new Dictionary<string, Assembly>();
             HashSet<string> loaded = new HashSet<string>();
@@ -78,14 +79,17 @@ namespace Square
                         toLoad.Push(name);
                 }
                 if (referencesThis)
+                {
+                    Debug.Info(currentName.Name);
                     loadedAssemblies[currentName.FullName] = assembly;
+                }
             }
             while (toLoad.Count > 0);
             Debug.Success("Finished Loading Assemblies! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             // Cache event registrators for Object Components
             ObjectComponent.RegistratorCache = new Dictionary<Type, Action<EventModule, ObjectComponent>>();
-            Debug.Info("Pre-Caching Event Registrators...");
+            Debug.Event("Pre-Caching Event Registrators...");
             watch.Restart();
             foreach (var assembly in loadedAssemblies.Values)
             {
@@ -93,36 +97,39 @@ namespace Square
                 {
                     if (typeof(ObjectComponent).IsAssignableFrom(type))
                     {
-                        Console.WriteLine(type.FullName);
+                        Debug.Info(type.FullName);
                         ObjectComponent.CreateRegistrator(type);
                     }
                 }
             }
             Debug.Success("Finished Pre-Caching Event Registrators! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
-            Debug.Info("Registrating Networking Type Handlers...");
+            Debug.Event("Registrating Networking Type Handlers...");
             watch.Restart();
 
-            NetworkEvent.RegisterCustomType<Int16>((v, w) => w.Write((Int16)v), r => r.ReadInt16());
-            NetworkEvent.RegisterCustomType<UInt16>((v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
+            NetworkMessage.RegisterCustomType<Int16>((v, w) => w.Write((Int16)v), r => r.ReadInt16());
+            NetworkMessage.RegisterCustomType<UInt16>((v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
 
-            NetworkEvent.RegisterCustomType<Int32>((v, w) => w.Write((Int32)v), r => r.ReadInt32());
-            NetworkEvent.RegisterCustomType<UInt32>((v, w) => w.Write((UInt32)v), r => r.ReadUInt32());
+            NetworkMessage.RegisterCustomType<Int32>((v, w) => w.Write((Int32)v), r => r.ReadInt32());
+            NetworkMessage.RegisterCustomType<UInt32>((v, w) => w.Write((UInt32)v), r => r.ReadUInt32());
 
-            NetworkEvent.RegisterCustomType<Int64>((v, w) => w.Write((Int64)v), r => r.ReadInt64());
-            NetworkEvent.RegisterCustomType<UInt64>((v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
+            NetworkMessage.RegisterCustomType<Int64>((v, w) => w.Write((Int64)v), r => r.ReadInt64());
+            NetworkMessage.RegisterCustomType<UInt64>((v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
 
-            NetworkEvent.RegisterCustomType<Single>((v, w) => w.Write((Single)v), r => r.ReadSingle());
-            NetworkEvent.RegisterCustomType<Double>((v, w) => w.Write((Double)v), r => r.ReadDouble());
-            NetworkEvent.RegisterCustomType<Decimal>((v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
-            NetworkEvent.RegisterCustomType<Char>((v, w) => w.Write((Char)v), r => r.ReadChar());
-            NetworkEvent.RegisterCustomType<String>((v, w) => w.Write((String)v), r => r.ReadString());
+            NetworkMessage.RegisterCustomType<Boolean>((v, w) => w.Write((Boolean)v), r => r.ReadBoolean());
+            NetworkMessage.RegisterCustomType<Single>((v, w) => w.Write((Single)v), r => r.ReadSingle());
+            NetworkMessage.RegisterCustomType<Double>((v, w) => w.Write((Double)v), r => r.ReadDouble());
+            NetworkMessage.RegisterCustomType<Decimal>((v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
+            NetworkMessage.RegisterCustomType<Char>((v, w) => w.Write((Char)v), r => r.ReadChar());
+            NetworkMessage.RegisterCustomType<String>((v, w) => w.Write((String)v), r => r.ReadString());
+
+            NetworkMessage.RegisterCustomType<Byte[]>((v, w) => { w.Write((Int32)v.Length); w.Write(v); }, r => { Int32 size = r.ReadInt32(); return r.ReadBytes(size); });
 
             Debug.Success("Finished Registrating Networking Type Handlers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
-            Debug.Info("Caching Network Events...");
+            Debug.Event("Caching Network Events...");
             watch.Restart();
-            NetworkEvent.BuildCache(loadedAssemblies.Values);
+            NetworkMessage.BuildCache(loadedAssemblies.Values);
             Debug.Success("Finished Caching Network Events! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             EventHost = new EventModule();
@@ -185,7 +192,7 @@ namespace Square
             float accumulator = 0f;
             while (SceneHost.CurrentScene != null)
             {
-                float deltaTime = (float)watch.Elapsed.TotalMilliseconds;
+                float deltaTime = (float)watch.Elapsed.TotalSeconds;
                 watch.Restart();
 
                 accumulator += deltaTime;
@@ -195,7 +202,7 @@ namespace Square
                     accumulator -= PhysicsTimeStep;
                 }
                 EventHost.GetEvent<UpdateEvent>().Trigger(new UpdateEvent(null, deltaTime));
-
+                
                 Thread.Sleep(1);
             }
 

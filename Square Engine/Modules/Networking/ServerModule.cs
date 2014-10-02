@@ -14,23 +14,32 @@ namespace Square.Modules.Networking
     {
         private Thread thread;
         private TcpListener listener;
-        private List<Client> clients;
+        private List<SquareClient> clients;
         private IEventListener updateListener;
+        public int Port { get; private set; }
 
         public ServerModule(int port)
         {
+            this.Port = port;
             listener = new TcpListener(System.Net.IPAddress.Any, port);
-            listener.Start();
+            try
+            {
+                listener.Start();
 
-            clients = new List<Client>();
-            
-            // Start listening for connections
-            thread = new Thread(Listener);
-            thread.IsBackground = true;
-            thread.Start();
-            Debug.Info("Listening for connections on {0}...", port);
+                clients = new List<SquareClient>();
 
-            updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue, Update);
+                // Start listening for connections
+                thread = new Thread(Listener);
+                thread.IsBackground = true;
+                thread.Start();
+                Debug.Success("Listening for connections on {0}...", port);
+
+                updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue, Update);
+            }
+            catch (SocketException e)
+            {
+                Debug.Error("Could not listen on port {0}: {1}", port, e.Message);
+            }
         }
 
         private void Update(UpdateEvent args)
@@ -46,25 +55,16 @@ namespace Square.Modules.Networking
                         {
                             using (BinaryReader reader = new BinaryReader(stream))
                             {
-                                ushort messageType = reader.ReadUInt16();
-                                NetworkEvent parameters = NetworkEvent.ReadEvent(messageType, reader);
-
-                                var ev = Engine.EventHost.GetEvent(parameters.GetType(), null);
-                                if (ev != null)
-                                {
-                                    if (ev.Count > 0)
-                                        ev.GenericTrigger(parameters);
-                                    else
-                                        Console.WriteLine(parameters.GetType().FullName + " has no handler!");
-                                }
-                                else
-                                    Console.WriteLine(parameters.GetType().FullName + " has no handler!");
+                                UInt16 messageType = reader.ReadUInt16();
+                                NetworkMessage receivedMessage = NetworkMessage.ReadEvent(clients[i], messageType, reader);
+                                receivedMessage.Received();
                             }
                         }
                     }
 
                     if (clients[i].IsDisconnected)
                     {
+                        Console.WriteLine(clients[i].IPAddress + " disconnected!");
                         clients.RemoveAt(i);
                         continue;
                     }
@@ -72,10 +72,10 @@ namespace Square.Modules.Networking
             }
         }
 
-        public void Raise<T>(T data)
-            where T : NetworkEvent
+        public void Send<T>(T data)
+            where T : NetworkMessage
         {
-            var buffer = NetworkEvent.ToByteArray<T>(data);
+            var buffer = NetworkMessage.ToByteArray<T>(data);
             lock (clients)
                 for (int i = clients.Count - 1; i >= 0; i--)
                     clients[i].Writer.Write(buffer);
@@ -97,10 +97,23 @@ namespace Square.Modules.Networking
                 while (listener.Server.IsBound)
                 {
                     var tcpClient = listener.AcceptTcpClient();
-
-                    lock (clients)
+                    try
                     {
-                        clients.Add(new Client(tcpClient));
+                        var client = new SquareClient(tcpClient);
+                        Debug.Info("{0} Connected!", client.IPAddress);
+
+                        lock (clients)
+                        {
+                            clients.Add(client);
+                        }
+                    }
+                    catch (InvalidVersionException e)
+                    {
+                        Debug.Error("{0}'s connection failed:\n{1}", tcpClient.Client.RemoteEndPoint, e.Message);
+                    }
+                    catch (NetworkHashMismatchException e)
+                    {
+                        Debug.Error("{0}'s connection failed:\n{1}", tcpClient.Client.RemoteEndPoint, e.Message);
                     }
                 }
             }
