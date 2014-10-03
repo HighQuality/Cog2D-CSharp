@@ -3,6 +3,7 @@ using Square.Modules.Renderer;
 using Square.Scenes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -14,6 +15,10 @@ namespace Square.Modules.Content
     {
         private List<IEventListener> registeredFunctions;
         internal static Dictionary<Type, Action<EventModule, ObjectComponent>> RegistratorCache;
+        internal static Dictionary<Type, ComponentSerializer> SerializerCache;
+        internal static Dictionary<Type, SynchronizedEditPermission[]> SynchronizedPermissions;
+        internal static Dictionary<Type, Action<ObjectComponent, BinaryReader>[]> SynchronizedReader;
+        internal static Dictionary<Type, Action<ObjectComponent, BinaryWriter>[]> SynchronizedWriter;
 
         public GameObject GameObject { get; internal set; }
         public Scene Scene { get { return GameObject.Scene; } }
@@ -45,8 +50,67 @@ namespace Square.Modules.Content
                 registeredFunctions[i].Cancel();
             registeredFunctions.Clear();
         }
+        
+        internal static ComponentSerializer CreateSerializer(Type type)
+        {
+            if (SerializerCache == null)
+            {
+                SerializerCache = new Dictionary<Type, ComponentSerializer>();
+                SynchronizedPermissions = new Dictionary<Type, SynchronizedEditPermission[]>();
+            }
+            if (SynchronizedPermissions.ContainsKey(type))
+                throw new InvalidOperationException("Cache for object component \"" + type.FullName + "\" already exists!");
 
-        internal static Action<EventModule, ObjectComponent> CreateRegistrator(Type type)
+            FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(o => typeof(ISynchronized).IsAssignableFrom(o.FieldType)).OrderBy(o => o.Name).ToArray();
+
+            Action<ObjectComponent, BinaryWriter> writer = null;
+            Action<ObjectComponent, BinaryReader> reader = null;
+            Action<ObjectComponent, BinaryWriter>[] writers = new Action<ObjectComponent, BinaryWriter>[fields.Length];
+            Action<ObjectComponent, BinaryReader>[] readers = new Action<ObjectComponent, BinaryReader>[fields.Length];
+            SynchronizedEditPermission[] permissionCollection = new SynchronizedEditPermission[fields.Length];
+
+            SynchronizedWriter.Add(type, writers);
+            SynchronizedReader.Add(type, readers);
+            SynchronizedPermissions.Add(type, permissionCollection);
+
+            for (int i=0; i<fields.Length; i++)
+            {
+                var field = fields[i];
+
+                var editAttribute = field.GetCustomAttribute<ClientEditAttribute>();
+                SynchronizedEditPermission permissions;
+                if (editAttribute != null)
+                {
+                    permissions.CanEdit = editAttribute.CanEdit;
+                    permissions.RequireOwner = editAttribute.RequireOwner;
+                }
+                else
+                {
+                    permissions.CanEdit = false;
+                    permissions.RequireOwner = false;
+                }
+                permissionCollection[i] = permissions;
+
+                var innerType = field.FieldType.GenericTypeArguments[0];
+                var typeSerializer = TypeSerializer.GetTypeWriter(innerType);
+                if (typeSerializer != null)
+                {
+                    writer += (c, w) => typeSerializer.GenericWrite(field.GetValue(c), w);
+                    reader += (c, r) => field.SetValue(c, typeSerializer.GenericRead(r));
+
+                    writers[i] = (c, w) => typeSerializer.GenericWrite(field.GetValue(c), w);
+                    readers[i] = (c, r) => field.SetValue(c, typeSerializer.GenericRead(r));
+                }
+                else
+                    throw new NoSerializerException(string.Format("Synchronized<{0}> {1}.{2} doesn't have a type serializer!", innerType.FullName, type.FullName, field.Name));
+            }
+            //TODO: Merge individual writers and readers to same variable as global, iterate through them all for global read / write, move them from seperate dictionary into this one (same with permissions)
+            var s = new ComponentSerializer(writer, reader);
+            SerializerCache.Add(type, s);
+            return s;
+        }
+
+        internal static Action<EventModule, ObjectComponent> CreateEventRegistrator(Type type)
         {
             Action<EventModule, ObjectComponent> registrator = null;
             HashSet<string> alreadyRegistered = new HashSet<string>();
@@ -113,7 +177,7 @@ namespace Square.Modules.Content
 
             if (!didRegister)
             {
-                registrator = CreateRegistrator(GetType());
+                registrator = CreateEventRegistrator(GetType());
 
                 // Register our events
                 if (registrator != null)

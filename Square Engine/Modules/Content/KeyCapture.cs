@@ -19,6 +19,11 @@ namespace Square.Modules.Content
             this.Key = key;
             listener = obj.RegisterEvent<KeyDownEvent>(Key, priority, KeyDown);
             this.RelayMode = relayMode;
+
+            if (Engine.IsServer && obj.Owner != null)
+            {
+
+            }
         }
 
         private void KeyDown(KeyDownEvent args)

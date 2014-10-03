@@ -17,7 +17,6 @@ namespace Square.Modules.Networking
         private static Dictionary<ushort, Action<Object, BinaryReader>> eventReaderCache;
         private static Dictionary<ushort, Action<Object, BinaryWriter>> eventWriterCache;
         private static Dictionary<ushort, Func<NetworkMessage>> eventCreators;
-        private static Dictionary<Type, ITypeWriter> typeWriters;
         private static Dictionary<Type, ushort> typeIds;
         public static byte[] NetworkingHash;
 
@@ -29,6 +28,7 @@ namespace Square.Modules.Networking
         /// The TcpSocket which sent us this message
         /// </summary>
         public TcpSocket Sender { get { return _sender; } }
+        public SquareClient Client { get { return _sender as SquareClient; } }
 
         public NetworkMessage()
         {
@@ -39,20 +39,7 @@ namespace Square.Modules.Networking
         /// </summary>
         /// <returns></returns>
         public abstract void Received();
-
-        /// <summary>
-        /// Registers a type to be allowed within a NetworkEvent
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="writer"></param>
-        /// <param name="reader"></param>
-        public static void RegisterCustomType<T>(Action<T, BinaryWriter> writer, Func<BinaryReader, T> reader)
-        {
-            if (typeWriters == null)
-                typeWriters = new Dictionary<Type, ITypeWriter>();
-            typeWriters[typeof(T)] = new TypeWriter<T>(writer, reader);
-        }
-
+        
         /// <summary>
         /// Gets the identifier
         /// </summary>
@@ -110,9 +97,9 @@ namespace Square.Modules.Networking
                         networkingDescriber.Append(field.Name);
                         networkingDescriber.Append(';');
 
-                        ITypeWriter writer;
                         // Find the specific type's writer/reader helper
-                        if (typeWriters.TryGetValue(fieldType, out writer))
+                        ITypeWriter writer = TypeSerializer.GetTypeWriter(fieldType);
+                        if (writer != null)
                         {
                             // Add write/read operations to the type handler
                             messageReader += (o, r) => field.SetValue(o, writer.GenericRead(r));

@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnemyScript.cs" />
     <Compile Include="GameScene.cs" />
     <Compile Include="PingMessage.cs" />
     <Compile Include="MovementComponent.cs" />

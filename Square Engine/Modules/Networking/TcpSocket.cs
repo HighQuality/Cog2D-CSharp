@@ -19,12 +19,12 @@ namespace Square.Modules.Networking
         private Thread thread;
         private Queue<byte[]> messages = new Queue<byte[]>();
         public bool IsDisconnected { get; private set; }
-        public string IPAddress { get; private set; }
+        public string IpAddress { get; private set; }
 
         internal TcpSocket(TcpClient client)
         {
             this.client = client;
-            IPAddress = client.Client.RemoteEndPoint.ToString();
+            IpAddress = client.Client.RemoteEndPoint.ToString();
             client.NoDelay = true;
             stream = client.GetStream();
             Writer = new BinaryWriter(stream, Encoding.UTF8);

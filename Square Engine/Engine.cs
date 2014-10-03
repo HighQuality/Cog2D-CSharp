@@ -63,20 +63,30 @@ namespace Square
             Stopwatch watch = Stopwatch.StartNew();
             loadedAssemblies = new Dictionary<string, Assembly>();
             HashSet<string> loaded = new HashSet<string>();
-            Stack<AssemblyName> toLoad = new Stack<AssemblyName>(Assembly.GetEntryAssembly().GetReferencedAssemblies());
+            var entryAssembly = Assembly.GetEntryAssembly();
+            var refAssemblies = entryAssembly.GetReferencedAssemblies();
+            Stack<AssemblyName> toLoad = new Stack<AssemblyName>(refAssemblies);
+            toLoad.Push(entryAssembly.GetName());
+            loaded.Add(entryAssembly.FullName);
+            foreach (var assembly in refAssemblies)
+                loaded.Add(assembly.FullName);
             var thisAssembly = Assembly.GetExecutingAssembly();
+
             do
             {
                 AssemblyName currentName = toLoad.Pop();
                 var assembly = AppDomain.CurrentDomain.Load(currentName);
-                loaded.Add(currentName.FullName);
+
                 bool referencesThis = false;
                 foreach (var name in assembly.GetReferencedAssemblies())
                 {
                     if (name.FullName == thisAssembly.FullName || assembly == thisAssembly)
                         referencesThis = true;
                     if (!loaded.Contains(name.FullName))
+                    {
                         toLoad.Push(name);
+                        loaded.Add(name.FullName);
+                    }
                 }
                 if (referencesThis)
                 {
@@ -87,46 +97,47 @@ namespace Square
             while (toLoad.Count > 0);
             Debug.Success("Finished Loading Assemblies! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
+            Debug.Event("Registrating Type Serializers...");
+            watch.Restart();
+
+            TypeSerializer.Register<Int16>((v, w) => w.Write((Int16)v), r => r.ReadInt16());
+            TypeSerializer.Register<UInt16>((v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
+
+            TypeSerializer.Register<Int32>((v, w) => w.Write((Int32)v), r => r.ReadInt32());
+            TypeSerializer.Register<UInt32>((v, w) => w.Write((UInt32)v), r => r.ReadUInt32());
+
+            TypeSerializer.Register<Int64>((v, w) => w.Write((Int64)v), r => r.ReadInt64());
+            TypeSerializer.Register<UInt64>((v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
+
+            TypeSerializer.Register<Boolean>((v, w) => w.Write((Boolean)v), r => r.ReadBoolean());
+            TypeSerializer.Register<Single>((v, w) => w.Write((Single)v), r => r.ReadSingle());
+            TypeSerializer.Register<Double>((v, w) => w.Write((Double)v), r => r.ReadDouble());
+            TypeSerializer.Register<Decimal>((v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
+            TypeSerializer.Register<Char>((v, w) => w.Write((Char)v), r => r.ReadChar());
+            TypeSerializer.Register<String>((v, w) => w.Write((String)v), r => r.ReadString());
+
+            TypeSerializer.Register<Byte[]>((v, w) => { w.Write((Int32)v.Length); w.Write(v); }, r => { Int32 size = r.ReadInt32(); return r.ReadBytes(size); });
+
+            Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+
             // Cache event registrators for Object Components
             ObjectComponent.RegistratorCache = new Dictionary<Type, Action<EventModule, ObjectComponent>>();
-            Debug.Event("Pre-Caching Event Registrators...");
+            Debug.Event("Pre-Caching Object Components...");
             watch.Restart();
-            foreach (var assembly in loadedAssemblies.Values)
+            foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
             {
-                foreach (var type in assembly.GetTypes())
+                foreach (var type in assembly.GetTypes().OrderBy(o => o.FullName))
                 {
                     if (typeof(ObjectComponent).IsAssignableFrom(type))
                     {
                         Debug.Info(type.FullName);
-                        ObjectComponent.CreateRegistrator(type);
+                        ObjectComponent.CreateEventRegistrator(type);
+                        ObjectComponent.CreateSerializer(type);
                     }
                 }
             }
-            Debug.Success("Finished Pre-Caching Event Registrators! ({0}ms)", watch.Elapsed.TotalMilliseconds);
-
-            Debug.Event("Registrating Networking Type Handlers...");
-            watch.Restart();
-
-            NetworkMessage.RegisterCustomType<Int16>((v, w) => w.Write((Int16)v), r => r.ReadInt16());
-            NetworkMessage.RegisterCustomType<UInt16>((v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
-
-            NetworkMessage.RegisterCustomType<Int32>((v, w) => w.Write((Int32)v), r => r.ReadInt32());
-            NetworkMessage.RegisterCustomType<UInt32>((v, w) => w.Write((UInt32)v), r => r.ReadUInt32());
-
-            NetworkMessage.RegisterCustomType<Int64>((v, w) => w.Write((Int64)v), r => r.ReadInt64());
-            NetworkMessage.RegisterCustomType<UInt64>((v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
-
-            NetworkMessage.RegisterCustomType<Boolean>((v, w) => w.Write((Boolean)v), r => r.ReadBoolean());
-            NetworkMessage.RegisterCustomType<Single>((v, w) => w.Write((Single)v), r => r.ReadSingle());
-            NetworkMessage.RegisterCustomType<Double>((v, w) => w.Write((Double)v), r => r.ReadDouble());
-            NetworkMessage.RegisterCustomType<Decimal>((v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
-            NetworkMessage.RegisterCustomType<Char>((v, w) => w.Write((Char)v), r => r.ReadChar());
-            NetworkMessage.RegisterCustomType<String>((v, w) => w.Write((String)v), r => r.ReadString());
-
-            NetworkMessage.RegisterCustomType<Byte[]>((v, w) => { w.Write((Int32)v.Length); w.Write(v); }, r => { Int32 size = r.ReadInt32(); return r.ReadBytes(size); });
-
-            Debug.Success("Finished Registrating Networking Type Handlers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
-
+            Debug.Success("Finished Pre-Caching Object Components! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+            
             Debug.Event("Caching Network Events...");
             watch.Restart();
             NetworkMessage.BuildCache(loadedAssemblies.Values);

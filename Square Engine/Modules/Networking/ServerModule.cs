@@ -21,6 +21,7 @@ namespace Square.Modules.Networking
         public ServerModule(int port)
         {
             this.Port = port;
+
             listener = new TcpListener(System.Net.IPAddress.Any, port);
             try
             {
@@ -64,7 +65,7 @@ namespace Square.Modules.Networking
 
                     if (clients[i].IsDisconnected)
                     {
-                        Console.WriteLine(clients[i].IPAddress + " disconnected!");
+                        Console.WriteLine(clients[i].IpAddress + " disconnected!");
                         clients.RemoveAt(i);
                         continue;
                     }
@@ -100,7 +101,7 @@ namespace Square.Modules.Networking
                     try
                     {
                         var client = new SquareClient(tcpClient);
-                        Debug.Info("{0} Connected!", client.IPAddress);
+                        Debug.Info("{0} Connected!", client.IpAddress);
 
                         lock (clients)
                         {
