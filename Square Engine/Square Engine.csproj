@@ -77,7 +77,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -96,6 +98,7 @@
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\ComponentSerializer.cs" />
+    <Compile Include="Modules\Content\CreateObjectMessage.cs" />
     <Compile Include="Modules\Content\KeyCapture.cs" />
     <Compile Include="Modules\Content\ObjectComponent.cs" />
     <Compile Include="Modules\Content\GameObject.cs" />
@@ -113,6 +116,7 @@
     <Compile Include="Modules\EventHost\EventModule.cs" />
     <Compile Include="Modules\EventHost\EventParameters.cs" />
     <Compile Include="Modules\EventHost\ExitEvent.cs" />
+    <Compile Include="Modules\EventHost\FinishedLoadingEvent.cs" />
     <Compile Include="Modules\EventHost\ICloneable.cs" />
     <Compile Include="Modules\EventHost\IEvent.cs" />
     <Compile Include="Modules\EventHost\IEventListener.cs" />
@@ -120,6 +124,12 @@
     <Compile Include="Modules\EventHost\LoadContentEvent.cs" />
     <Compile Include="Modules\EventHost\PhysicsUpdateEvent.cs" />
     <Compile Include="Modules\EventHost\UpdateEvent.cs" />
+    <Compile Include="Modules\Networking\CachedStringMessageTest.cs" />
+    <Compile Include="ISerializable.cs" />
+    <Compile Include="Modules\Networking\IStringCacher.cs" />
+    <Compile Include="Modules\Networking\MessageExecutionProperty.cs" />
+    <Compile Include="Modules\Networking\StringCacheMessage.cs" />
+    <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
     <Compile Include="NoSerializerException.cs" />
     <Compile Include="Modules\Networking\TcpSocket.cs" />
     <Compile Include="Modules\Networking\ClientModule.cs" />
@@ -128,6 +138,12 @@
     <Compile Include="Modules\Networking\NetworkMessage.cs" />
     <Compile Include="Modules\Networking\NetworkIgnoreAttribute.cs" />
     <Compile Include="Modules\Networking\ServerModule.cs" />
+    <Compile Include="SplashScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SplashScreen.Designer.cs">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </Compile>
     <Compile Include="TypeWriter.cs" />
     <Compile Include="Modules\Renderer\DefaultRenderer.cs" />
     <Compile Include="Modules\Renderer\DrawInterfaceEvent.cs" />
@@ -158,6 +174,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SplashScreen.resx">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

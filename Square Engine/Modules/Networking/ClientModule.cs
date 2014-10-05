@@ -23,32 +23,19 @@ namespace Square.Modules.Networking
             var tcpClient = new TcpClient();
             tcpClient.Connect(hostname, port);
 
-            client = new TcpSocket(tcpClient);
+            client = new TcpSocket(tcpClient, Permissions.DefaultClientPermissions);
             updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue, Update);
         }
 
         private void Update(UpdateEvent args)
         {
-            byte[] message;
-            while ((message = client.DequeueMessage()) != null)
-            {
-                using (MemoryStream stream = new MemoryStream(message))
-                {
-                    using (BinaryReader reader = new BinaryReader(stream))
-                    {
-                        UInt16 messageType = reader.ReadUInt16();
-                        NetworkMessage receivedMessage = NetworkMessage.ReadEvent(client, messageType, reader);
-                        receivedMessage.Received();
-                    }
-                }
-            }
+            client.DispatchMessages();
         }
         
-        public void Raise<T>(T data)
+        public void Send<T>(T message)
             where T : NetworkMessage
         {
-            var buffer = NetworkMessage.ToByteArray<T>(data);
-            client.Writer.Write(buffer);
+            client.Send<T>(message);
         }
 
         public void Disconnect()

@@ -48,16 +48,33 @@ namespace Square
 
         public static float PhysicsTimeStep;
 
+        private static long nextGlobalId,
+            nextLocalId;
+
+        public static Permissions Permissions;
+
         /// <summary>
         /// Initializes Square Engine making it's modules available for use
         /// </summary>
         /// <typeparam name="TRenderer"></typeparam>
-        public static void Initialize<TRenderer>()
+        public static void Initialize<TRenderer>(Image splashScreenImage)
             where TRenderer : IRenderModule, new()
         {
+            EventHost = new EventModule();
+
+            if (splashScreenImage != null)
+            {
+                var splashScreen = new SplashScreen(splashScreenImage);
+                splashScreen.Show();
+                EventHost.RegisterEvent<FinishedLoadingEvent>(-999, e => splashScreen.Invoke((System.Windows.Forms.MethodInvoker)delegate { splashScreen.Close(); }));
+            }
+
             var entireLoadTime = Stopwatch.StartNew();
             random = new Random();
             PhysicsTimeStep = 1f / 120f;
+            Permissions = Permissions.FullPermissions;
+            nextGlobalId = 1;
+            nextLocalId = -1;
 
             Debug.Event("Loading Assemblies...");
             Stopwatch watch = Stopwatch.StartNew();
@@ -100,6 +117,7 @@ namespace Square
             Debug.Event("Registrating Type Serializers...");
             watch.Restart();
 
+            // UPDATE DOCUMENTATION UNDER "NETWORKING" WHEN MAKING CHANGES
             TypeSerializer.Register<Int16>((v, w) => w.Write((Int16)v), r => r.ReadInt16());
             TypeSerializer.Register<UInt16>((v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
 
@@ -109,14 +127,19 @@ namespace Square
             TypeSerializer.Register<Int64>((v, w) => w.Write((Int64)v), r => r.ReadInt64());
             TypeSerializer.Register<UInt64>((v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
 
+            TypeSerializer.Register<Byte>((v, w) => w.Write((Byte)v), r => r.ReadByte());
+            TypeSerializer.Register<SByte>((v, w) => w.Write((SByte)v), r => r.ReadSByte());
+
             TypeSerializer.Register<Boolean>((v, w) => w.Write((Boolean)v), r => r.ReadBoolean());
             TypeSerializer.Register<Single>((v, w) => w.Write((Single)v), r => r.ReadSingle());
             TypeSerializer.Register<Double>((v, w) => w.Write((Double)v), r => r.ReadDouble());
             TypeSerializer.Register<Decimal>((v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
             TypeSerializer.Register<Char>((v, w) => w.Write((Char)v), r => r.ReadChar());
-            TypeSerializer.Register<String>((v, w) => w.Write((String)v), r => r.ReadString());
+            TypeSerializer.Register<String>((v, w) => { if (v == null || v.Length == 0) { w.Write((UInt32)0); } else { var bytes = Encoding.UTF8.GetBytes(v); w.Write((UInt32)bytes.Length); w.Write(bytes); } }, r => { UInt32 size = r.ReadUInt32(); if (size == 0) return ""; return Encoding.UTF8.GetString(r.ReadBytes((int)size)); });
 
-            TypeSerializer.Register<Byte[]>((v, w) => { w.Write((Int32)v.Length); w.Write(v); }, r => { Int32 size = r.ReadInt32(); return r.ReadBytes(size); });
+            TypeSerializer.Register<Vector2>((v, w) => { w.Write((float)v.X); w.Write((float)v.Y); }, r => { Vector2 v; v.X = r.ReadSingle(); v.Y = r.ReadSingle(); return v; });
+            TypeSerializer.Register<Rectangle>((v, w) => { w.Write((float)v.TopLeft.X); w.Write((float)v.TopLeft.Y); w.Write((float)v.Size.X); w.Write((float)v.Size.Y); }, r => { Vector2 topLeft, size; topLeft.X = r.ReadSingle(); topLeft.Y = r.ReadSingle(); size.X = r.ReadSingle(); size.Y = r.ReadSingle(); return new Rectangle(topLeft, size); });
+            TypeSerializer.Register<Color>((v, w) => { w.Write((byte)v.R); w.Write((byte)v.G); w.Write((byte)v.B); w.Write((byte)v.A); }, r => { Color v; v.R = r.ReadByte(); v.G = r.ReadByte(); v.B = r.ReadByte(); v.A = r.ReadByte(); return v; });
 
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
@@ -137,13 +160,12 @@ namespace Square
                 }
             }
             Debug.Success("Finished Pre-Caching Object Components! ({0}ms)", watch.Elapsed.TotalMilliseconds);
-            
+
             Debug.Event("Caching Network Events...");
             watch.Restart();
             NetworkMessage.BuildCache(loadedAssemblies.Values);
             Debug.Success("Finished Caching Network Events! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
-            EventHost = new EventModule();
             SceneHost = new SceneManager();
             Renderer = new TRenderer();
 
@@ -156,12 +178,14 @@ namespace Square
         /// </summary>
         public static void StartGame(string title, int width, int height, WindowStyle style)
         {
-            Window = Renderer.CreateWindow(title, width, height, style, EventHost);
-            Window.VerticalSynchronization = true;
-
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
             EventHost.RegisterEvent<ExitEvent>(-999, e => { Window.Close(); e.Intercept = true; });
             EventHost.RegisterEvent<CloseButtonEvent>(-999, e => { EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null)); e.Intercept = true; });
+
+            EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
+
+            Window = Renderer.CreateWindow(title, width, height, style, EventHost);
+            Window.VerticalSynchronization = true;
 
             Stopwatch watch = Stopwatch.StartNew();
             float accumulator = 0f;
@@ -198,6 +222,8 @@ namespace Square
             ServerModule = new ServerModule(port);
 
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
+
+            EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
 
             Stopwatch watch = Stopwatch.StartNew();
             float accumulator = 0f;
@@ -246,6 +272,16 @@ namespace Square
         public static float RandomFloat()
         {
             return (float)random.NextDouble();
+        }
+
+        internal static long GetGlobalId()
+        {
+            return nextGlobalId++;
+        }
+
+        internal static long GetLocalId()
+        {
+            return nextLocalId--;
         }
     }
 }

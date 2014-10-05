@@ -4,25 +4,31 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Square.Modules.Networking
 {
-    public class TcpSocket
+    public class TcpSocket : IStringCacher
     {
         private TcpClient client;
         private NetworkStream stream;
         internal BinaryWriter Writer;
         internal BinaryReader Reader;
         private Thread thread;
-        private Queue<byte[]> messages = new Queue<byte[]>();
+        private Queue<NetworkMessage> messages = new Queue<NetworkMessage>();
         public bool IsDisconnected { get; private set; }
         public string IpAddress { get; private set; }
+        internal List<string> CachedStrings = new List<string>();
+        internal Dictionary<string, ushort> CachedStringDictionary = new Dictionary<string, ushort>();
+        private Dictionary<string, ushort> sentStrings = new Dictionary<string, ushort>();
+        public Permissions Permissions;
 
-        internal TcpSocket(TcpClient client)
+        internal TcpSocket(TcpClient client, Permissions permissions)
         {
+            this.Permissions = permissions;
             this.client = client;
             IpAddress = client.Client.RemoteEndPoint.ToString();
             client.NoDelay = true;
@@ -45,29 +51,35 @@ namespace Square.Modules.Networking
             thread.IsBackground = true;
             thread.Start();
         }
-
-        /// <summary>
-        /// Tries to dequeue a received message, returns null if there currently are no messages queued
-        /// </summary>
-        public byte[] DequeueMessage()
+        
+        public void DispatchMessages()
         {
-            lock (messages)
-                if (messages.Count > 0)
-                    return messages.Dequeue();
-            return null;
+            while (messages.Count > 0)
+            {
+                messages.Dequeue().Received();
+            }
         }
         
+        public void Send<T>(T message)
+            where T : NetworkMessage
+        {
+            NetworkMessage.WriteToSocket<T>(message, this);
+        }
+
         private void Receive()
         {
             try
             {
                 for (; ; )
                 {
-                    UInt32 messageSize = Reader.ReadUInt32();
-                    byte[] messageData = Reader.ReadBytes((int)messageSize);
+                    NetworkMessage receivedMessage = NetworkMessage.ReadMessage(this, this);
 
-                    lock (messages)
-                        messages.Enqueue(messageData);
+                    var properties = receivedMessage.GetType().GetCustomAttribute<MessageExecutionAttribute>();
+                    if (properties != null && properties.Immediate)
+                        receivedMessage.Received();
+                    else
+                        lock(messages)
+                            messages.Enqueue(receivedMessage);
                 }
             }
             catch(IOException e)
@@ -77,17 +89,27 @@ namespace Square.Modules.Networking
             }
         }
 
+        public ushort GetIdFromString(string value)
+        {
+            ushort id;
+            if (!sentStrings.TryGetValue(value, out id))
+            {
+                id = (ushort)sentStrings.Count;
+                sentStrings.Add(value, id);
+                Send(new StringCacheMessage(value));
+            }
+            return id;
+        }
+
+        public string GetStringFromId(ushort id)
+        {
+            return CachedStrings[(int)id];
+        }
+
         public void Disconnect()
         {
             IsDisconnected = true;
             client.Close();
-        }
-
-        public void Send<T>(T data)
-            where T : NetworkMessage
-        {
-            var buffer = NetworkMessage.ToByteArray<T>(data);
-            Writer.Write(buffer);
         }
     }
 }

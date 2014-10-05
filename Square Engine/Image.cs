@@ -25,6 +25,23 @@ namespace Square
             colors = new Color[Width * Height];
         }
 
+        public Image(string filename)
+        {
+            var bitmap = (System.Drawing.Bitmap)System.Drawing.Bitmap.FromFile(filename);
+            Width = bitmap.Width;
+            Height = bitmap.Height;
+            colors = new Color[Width * Height];
+
+            for (int x = bitmap.Width - 1; x >= 0; x--)
+            {
+                for (int y = bitmap.Height - 1; y >= 0; y--)
+                {
+                    var color = bitmap.GetPixel(x, y);
+                    colors[x + y * Width] = new Color(color.R, color.G, color.B, color.A);
+                }
+            }
+        }
+
         public void SetColor(int x, int y, Color color)
         {
             if (x < 0 || x >= Width)

@@ -49,19 +49,7 @@ namespace Square.Modules.Networking
             {
                 for (int i = clients.Count - 1; i >= 0; i--)
                 {
-                    byte[] message;
-                    while ((message = clients[i].DequeueMessage()) != null)
-                    {
-                        using (MemoryStream stream = new MemoryStream(message))
-                        {
-                            using (BinaryReader reader = new BinaryReader(stream))
-                            {
-                                UInt16 messageType = reader.ReadUInt16();
-                                NetworkMessage receivedMessage = NetworkMessage.ReadEvent(clients[i], messageType, reader);
-                                receivedMessage.Received();
-                            }
-                        }
-                    }
+                    clients[i].DispatchMessages();
 
                     if (clients[i].IsDisconnected)
                     {
@@ -73,13 +61,12 @@ namespace Square.Modules.Networking
             }
         }
 
-        public void Send<T>(T data)
+        public void Send<T>(T message)
             where T : NetworkMessage
         {
-            var buffer = NetworkMessage.ToByteArray<T>(data);
             lock (clients)
                 for (int i = clients.Count - 1; i >= 0; i--)
-                    clients[i].Writer.Write(buffer);
+                    clients[i].Send<T>(message);
         }
 
         public void StopServer()

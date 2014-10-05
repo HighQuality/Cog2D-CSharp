@@ -13,9 +13,8 @@ namespace TestGame
     {
         public MovementComponent MovementComponent { get; private set; }
         public SpriteComponent SpriteComponent { get; private set; }
-
-        public PlayerObject(Scene scene, Vector2 position)
-            : base(scene, position)
+        
+        public PlayerObject()
         {
             MovementComponent = AddComponenet<MovementComponent>();
             SpriteComponent = AddComponenet<SpriteComponent>();

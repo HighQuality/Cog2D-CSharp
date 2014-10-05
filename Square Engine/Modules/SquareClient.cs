@@ -12,7 +12,7 @@ namespace Square.Modules
     public class SquareClient : TcpSocket
     {
         internal SquareClient(TcpClient client)
-            : base(client)
+            : base(client, Permissions.DefaultClientPermissions)
         {
 
         }

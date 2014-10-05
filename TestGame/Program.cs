@@ -9,6 +9,7 @@ using Square.Modules.Renderer;
 using Square.Modules.EventHost;
 using Square.Modules.Content;
 using System.Threading;
+using Square.Modules.Networking;
 
 namespace TestGame
 {
@@ -16,11 +17,11 @@ namespace TestGame
     {
         static void Main(string[] args)
         {
-            Engine.Initialize<SfmlRenderer>();
+            Engine.Initialize<SfmlRenderer>(new Square.Image("splash.png"));
             
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
-                var message = Engine.ConnectServer("localhost", 1234);
+                var message = Engine.ConnectServer("127.0.0.1", 1234);
                 if (message != null)
                     Debug.Error(message);
                 else
@@ -32,7 +33,7 @@ namespace TestGame
             
             Engine.EventHost.RegisterEvent<KeyDownEvent>(Keyboard.Key.Space, 1, e =>
             {
-                Engine.ClientModule.Raise<PingMessage>(new PingMessage());
+                Engine.ClientModule.Send<TestMessage>(new TestMessage(new Vector2(128f, 64f)));
             });
 
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>

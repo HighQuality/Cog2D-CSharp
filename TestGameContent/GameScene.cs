@@ -16,7 +16,6 @@ namespace TestGame
         public GameScene()
             : base("Game")
         {
-            World = new World(this);
         }
     }
 }

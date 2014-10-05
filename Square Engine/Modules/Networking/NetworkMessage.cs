@@ -14,14 +14,12 @@ namespace Square.Modules.Networking
     public abstract class NetworkMessage
     {
         private static ushort nextId;
-        private static Dictionary<ushort, Action<Object, BinaryReader>> eventReaderCache;
-        private static Dictionary<ushort, Action<Object, BinaryWriter>> eventWriterCache;
+        private static Dictionary<ushort, Action<Object, BinaryWriter, IStringCacher>> messageWriterCache;
+        private static Dictionary<ushort, Action<Object, BinaryReader, IStringCacher>> messageReaderCache;
         private static Dictionary<ushort, Func<NetworkMessage>> eventCreators;
         private static Dictionary<Type, ushort> typeIds;
         public static byte[] NetworkingHash;
 
-        [NetworkIgnore()]
-        public Int32 MessageSize;
         [NetworkIgnore()]
         private TcpSocket _sender;
         /// <summary>
@@ -62,26 +60,30 @@ namespace Square.Modules.Networking
 
             typeIds = new Dictionary<Type, ushort>();
             eventCreators = new Dictionary<ushort, Func<NetworkMessage>>();
-            eventReaderCache = new Dictionary<ushort, Action<object, BinaryReader>>();
-            eventWriterCache = new Dictionary<ushort, Action<object, BinaryWriter>>();
+            messageWriterCache = new Dictionary<ushort, Action<object, BinaryWriter, IStringCacher>>();
+            messageReaderCache = new Dictionary<ushort, Action<object, BinaryReader, IStringCacher>>();
 
             // Build a list of all classes which derive from NetworkEvent
             List<Type> types = new List<Type>();
             foreach (var assembly in assemblies)
                 foreach (var type in assembly.GetTypes())
-                    if (typeof(NetworkMessage).IsAssignableFrom(type))
-                        types.Add(type);
+                    if (!type.IsAbstract)
+                        if (typeof(NetworkMessage).IsAssignableFrom(type))
+                            types.Add(type);
 
             // Iterate through them alphabetically
             foreach (var type in types.OrderBy(o => o.FullName))
             {
                 Debug.Info("Network Id {0} = {1}", nextId, type.FullName);
 
+                if (type.ContainsGenericParameters)
+                    throw new Exception("Types that derive from NetworkMessage may not be generic!");
+
                 networkingDescriber.Append(type.FullName);
                 networkingDescriber.Append('{');
 
-                Action<Object, BinaryReader> messageReader = null;
-                Action<Object, BinaryWriter> messageWriter = null;
+                Action<Object, BinaryWriter, IStringCacher> messageWriter = null;
+                Action<Object, BinaryReader, IStringCacher> messageReader = null;
                 // Iterate through all fields contained within the type alphabetically
                 foreach (var currentField in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).OrderBy(o => o.Name))
                 {
@@ -98,28 +100,85 @@ namespace Square.Modules.Networking
                         networkingDescriber.Append(';');
 
                         // Find the specific type's writer/reader helper
-                        ITypeWriter writer = TypeSerializer.GetTypeWriter(fieldType);
-                        if (writer != null)
+                        if (fieldType == typeof(string))
                         {
-                            // Add write/read operations to the type handler
-                            messageReader += (o, r) => field.SetValue(o, writer.GenericRead(r));
-                            messageWriter += (o, w) => writer.GenericWrite(field.GetValue(o), w);
-                        }
-                        else if (fieldType.IsEnum)
-                        {
-                            messageReader += (o, r) => field.SetValue(o, r.ReadUInt16());
-                            messageWriter += (o, w) => w.Write((UInt16)field.GetValue(o));
+                            var properties = field.GetCustomAttribute<StringPropertiesAttribute>();
+                            if (properties == null)
+                                properties = new StringPropertiesAttribute(StringSendType.DynamicUShort);
+                            switch (properties.Type)
+                            {
+                                case StringSendType.DynamicUShort:
+                                    messageWriter += (o, w, sc) =>
+                                    {
+                                        string value = (string)field.GetValue(o);
+                                        if (value == null || value.Length == 0)
+                                            w.Write((UInt16)0);
+                                        else
+                                        {
+                                            var data = Encoding.UTF8.GetBytes(value);
+                                            w.Write((UInt16)data.Length);
+                                            w.Write(data);
+                                        }
+                                    };
+
+                                    messageReader += (o, r, sc) =>
+                                    {
+                                        string value = "";
+                                        int size = (int)r.ReadUInt16();
+                                        if (size > 0)
+                                            value = Encoding.UTF8.GetString(r.ReadBytes(size));
+                                        field.SetValue(o, value);
+                                    };
+                                    break;
+
+                                case StringSendType.Cached:
+                                    messageWriter += (o, w, sc) =>
+                                    {
+                                        var value = (string)field.GetValue(o);
+                                        w.Write((ushort)sc.GetIdFromString(value));
+                                    };
+
+                                    messageReader += (o, r, sc) =>
+                                    {
+                                        ushort id = r.ReadUInt16();
+                                        field.SetValue(o, sc.GetStringFromId(id));
+                                    };
+                                    break;
+
+                                default:
+                                    throw new NotImplementedException("String Send Type \"" + properties.Type.ToString() + "\" is not implemented!");
+                            }
                         }
                         else
-                            throw new Exception(string.Format("Network Event type {0} contains a type without a registered type handler: {1}\r\nEither register a custom type handler through NetworkEvent.RegisterCustomType<T>(writer, reader) or add a NetworkIgnore-attribute to the field.", type.FullName, field.Name));
+                        {
+                            ITypeWriter writer = TypeSerializer.GetTypeWriter(fieldType);
+                            if (writer != null)
+                            {
+                                // Add write/read operations to the type handler
+                                messageWriter += (o, w, sc) => writer.GenericWrite(field.GetValue(o), w);
+                                messageReader += (o, r, sc) => field.SetValue(o, writer.GenericRead(r));
+                            }
+                            else if (fieldType.IsEnum)
+                            {
+                                messageWriter += (o, w, sc) => w.Write((UInt16)field.GetValue(o));
+                                messageReader += (o, r, sc) => field.SetValue(o, r.ReadUInt16());
+                            }
+                            else if (typeof(ISerializable).IsAssignableFrom(fieldType))
+                            {
+                                messageWriter += (o, w, sc) => { ((ISerializable)field.GetValue(o)).Serialize(w); };
+                                messageReader += (o, r, sc) => { var v = (ISerializable)FormatterServices.GetUninitializedObject(fieldType); v.Deserialize(r); field.SetValue(o, v); };
+                            }
+                            else
+                                throw new Exception(string.Format("Network Event type {0} contains a type without a registered type handler: {1}\r\nEither register a custom type handler through NetworkEvent.RegisterCustomType<T>(writer, reader) or add a NetworkIgnore-attribute to the field.", type.FullName, field.Name));
+                        }
                     }
                 }
                 networkingDescriber.Append('}');
                 networkingDescriber.Append('\n');
 
                 // Register the collection of write/read functions for this type
-                eventReaderCache[nextId] = messageReader;
-                eventWriterCache[nextId] = messageWriter;
+                messageReaderCache[nextId] = messageReader;
+                messageWriterCache[nextId] = messageWriter;
                 // Create an anonymous function that creates an instance of the specified type without invoking it's constructor
                 eventCreators[nextId] = () => (NetworkMessage)FormatterServices.GetUninitializedObject(type);
                 // Register the ID to this type
@@ -140,42 +199,38 @@ namespace Square.Modules.Networking
         /// <summary>
         /// Creates a byte array portraying the given NetworkEvent, including event ID and size
         /// </summary>
-        internal static byte[] ToByteArray<T>(T data)
+        internal static void WriteToSocket<T>(T message, TcpSocket socket)
             where T : NetworkMessage
         {
+            var id = GetId<T>();
+
             using (MemoryStream stream = new MemoryStream())
             {
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    var id = GetId<T>();
-                    writer.Write((UInt32)0);
-
                     writer.Write((UInt16)id);
-                    
-                    var messageWriter = eventWriterCache[id];
-                    if (messageWriter != null)
-                        messageWriter((Object)data, writer);
 
-                    long size = stream.Position - sizeof(UInt32);
-                    stream.Seek(0, SeekOrigin.Begin);
-                    writer.Write((UInt32)size);
+                    var messageWriter = messageWriterCache[id];
+                    if (messageWriter != null)
+                        messageWriter((Object)message, writer, socket);
                 }
-                return stream.ToArray();
+
+                socket.Writer.Write(stream.ToArray());
             }
         }
 
         /// <summary>
         /// Reads an event of the given type from the given BinaryReader
         /// </summary>
-        internal static NetworkMessage ReadEvent(TcpSocket sender, UInt16 type, BinaryReader reader)
+        internal static NetworkMessage ReadMessage(TcpSocket sender, TcpSocket socket)
         {
+            UInt16 type = socket.Reader.ReadUInt16();
+
             NetworkMessage ev = eventCreators[type]();
-            long initialPosition = reader.BaseStream.Position;
-            var messageReader = eventReaderCache[type];
+            var messageReader = messageReaderCache[type];
             if (messageReader != null)
-                messageReader((Object)ev, reader);
-            ev.MessageSize = (int)(reader.BaseStream.Position - initialPosition);
-            typeof(NetworkMessage).GetField("_sender", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(ev, sender);
+                messageReader((Object)ev, socket.Reader, socket);
+            ev._sender = sender;
             return ev;
         }
     }

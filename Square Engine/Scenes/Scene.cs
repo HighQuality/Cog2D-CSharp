@@ -1,9 +1,11 @@
-﻿using Square.Modules.Content;
+﻿using Square.Modules;
+using Square.Modules.Content;
 using Square.Modules.EventHost;
 using Square.Modules.Renderer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +15,7 @@ namespace Square.Scenes
     {
         public string Name { get; private set; }
         public LinkedList<GameObject> Objects = new LinkedList<GameObject>();
+        public Dictionary<long, GameObject> ObjectDictionary = new Dictionary<long, GameObject>();
         public EventModule EventModule = new EventModule();
         private Dictionary<EventIdentifier, List<IEventListener>> eventStrength = new Dictionary<EventIdentifier, List<IEventListener>>();
         private Dictionary<EventIdentifier, IEventListener> globalListeners = new Dictionary<EventIdentifier, IEventListener>();
@@ -70,14 +73,47 @@ namespace Square.Scenes
             }
         }
 
-        public void AddObject(GameObject obj)
+        public T CreateObject<T>()
+            where T : GameObject, new()
         {
-            foreach (var component in obj.Components)
+            return CreateObject<T>(null, new Vector2());
+        }
+
+        public T CreateObject<T>(Vector2 position)
+            where T : GameObject, new()
+        {
+            return CreateObject<T>(null, position);
+        }
+
+        public T CreateObject<T>(SquareClient owner, Vector2 position)
+            where T : GameObject, new()
+        {
+            if (Engine.IsNetworkGame && !Engine.IsServer)
+                throw new Exception("Only the server can create global objects!");
+
+            // Create an object of this type without invoking the constructor
+            T obj = (T)FormatterServices.GetUninitializedObject(typeof(T));
+            obj.Scene = this;
+            obj.Owner = owner;
+            obj.Id = Engine.GetGlobalId();
+            // Invoke the constructor, new()-constraint ensures an empty one exists
+            typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
+            
+            ObjectDictionary.Add(obj.Id, obj);
+            Objects.AddLast(obj);
+
+            // Serialize and send to clients that are subscribed to this scene
+            if (Engine.IsServer)
             {
-                component.Value.RegisterFunctions(EventModule);
+
             }
 
-            Objects.AddLast(obj);
+            return obj;
+        }
+
+        public T CreateLocalObject<T>(Vector2 position)
+        {
+            throw new NotImplementedException();
         }
 
         public void Clear()

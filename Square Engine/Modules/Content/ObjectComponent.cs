@@ -57,6 +57,8 @@ namespace Square.Modules.Content
             {
                 SerializerCache = new Dictionary<Type, ComponentSerializer>();
                 SynchronizedPermissions = new Dictionary<Type, SynchronizedEditPermission[]>();
+                SynchronizedWriter = new Dictionary<Type, Action<ObjectComponent, BinaryWriter>[]>();
+                SynchronizedReader = new Dictionary<Type, Action<ObjectComponent, BinaryReader>[]>();
             }
             if (SynchronizedPermissions.ContainsKey(type))
                 throw new InvalidOperationException("Cache for object component \"" + type.FullName + "\" already exists!");

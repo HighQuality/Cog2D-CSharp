@@ -13,7 +13,7 @@ namespace TestGameServer
     {
         static void Main(string[] args)
         {
-            Square.Engine.Initialize<DefaultRenderer>();
+            Square.Engine.Initialize<DefaultRenderer>(null);
             
             Square.Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {

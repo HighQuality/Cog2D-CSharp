@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Square.Modules.Content
 {
-    public class GameObject
+    public abstract class GameObject
     {
         public string ObjectName;
         public GameObject Parent;
@@ -18,26 +18,19 @@ namespace Square.Modules.Content
         public Vector2 WorldCoord { get { if (Parent != null) return Parent.WorldCoord + LocalCoord; return LocalCoord; } set { if (Parent != null) LocalCoord = value - Parent.WorldCoord; LocalCoord = value; } }
         public Vector2 Size { get; set; }
         public Dictionary<Type, ObjectComponent> Components = new Dictionary<Type, ObjectComponent>();
-        public Scene Scene { get; private set; }
+        public Scene Scene { get; internal set; }
         public bool DoRemove { get; private set; }
-        public SquareClient Owner { get; private set; }
-
+        public SquareClient Owner { get; internal set; }
+        public long Id { get; internal set; }
+        public bool IsGlobal { get { return Id > 0; } }
+        public bool IsLocal { get { return Id < 0; } }
+        public bool IsComponentsLocked { get; internal set; }
         private List<IEventListener> registeredEvents;
 
-        public GameObject(Scene scene, Vector2 worldCoord)
+        public GameObject()
         {
-            this.Scene = scene;
-            this.WorldCoord = worldCoord;
-            this.Size = new Vector2(1f, 1f);
-            this.Scene.AddObject(this);
         }
-
-        public GameObject(Scene scene, Vector2 worldCoord, SquareClient owner)
-            : this(scene, worldCoord)
-        {
-            this.Owner = owner;
-        }
-
+        
         public bool KeyIsDown(Keyboard.Key key)
         {
             if (Engine.IsClient)
@@ -50,6 +43,8 @@ namespace Square.Modules.Content
         public T AddComponenet<T>()
             where T : ObjectComponent, new()
         {
+            if (IsComponentsLocked)
+                throw new Exception("You may not add a component to this object at this time!");
             if (Components.ContainsKey(typeof(T)))
                 throw new InvalidOperationException("The Game Object \"" + ObjectName + "\" already contains a \"" + typeof(T).FullName + "\" component");
             // Create a new instance of T without invoking the constructor
@@ -65,19 +60,7 @@ namespace Square.Modules.Content
 
             return component;
         }
-
-        public void RemoveComponent<T>()
-            where T : ObjectComponent
-        {
-            ObjectComponent comp;
-            if (Components.TryGetValue(typeof(T), out comp))
-            {
-                comp.ComponentRemoved();
-                comp.DeregisterFunctions();
-                Components.Remove(typeof(T));
-            }
-        }
-        
+                
         public void Remove()
         {
             foreach (var component in Components)
