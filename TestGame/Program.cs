@@ -21,7 +21,7 @@ namespace TestGame
             
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
-                var message = Engine.ConnectServer("www.nevereal.net", 1234);
+                var message = Engine.ConnectServer("127.0.0.1", 1234);
                 if (message != null)
                     Debug.Error(message);
                 else
