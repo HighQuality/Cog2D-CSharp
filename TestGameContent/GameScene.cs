@@ -1,6 +1,6 @@
-﻿using Square;
-using Square.Modules.EventHost;
-using Square.Scenes;
+﻿using Cog;
+using Cog.Modules.EventHost;
+using Cog.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

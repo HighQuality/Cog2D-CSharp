@@ -50,9 +50,9 @@
     <Compile Include="World.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Square Engine\Square Engine.csproj">
+    <ProjectReference Include="..\Cog2D\Cog2D.csproj">
       <Project>{5c56475f-f797-4c69-83f5-d5920c204e4a}</Project>
-      <Name>Square Engine</Name>
+      <Name>Cog2D</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

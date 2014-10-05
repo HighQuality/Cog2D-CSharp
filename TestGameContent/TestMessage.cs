@@ -1,5 +1,5 @@
-﻿using Square;
-using Square.Modules.Networking;
+﻿using Cog;
+using Cog.Modules.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;

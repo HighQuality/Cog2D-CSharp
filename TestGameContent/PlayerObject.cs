@@ -1,6 +1,6 @@
-﻿using Square;
-using Square.Modules.Content;
-using Square.Scenes;
+﻿using Cog;
+using Cog.Modules.Content;
+using Cog.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace TestGame
         {
             MovementComponent = AddComponenet<MovementComponent>();
             SpriteComponent = AddComponenet<SpriteComponent>();
-            SpriteComponent.Texture = Engine.Renderer.LoadTexture("texture.png");
+            // SpriteComponent.Texture = Engine.Renderer.LoadTexture("texture.png");
         }
     }
 }

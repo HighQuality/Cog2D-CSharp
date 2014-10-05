@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Square;
-using Square.Modules;
-using Square.Modules.Content;
-using Square.Modules.EventHost;
+using Cog;
+using Cog.Modules;
+using Cog.Modules.Content;
+using Cog.Modules.EventHost;
 
 namespace TestGame
 {
-    public class MovementComponent : Square.Modules.Content.LinearPhysicsComponent
+    public class MovementComponent : Cog.Modules.Content.LinearPhysicsComponent
     {
         public KeyCapture Left,
             Right,

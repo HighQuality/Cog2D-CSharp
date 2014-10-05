@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Square;
-using Square.SfmlRenderer;
-using Square.Modules.Renderer;
-using Square.Modules.EventHost;
-using Square.Modules.Content;
+using Cog;
+using Cog.SfmlRenderer;
+using Cog.Modules.Renderer;
+using Cog.Modules.EventHost;
+using Cog.Modules.Content;
 using System.Threading;
-using Square.Modules.Networking;
+using Cog.Modules.Networking;
 
 namespace TestGame
 {
@@ -17,11 +17,11 @@ namespace TestGame
     {
         static void Main(string[] args)
         {
-            Engine.Initialize<SfmlRenderer>(new Square.Image("splash.png"));
+            Engine.Initialize<SfmlRenderer>(new Cog.Image("splash.png"));
             
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
-                var message = Engine.ConnectServer("127.0.0.1", 1234);
+                var message = Engine.ConnectServer("www.nevereal.net", 1234);
                 if (message != null)
                     Debug.Error(message);
                 else

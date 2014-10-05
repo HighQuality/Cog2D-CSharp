@@ -50,9 +50,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Square Engine\Square Engine.csproj">
+    <ProjectReference Include="..\Cog2D\Cog2D.csproj">
       <Project>{5c56475f-f797-4c69-83f5-d5920c204e4a}</Project>
-      <Name>Square Engine</Name>
+      <Name>Cog2D</Name>
     </ProjectReference>
     <ProjectReference Include="..\TestGameContent\TestGameContent.csproj">
       <Project>{80127101-1b52-4c7f-ab65-e7b11c8f46f6}</Project>

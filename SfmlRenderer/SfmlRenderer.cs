@@ -1,12 +1,12 @@
-﻿using Square.Modules.EventHost;
-using Square.Modules.Renderer;
+﻿using Cog.Modules.EventHost;
+using Cog.Modules.Renderer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Square.SfmlRenderer
+namespace Cog.SfmlRenderer
 {
     public class SfmlRenderer : IRenderModule
     {

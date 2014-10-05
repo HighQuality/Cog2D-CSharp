@@ -1,13 +1,13 @@
 ﻿using SFML.Graphics;
-using Square.Modules.EventHost;
-using Square.Modules.Renderer;
+using Cog.Modules.EventHost;
+using Cog.Modules.Renderer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Square.SfmlRenderer
+namespace Cog.SfmlRenderer
 {
     public class SfmlWindow : IWindow, IRenderTarget
     {
@@ -142,15 +142,15 @@ namespace Square.SfmlRenderer
 
         private static Dictionary<Keyboard.Key, SFML.Window.Keyboard.Key> reverseKeyMap;
 
-        private Keyboard.Key SfmlKeyToSquare(SFML.Window.Keyboard.Key key)
+        private Keyboard.Key SfmlKeyToCog(SFML.Window.Keyboard.Key key)
         {
-            Keyboard.Key squareKey;
-            if (keymap.TryGetValue(key, out squareKey))
-                return squareKey;
+            Keyboard.Key cogKey;
+            if (keymap.TryGetValue(key, out cogKey))
+                return cogKey;
             return Keyboard.Key.Unknown;
         }
 
-        private SFML.Window.Keyboard.Key SquareKeyToSfml(Keyboard.Key key)
+        private SFML.Window.Keyboard.Key CogKeyToSfml(Keyboard.Key key)
         {
             SFML.Window.Keyboard.Key sfmlKey;
             if (reverseKeyMap.TryGetValue(key, out sfmlKey))
@@ -165,10 +165,10 @@ namespace Square.SfmlRenderer
 
             if (!keyUpEvents.ContainsKey(e.Code))
             {
-                var newKey = SfmlKeyToSquare(e.Code);
+                var newKey = SfmlKeyToCog(e.Code);
                 if (newKey == Keyboard.Key.Unknown)
                 {
-                    Console.WriteLine(e.Code.ToString() + " is not mapped to a Square.Keyboard.Key");
+                    Console.WriteLine(e.Code.ToString() + " is not mapped to a Cog.Keyboard.Key");
                     return;
                 }
 
@@ -231,7 +231,7 @@ namespace Square.SfmlRenderer
 
         public bool IsKeyDown(Keyboard.Key key)
         {
-            return pressedKeys.Contains(SquareKeyToSfml(key));
+            return pressedKeys.Contains(CogKeyToSfml(key));
         }
     }
 }

@@ -7,7 +7,7 @@
     <ProjectGuid>{084372EB-5096-4AE6-BFED-4B10637CD216}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Square.SfmlRenderer</RootNamespace>
+    <RootNamespace>Cog.SfmlRenderer</RootNamespace>
     <AssemblyName>SfmlRenderer</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -90,9 +90,9 @@
     <Compile Include="SfmlWindow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Square Engine\Square Engine.csproj">
+    <ProjectReference Include="..\Cog2D\Cog2D.csproj">
       <Project>{5c56475f-f797-4c69-83f5-d5920c204e4a}</Project>
-      <Name>Square Engine</Name>
+      <Name>Cog2D</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
