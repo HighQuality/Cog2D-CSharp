@@ -105,7 +105,9 @@ namespace Cog.Scenes
             // Serialize and send to clients that are subscribed to this scene
             if (Engine.IsServer)
             {
+                CreateObjectMessage message = obj.CreateCreationMessage();
 
+                Engine.ServerModule.Send<CreateObjectMessage>(message);
             }
 
             return obj;

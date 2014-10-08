@@ -13,14 +13,13 @@ namespace Cog.Modules.Content
 {
     public abstract class ObjectComponent
     {
-        private List<IEventListener> registeredFunctions;
         internal static Dictionary<Type, Action<EventModule, ObjectComponent>> RegistratorCache;
         internal static Dictionary<Type, ComponentSerializer> SerializerCache;
-        internal static Dictionary<Type, SynchronizedEditPermission[]> SynchronizedPermissions;
-        internal static Dictionary<Type, Action<ObjectComponent, BinaryReader>[]> SynchronizedReader;
-        internal static Dictionary<Type, Action<ObjectComponent, BinaryWriter>[]> SynchronizedWriter;
+        internal static List<ComponentSerializer> Serializers;
+        internal static Dictionary<FieldInfo, SynchronizedEditPermission[]> SynchronizedPermissions;
+        internal static UInt16 NextComponentId;
 
-        public GameObject GameObject { get; internal set; }
+        private List<IEventListener> registeredFunctions; public GameObject GameObject { get; internal set; }
         public Scene Scene { get { return GameObject.Scene; } }
         public Vector2 WorldCoord { get { return GameObject.WorldCoord; } set { GameObject.WorldCoord = value; } }
 
@@ -51,29 +50,24 @@ namespace Cog.Modules.Content
             registeredFunctions.Clear();
         }
         
+        internal static void InitializeCache()
+        {
+            SerializerCache = new Dictionary<Type, ComponentSerializer>();
+            Serializers = new List<ComponentSerializer>();
+            SynchronizedPermissions = new Dictionary<FieldInfo, SynchronizedEditPermission[]>();
+            NextComponentId = 1;
+        }
+
         internal static ComponentSerializer CreateSerializer(Type type)
         {
-            if (SerializerCache == null)
-            {
-                SerializerCache = new Dictionary<Type, ComponentSerializer>();
-                SynchronizedPermissions = new Dictionary<Type, SynchronizedEditPermission[]>();
-                SynchronizedWriter = new Dictionary<Type, Action<ObjectComponent, BinaryWriter>[]>();
-                SynchronizedReader = new Dictionary<Type, Action<ObjectComponent, BinaryReader>[]>();
-            }
-            if (SynchronizedPermissions.ContainsKey(type))
+            if (SerializerCache.ContainsKey(type))
                 throw new InvalidOperationException("Cache for object component \"" + type.FullName + "\" already exists!");
 
             FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(o => typeof(ISynchronized).IsAssignableFrom(o.FieldType)).OrderBy(o => o.Name).ToArray();
 
-            Action<ObjectComponent, BinaryWriter> writer = null;
-            Action<ObjectComponent, BinaryReader> reader = null;
             Action<ObjectComponent, BinaryWriter>[] writers = new Action<ObjectComponent, BinaryWriter>[fields.Length];
             Action<ObjectComponent, BinaryReader>[] readers = new Action<ObjectComponent, BinaryReader>[fields.Length];
             SynchronizedEditPermission[] permissionCollection = new SynchronizedEditPermission[fields.Length];
-
-            SynchronizedWriter.Add(type, writers);
-            SynchronizedReader.Add(type, readers);
-            SynchronizedPermissions.Add(type, permissionCollection);
 
             for (int i=0; i<fields.Length; i++)
             {
@@ -92,14 +86,11 @@ namespace Cog.Modules.Content
                     permissions.RequireOwner = false;
                 }
                 permissionCollection[i] = permissions;
-
+                
                 var innerType = field.FieldType.GenericTypeArguments[0];
                 var typeSerializer = TypeSerializer.GetTypeWriter(innerType);
                 if (typeSerializer != null)
                 {
-                    writer += (c, w) => typeSerializer.GenericWrite(field.GetValue(c), w);
-                    reader += (c, r) => field.SetValue(c, typeSerializer.GenericRead(r));
-
                     writers[i] = (c, w) => typeSerializer.GenericWrite(field.GetValue(c), w);
                     readers[i] = (c, r) => field.SetValue(c, typeSerializer.GenericRead(r));
                 }
@@ -107,8 +98,9 @@ namespace Cog.Modules.Content
                     throw new NoSerializerException(string.Format("Synchronized<{0}> {1}.{2} doesn't have a type serializer!", innerType.FullName, type.FullName, field.Name));
             }
             //TODO: Merge individual writers and readers to same variable as global, iterate through them all for global read / write, move them from seperate dictionary into this one (same with permissions)
-            var s = new ComponentSerializer(writer, reader);
+            var s = new ComponentSerializer(type, writers, readers, NextComponentId++);
             SerializerCache.Add(type, s);
+            Serializers.Add(s);
             return s;
         }
 
@@ -159,6 +151,16 @@ namespace Cog.Modules.Content
             return registrator;
         }
         
+        internal static ComponentSerializer GetSerializer(Type type)
+        {
+            return SerializerCache[type];
+        }
+
+        internal static ComponentSerializer GetSerializer(UInt16 id)
+        {
+            return Serializers[id];
+        }
+
         internal void RegisterFunctions(EventModule events)
         {
             Action<EventModule, ObjectComponent> registrator = null;

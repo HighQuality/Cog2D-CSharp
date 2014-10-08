@@ -107,6 +107,7 @@
     <Compile Include="Modules\Content\SpriteComponent.cs" />
     <Compile Include="Modules\Content\Synchronized.cs" />
     <Compile Include="Modules\Content\SynchronizedEditPermission.cs" />
+    <Compile Include="Modules\EventHost\ButtonDownEvent.cs" />
     <Compile Include="Modules\EventHost\CloseButtonEvent.cs" />
     <Compile Include="Modules\EventHost\ComponentEventAttribute.cs" />
     <Compile Include="Modules\EventHost\Event.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Modules\EventHost\IEventListener.cs" />
     <Compile Include="Modules\EventHost\KeyDownEvent.cs" />
     <Compile Include="Modules\EventHost\LoadContentEvent.cs" />
+    <Compile Include="Modules\EventHost\Mouse.cs" />
     <Compile Include="Modules\EventHost\PhysicsUpdateEvent.cs" />
     <Compile Include="Modules\EventHost\UpdateEvent.cs" />
     <Compile Include="Modules\Networking\CachedStringMessageTest.cs" />
@@ -189,6 +191,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="blue_window.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

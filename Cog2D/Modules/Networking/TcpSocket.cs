@@ -21,6 +21,7 @@ namespace Cog.Modules.Networking
         private Queue<NetworkMessage> messages = new Queue<NetworkMessage>();
         public bool IsDisconnected { get; private set; }
         public string IpAddress { get; private set; }
+        public string Identifier { get { return IpAddress; } }
         internal List<string> CachedStrings = new List<string>();
         internal Dictionary<string, ushort> CachedStringDictionary = new Dictionary<string, ushort>();
         private Dictionary<string, ushort> sentStrings = new Dictionary<string, ushort>();

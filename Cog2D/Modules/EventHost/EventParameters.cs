@@ -9,9 +9,7 @@ namespace Cog.Modules.EventHost
 {
     public class EventParameters
     {
-        [NetworkIgnore()]
         private Object _sender;
-        [NetworkIgnore()]
         public bool Intercept;
 
         public Object Sender { get { return _sender; } }

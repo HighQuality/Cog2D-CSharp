@@ -28,6 +28,7 @@ namespace Cog.SfmlRenderer
         public IRenderTarget RenderTarget { get { return this; } }
 
         public EventModule EventHost;
+        private bool[] mouseButtons = new bool[(int)SFML.Window.Mouse.Button.ButtonCount];
 
         public SfmlWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
         {
@@ -64,13 +65,31 @@ namespace Cog.SfmlRenderer
             this.EventHost = eventHost;
 
             InnerWindow.KeyPressed += InnerWindow_KeyPressed;
+            InnerWindow.MouseButtonPressed += InnerWindow_MouseButtonPressed;
+            InnerWindow.MouseMoved += InnerWindow_MouseMoved;
             InnerWindow.Closed += InnerWindow_Closed;
+        }
+
+        private void InnerWindow_MouseMoved(object sender, SFML.Window.MouseMoveEventArgs e)
+        {
+            Mouse.Location = new Vector2(e.X, e.Y);
+        }
+
+        private void InnerWindow_MouseButtonPressed(object sender, SFML.Window.MouseButtonEventArgs e)
+        {
+            if ((int)e.Button >= sfmlButtonToCog.Length)
+                return;
+            mouseButtons[(int)e.Button] = true;
+            Mouse.SetDown(sfmlButtonToCog[(int)e.Button]);
         }
 
         void InnerWindow_Closed(object sender, EventArgs e)
         {
             Engine.EventHost.GetEvent<CloseButtonEvent>().Trigger(new CloseButtonEvent(this));
         }
+
+        private static Mouse.Button[] sfmlButtonToCog = new Mouse.Button[3] { Mouse.Button.Left, Mouse.Button.Right, Mouse.Button.Middle };
+        private static SFML.Window.Mouse.Button[] cogToSfml = new SFML.Window.Mouse.Button[3] { SFML.Window.Mouse.Button.Left, SFML.Window.Mouse.Button.Middle, SFML.Window.Mouse.Button.Right };
 
         private static Dictionary<SFML.Window.Keyboard.Key, Keyboard.Key> keymap = new Dictionary<SFML.Window.Keyboard.Key, Keyboard.Key>
         {
@@ -199,6 +218,17 @@ namespace Cog.SfmlRenderer
                 node = node.Next;
             }
             
+            for (int i=0; i<mouseButtons.Length; i++)
+            {
+                if (i >= sfmlButtonToCog.Length)
+                    continue;
+
+                if (mouseButtons[i] && !SFML.Window.Mouse.IsButtonPressed((SFML.Window.Mouse.Button)i))
+                {
+                    Mouse.SetReleased(sfmlButtonToCog[i]);
+                    mouseButtons[i] = false;
+                }
+            }
         }
         
         public void Clear(Color color)
@@ -226,6 +256,18 @@ namespace Cog.SfmlRenderer
             sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
             sprite.Texture = ((SfmlTexture)texture).Texture;
             sprite.Scale = new SFML.System.Vector2f(1f, 1f);
+            InnerWindow.Draw(sprite);
+        }
+
+        public void RenderTexture(ITexture texture, Vector2 windowCoords, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
+        {
+            Sprite sprite = new Sprite();
+            sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
+            sprite.Origin = new SFML.System.Vector2f(origin.X, origin.Y);
+            sprite.Scale = new SFML.System.Vector2f(scale.X, scale.Y);
+            sprite.Texture = ((SfmlTexture)texture).Texture;
+            sprite.Rotation = rotation;
+            sprite.TextureRect = new IntRect((int)textureRect.TopLeft.X, (int)textureRect.TopLeft.Y, (int)textureRect.Size.X, (int)textureRect.Size.Y);
             InnerWindow.Draw(sprite);
         }
 

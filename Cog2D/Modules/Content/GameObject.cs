@@ -3,6 +3,7 @@ using Cog.Modules.Networking;
 using Cog.Scenes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -12,6 +13,10 @@ namespace Cog.Modules.Content
 {
     public abstract class GameObject
     {
+        private static Dictionary<Type, UInt16> objectsDictionary;
+        private static List<Type> objectsArray;
+        private static UInt16 nextObjectId;
+
         public string ObjectName;
         public GameObject Parent;
         public Vector2 LocalCoord { get; set; }
@@ -96,6 +101,68 @@ namespace Cog.Modules.Content
                 registeredEvents = new List<IEventListener>();
             registeredEvents.Add(listener);
             return listener;
+        }
+
+        internal CreateObjectMessage CreateCreationMessage()
+        {
+            var id = objectsDictionary[GetType()];
+
+            UInt16[] componentIds = new ushort[Components.Count];
+            byte[][] componentDatas = new byte[Components.Count][];
+
+            int componentNumber = 0;
+            foreach (var component in Components.Values)
+            {
+                var type = component.GetType();
+                var serializer = ObjectComponent.GetSerializer(type);
+                componentIds[componentNumber] = serializer.Id;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    using (BinaryWriter writer = new BinaryWriter(stream))
+                    {
+                        serializer.Serialize(component, writer);
+                    }
+                    componentDatas[componentNumber] = stream.ToArray();
+                }
+
+                componentNumber++;
+            }
+
+            return new CreateObjectMessage(id, componentIds, componentDatas);
+        }
+
+        internal static GameObject CreateFromMessage(CreateObjectMessage message)
+        {
+            Type objectType = objectsArray[message.ObjectType];
+            GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(objectType);
+
+            for (UInt16 i = 0; i < message.Components.Length; i++)
+            {
+                ObjectComponent comp = (ObjectComponent)FormatterServices.GetUninitializedObject(ObjectComponent.GetSerializer(message.Components[i]).Type);
+
+                using (MemoryStream stream = new MemoryStream(message.ComponentDatas[i]))
+                {
+                    using (BinaryReader reader = new BinaryReader(stream))
+                    {
+                        ObjectComponent.GetSerializer(i).Deserialize(comp, reader);
+                    }
+                }
+            }
+
+            return obj;
+        }
+
+        internal static void InitializeCache()
+        {
+            objectsArray = new List<Type>();
+            objectsDictionary = new Dictionary<Type, ushort>();
+            nextObjectId = 1;
+        }
+
+        internal static void CreateCache(Type type)
+        {
+            objectsArray.Add(type);
+            objectsDictionary.Add(type, nextObjectId++);
         }
     }
 }

@@ -18,6 +18,12 @@ namespace Cog
         public Vector2 Center { get { return TopLeft + Size / 2f; } }
         public Vector2 Size { get { return _size; } set { _size = value; } }
 
+        public Rectangle(float left, float top, float width, float height)
+        {
+            _topLeft = new Vector2(left, top);
+            _size = new Vector2(width, height); 
+        }
+
         public Rectangle(Vector2 topLeft, Vector2 size)
         {
             this._topLeft = topLeft;
@@ -32,6 +38,11 @@ namespace Cog
         public bool Contains(Rectangle other)
         {
             return other.TopLeft >= TopLeft && other.BottomRight <= BottomRight;
+        }
+
+        public bool Contains(Vector2 point)
+        {
+            return point.X >= TopLeft.X && point.Y >= TopLeft.Y && point.X < TopLeft.X + Size.X && point.Y < TopLeft.Y + Size.Y;
         }
     }
 }

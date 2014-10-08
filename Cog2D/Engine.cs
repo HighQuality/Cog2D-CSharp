@@ -64,9 +64,16 @@ namespace Cog
 
             if (splashScreenImage != null)
             {
-                var splashScreen = new SplashScreen(splashScreenImage);
-                splashScreen.Show();
+                AutoResetEvent ev = new AutoResetEvent(false);
+                SplashScreen splashScreen = null;
                 EventHost.RegisterEvent<FinishedLoadingEvent>(-999, e => splashScreen.Invoke((System.Windows.Forms.MethodInvoker)delegate { splashScreen.Close(); }));
+                new Thread(() =>
+                {
+                    splashScreen = new SplashScreen(splashScreenImage);
+                    ev.Set();
+                    splashScreen.ShowDialog();
+                }).Start();
+                ev.WaitOne();
             }
 
             var entireLoadTime = Stopwatch.StartNew();
@@ -75,6 +82,10 @@ namespace Cog
             Permissions = Permissions.FullPermissions;
             nextGlobalId = 1;
             nextLocalId = -1;
+
+            GameObject.InitializeCache();
+            ObjectComponent.InitializeCache();
+            Mouse.Initialize();
 
             Debug.Event("Loading Assemblies...");
             Stopwatch watch = Stopwatch.StartNew();
@@ -145,7 +156,7 @@ namespace Cog
 
             // Cache event registrators for Object Components
             ObjectComponent.RegistratorCache = new Dictionary<Type, Action<EventModule, ObjectComponent>>();
-            Debug.Event("Pre-Caching Object Components...");
+            Debug.Event("Pre-Caching GameObjects / ObjectComponents...");
             watch.Restart();
             foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
             {
@@ -157,9 +168,14 @@ namespace Cog
                         ObjectComponent.CreateEventRegistrator(type);
                         ObjectComponent.CreateSerializer(type);
                     }
+                    else if (typeof(GameObject).IsAssignableFrom(type))
+                    {
+                        Debug.Info(type.FullName);
+                        GameObject.CreateCache(type);
+                    }
                 }
             }
-            Debug.Success("Finished Pre-Caching Object Components! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+            Debug.Success("Finished Pre-Caching GameObjects / ObjectComponents! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             Debug.Event("Caching Network Events...");
             watch.Restart();

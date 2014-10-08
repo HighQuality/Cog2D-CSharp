@@ -27,5 +27,15 @@ namespace Cog
         {
             return (float)Math.Sqrt(value);
         }
+
+        public static float Sin(float value)
+        {
+            return (float)Math.Sin(value);
+        }
+
+        public static float Cos(float value)
+        {
+            return (float)Math.Cos(value);
+        }
     }
 }
