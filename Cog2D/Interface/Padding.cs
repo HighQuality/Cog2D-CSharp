@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestGame
+namespace Cog2D.Interface
 {
     public struct Padding
     {

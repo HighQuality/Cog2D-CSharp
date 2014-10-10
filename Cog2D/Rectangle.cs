@@ -32,12 +32,14 @@ namespace Cog
 
         public bool Intersects(Rectangle other)
         {
-            return (TopLeft <= other.BottomRight && BottomRight > other.TopLeft);
+            return (BottomRight.X >= other.TopLeft.X && BottomRight.Y >= other.TopLeft.Y) &&
+                (TopLeft.X < other.BottomRight.X && TopLeft.Y < other.BottomRight.Y);
         }
 
         public bool Contains(Rectangle other)
         {
-            return other.TopLeft >= TopLeft && other.BottomRight <= BottomRight;
+            return (other.TopLeft.X >= TopLeft.X && other.TopLeft.Y >= TopLeft.Y) &&
+                (other.BottomRight.X < BottomRight.X && other.BottomRight.Y < BottomRight.Y);
         }
 
         public bool Contains(Vector2 point)

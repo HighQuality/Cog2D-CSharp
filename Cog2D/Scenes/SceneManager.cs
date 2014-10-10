@@ -39,6 +39,18 @@ namespace Cog.Scenes
             }
         }
 
+        public void TriggerButton(ButtonDownEvent ev)
+        {
+            if (CurrentScene != null)
+            {
+                CurrentScene.Interface.TriggerPress(ev.Position, ev);
+            }
+
+            if (!ev.Intercept)
+                if (!Engine.EventHost.GetEvent<ButtonDownEvent>(ev.Button).Trigger(ev))
+                    Engine.EventHost.GetEvent<ButtonDownEvent>().Trigger(ev);
+        }
+
         public void Push(Scene scene)
         {
             sceneStack.Push(scene);

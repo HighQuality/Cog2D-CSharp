@@ -93,6 +93,9 @@
     <Compile Include="Debug.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Image.cs" />
+    <Compile Include="Interface\InterfaceElement.cs" />
+    <Compile Include="Interface\Padding.cs" />
+    <Compile Include="Interface\Window.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="Mathf.cs" />
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
@@ -140,6 +143,7 @@
     <Compile Include="Modules\Networking\NetworkMessage.cs" />
     <Compile Include="Modules\Networking\NetworkIgnoreAttribute.cs" />
     <Compile Include="Modules\Networking\ServerModule.cs" />
+    <Compile Include="Scenes\GameInterface.cs" />
     <Compile Include="SplashScreen.cs">
       <SubType>Form</SubType>
     </Compile>

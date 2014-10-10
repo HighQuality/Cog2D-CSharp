@@ -16,7 +16,7 @@ namespace Cog.Modules.Renderer
         /// <summary>
         /// Gets or Sets the size of the window
         /// </summary>
-        Vector2 Size { get; set; }
+        Vector2 Resolution { get; set; }
         /// <summary>
         /// Gets or Sets the position of the window
         /// </summary>

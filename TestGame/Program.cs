@@ -10,38 +10,12 @@ using Cog.Modules.EventHost;
 using Cog.Modules.Content;
 using System.Threading;
 using Cog.Modules.Networking;
+using Cog2D.Interface;
 
 namespace TestGame
 {
     class Program
     {
-        static ITexture window;
-
-        static void DrawWindow(Rectangle rect, IRenderTarget target)
-        {
-            // Top Left
-            target.RenderTexture(window, rect.TopLeft, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 0f, 8f, 20f));
-            // Top Right
-            target.RenderTexture(window, rect.TopRight - new Vector2(8f, 0f), Vector2.One, Vector2.Zero, 0f, new Rectangle(window.Size.X - 8f, 0f, 8f, 20f));
-            // Bottom Left
-            target.RenderTexture(window, rect.BottomLeft - new Vector2(0f, 8f), Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 23f, 8f, 8f));
-            // Bottom Right
-            target.RenderTexture(window, rect.BottomRight - new Vector2(8f, 8f), Vector2.One, Vector2.Zero, 0f, new Rectangle(11f, 23f, 8f, 8f));
-
-            // Top
-            target.RenderTexture(window, rect.TopLeft + new Vector2(8f, 0f), new Vector2(rect.Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 0f, 1f, 20f));
-            // Bottom
-            target.RenderTexture(window, rect.BottomLeft + new Vector2(8f, -8f), new Vector2(rect.Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 23, 1f, 8f));
-            // Left
-            target.RenderTexture(window, rect.TopLeft + new Vector2(0f, 20f), new Vector2(1f, rect.Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(0f, 21f, 8f, 1f));
-            // Right
-            target.RenderTexture(window, rect.TopRight + new Vector2(-8f, 20f), new Vector2(1f, rect.Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(11f, 21f, 8f, 1f));
-
-            // Middle Texture
-            target.RenderTexture(window, rect.TopLeft + new Vector2(8f, 20f), rect.Size - new Vector2(16f, 28f), Vector2.Zero, 0f, new Rectangle(9f, 21f, 1f, 1f));
-
-        }
-
         static void Main(string[] args)
         {
             Engine.Initialize<SfmlRenderer>(new Cog.Image("splash.png"));
@@ -55,10 +29,11 @@ namespace TestGame
                 else
                     Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);*/
 
-                window = Engine.Renderer.LoadTexture("blue_window.png");
-
                 // Create and push the initial scene
-                Engine.SceneHost.Push(new GameScene());
+                var scene = new GameScene();
+                Engine.SceneHost.Push(scene);
+
+                new Window(scene.Interface, new Vector2(128f, 128f));
             });
             
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
@@ -75,7 +50,7 @@ namespace TestGame
             {
             });
 
-            Engine.StartGame("Test Game", 640, 480, WindowStyle.Default);
+            Engine.StartGame("Test Game", WindowStyle.Default);
         }
     }
 }

@@ -35,8 +35,7 @@ namespace Cog.Modules.EventHost
                 throw new InvalidOperationException("The button is already down!");
             buttonState[(int)button] = true;
             var ev = new ButtonDownEvent(null, button, Mouse.Location);
-            if (!Engine.EventHost.GetEvent<ButtonDownEvent>((int)button).Trigger(ev))
-                Engine.EventHost.GetEvent<ButtonDownEvent>().Trigger(ev);
+            Engine.SceneHost.TriggerButton(ev);
             buttonUpCallbacks[(int)button] = ev.ButtonUpCallback;
         }
 

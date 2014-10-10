@@ -2,6 +2,7 @@
 using Cog.Modules.Content;
 using Cog.Modules.EventHost;
 using Cog.Modules.Renderer;
+using Cog2D.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,13 +22,18 @@ namespace Cog.Scenes
         private Dictionary<EventIdentifier, IEventListener> globalListeners = new Dictionary<EventIdentifier, IEventListener>();
         private List<EventIdentifier> toBeRemoved = new List<EventIdentifier>();
         private float eventStrengthUpdateTimer = 0f;
+        public GameInterface Interface;
 
         public Scene(string name)
         {
             // Randomize an offset for the event strength update timer
             eventStrengthUpdateTimer = Engine.RandomFloat();
 
-            AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Update(e); }));
+            Interface = new GameInterface();
+            Interface.Size = Engine.Resolution;
+
+            AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { Update(e); Interface.TriggerUpdate(e); } }));
+            AddEventStrength<DrawInterfaceEvent>(EventModule.RegisterEvent<DrawInterfaceEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Interface.TriggerDraw(e, new Vector2()); }));
         }
 
         public void Update(UpdateEvent args)

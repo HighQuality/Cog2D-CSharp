@@ -71,24 +71,24 @@ namespace Cog
             return new Vector2(first.X * second, first.Y * second);
         }
 
-        public static bool operator <(Vector2 first, Vector2 second)
+        public static bool operator ==(Vector2 first, Vector2 second)
         {
-            return (first.X < second.X && first.Y < second.Y);
+            return first.X == second.X && first.Y == second.Y;
         }
 
-        public static bool operator >(Vector2 first, Vector2 second)
+        public static bool operator !=(Vector2 first, Vector2 second)
         {
-            return (first.X > second.X && first.Y > second.Y);
+            return first.X != second.X || first.Y != second.Y;
         }
 
-        public static bool operator >=(Vector2 first, Vector2 second)
+        public override bool Equals(object obj)
         {
-            return (first.X >= second.X && first.Y >= second.Y);
+            return base.Equals(obj);
         }
 
-        public static bool operator <=(Vector2 first, Vector2 second)
+        public override int GetHashCode()
         {
-            return (first.X <= second.X && first.Y <= second.Y);
+            return base.GetHashCode();
         }
 
         public override string ToString()

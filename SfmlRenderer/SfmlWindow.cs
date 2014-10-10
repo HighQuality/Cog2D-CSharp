@@ -17,7 +17,7 @@ namespace Cog.SfmlRenderer
         public LinkedList<SFML.Window.Keyboard.Key> pressedKeys = new LinkedList<SFML.Window.Keyboard.Key>();
         private string _title;
         public string Title { get { return _title; } set { _title = value; InnerWindow.SetTitle(_title); } }
-        public Vector2 Size { get { var size = InnerWindow.Size; return new Vector2((float)size.X, (float)size.Y); } set { InnerWindow.Size = new SFML.System.Vector2u((uint)value.X, (uint)value.Y); } }
+        public Vector2 Resolution { get { var size = InnerWindow.Size; return new Vector2((float)size.X, (float)size.Y); } set { InnerWindow.Size = new SFML.System.Vector2u((uint)value.X, (uint)value.Y); } }
         public Vector2 Position { get { var position = InnerWindow.Position; return new Vector2((float)position.X, (float)position.Y); } set { InnerWindow.Position = new SFML.System.Vector2i((int)value.X, (int)value.Y); } }
         private bool _visible;
         public bool Visible { get { return _visible; } set { _visible = value; InnerWindow.SetVisible(value); } }

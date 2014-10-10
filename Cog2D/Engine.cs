@@ -54,6 +54,17 @@ namespace Cog
         public static Permissions Permissions;
 
         /// <summary>
+        /// Gets or sets the desired resolution.
+        /// If a window has already been created the renderer must be restarted for a new resolution to take affect.
+        /// </summary>
+        public static Vector2 DesiredResolution { get; set; }
+        /// <summary>
+        /// If there is no window currently created, gets the desired resolution.
+        /// Otherwise gets the window's actual resolution.
+        /// </summary>
+        public static Vector2 Resolution { get { if (Window != null) return Window.Resolution; return DesiredResolution; } }
+
+        /// <summary>
         /// Initializes Cog2D making it's modules available for use
         /// </summary>
         /// <typeparam name="TRenderer"></typeparam>
@@ -82,6 +93,7 @@ namespace Cog
             Permissions = Permissions.FullPermissions;
             nextGlobalId = 1;
             nextLocalId = -1;
+            DesiredResolution = new Vector2(640f, 480f);
 
             GameObject.InitializeCache();
             ObjectComponent.InitializeCache();
@@ -192,7 +204,7 @@ namespace Cog
         /// Starts the game.
         /// Iniitalize must be called first.
         /// </summary>
-        public static void StartGame(string title, int width, int height, WindowStyle style)
+        public static void StartGame(string title, WindowStyle style)
         {
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
             EventHost.RegisterEvent<ExitEvent>(-999, e => { Window.Close(); e.Intercept = true; });
@@ -200,7 +212,7 @@ namespace Cog
 
             EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
 
-            Window = Renderer.CreateWindow(title, width, height, style, EventHost);
+            Window = Renderer.CreateWindow(title, (int)DesiredResolution.X, (int)DesiredResolution.Y, style, EventHost);
             Window.VerticalSynchronization = true;
 
             Stopwatch watch = Stopwatch.StartNew();
