@@ -30,6 +30,7 @@ namespace Cog2D.Interface
         private Vector2 oldMousePos;
         private bool isDragging;
         private ResizeMode resizeMode = ResizeMode.None;
+        private BitmapFont font;
 
         public Window(InterfaceElement parent, Vector2 location)
             : base(parent, location)
@@ -38,6 +39,8 @@ namespace Cog2D.Interface
             Size = new Vector2(128f, 128f);
             MinimumSize = new Vector2(17f, 29f);
             Padding = new Padding(8f, 8f, 18f, 8f);
+
+            font = new BitmapFont("merriweather_16.fnt");
         }
 
         public override void OnUpdate(float deltaTime)
@@ -93,25 +96,31 @@ namespace Cog2D.Interface
         public override void OnDraw(IRenderTarget target, Vector2 drawPosition)
         {
             // Top Left
-            target.RenderTexture(windowTexture, drawPosition, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 0f, 8f, 20f));
+            target.RenderTexture(windowTexture, drawPosition, Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 0f, 8f, 20f));
             // Top Right
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(Size.X - 8f, 0f), Vector2.One, Vector2.Zero, 0f, new Rectangle(windowTexture.Size.X - 8f, 0f, 8f, 20f));
+            target.RenderTexture(windowTexture, drawPosition + new Vector2(Size.X - 8f, 0f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(windowTexture.Size.X - 8f, 0f, 8f, 20f));
             // Bottom Left
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(0f, Size.Y - 8f), Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 23f, 8f, 8f));
+            target.RenderTexture(windowTexture, drawPosition + new Vector2(0f, Size.Y - 8f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 23f, 8f, 8f));
             // Bottom Right
-            target.RenderTexture(windowTexture, drawPosition + Size - new Vector2(8f, 8f), Vector2.One, Vector2.Zero, 0f, new Rectangle(11f, 23f, 8f, 8f));
+            target.RenderTexture(windowTexture, drawPosition + Size - new Vector2(8f, 8f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(11f, 23f, 8f, 8f));
 
             // Top
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, 0f), new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 0f, 1f, 20f));
+            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, 0f), Color.White, new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 0f, 1f, 20f));
             // Bottom
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, Size.Y + -8f), new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 23, 1f, 8f));
+            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, Size.Y + -8f), Color.White, new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 23, 1f, 8f));
             // Left
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(0f, 20f), new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(0f, 21f, 8f, 1f));
+            target.RenderTexture(windowTexture, drawPosition + new Vector2(0f, 20f), Color.White, new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(0f, 21f, 8f, 1f));
             // Right
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(Size.X + -8f, 20f), new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(11f, 21f, 8f, 1f));
+            target.RenderTexture(windowTexture, drawPosition + new Vector2(Size.X + -8f, 20f), Color.White, new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(11f, 21f, 8f, 1f));
 
             // Middle Texture
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, 20f), Size - new Vector2(16f, 28f), Vector2.Zero, 0f, new Rectangle(9f, 21f, 1f, 1f));
+            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, 20f), Color.White, Size - new Vector2(16f, 28f), Vector2.Zero, 0f, new Rectangle(9f, 21f, 1f, 1f));
+
+            var textRect = ContentBounds;
+            textRect.TopLeft += Location;
+
+            font.DrawString(target, @"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque accumsan, risus sed luctus vulputate, magna ex egestas lorem, id posuere tellus velit quis ipsum. Morbi efficitur felis sed congue convallis. Pellentesque id dapibus mauris. Phasellus commodo sodales eleifend. Donec non fermentum risus. Morbi pretium ex ligula, tristique finibus ante dapibus et. In vitae massa id turpis rhoncus lobortis. Aliquam auctor ligula mauris, sed semper est porta vehicula.",
+                Color.Black, textRect);
 
             base.OnDraw(target, drawPosition);
         }

@@ -13,17 +13,21 @@ namespace Cog
     public partial class SplashScreen : Form
     {
         private System.Drawing.Bitmap img;
-
+        
         public SplashScreen(Cog.Image image)
         {
             InitializeComponent();
-            img = new System.Drawing.Bitmap(image.Width, image.Height);
-            for (int x=image.Width - 1; x >= 0; x--)
+
+            if (image != null)
             {
-                for (int y=image.Height - 1; y >= 0; y--)
+                img = new System.Drawing.Bitmap(image.Width, image.Height);
+                for (int x = image.Width - 1; x >= 0; x--)
                 {
-                    var color = image.GetColor(x, y);
-                    img.SetPixel(x, y, System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B));
+                    for (int y = image.Height - 1; y >= 0; y--)
+                    {
+                        var color = image.GetColor(x, y);
+                        img.SetPixel(x, y, System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B));
+                    }
                 }
             }
         }

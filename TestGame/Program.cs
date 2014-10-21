@@ -43,13 +43,12 @@ namespace TestGame
             
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>
             {
-
             });
 
             Engine.EventHost.RegisterEvent<ExitEvent>(0, e =>
             {
             });
-
+            
             Engine.StartGame("Test Game", WindowStyle.Default);
         }
     }

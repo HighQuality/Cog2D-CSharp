@@ -78,12 +78,18 @@ namespace Cog
                 AutoResetEvent ev = new AutoResetEvent(false);
                 SplashScreen splashScreen = null;
                 EventHost.RegisterEvent<FinishedLoadingEvent>(-999, e => splashScreen.Invoke((System.Windows.Forms.MethodInvoker)delegate { splashScreen.Close(); }));
-                new Thread(() =>
+
+                var thread = new Thread(() =>
                 {
                     splashScreen = new SplashScreen(splashScreenImage);
                     ev.Set();
                     splashScreen.ShowDialog();
-                }).Start();
+                });
+
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.IsBackground = true;
+                thread.Start();
+
                 ev.WaitOne();
             }
 

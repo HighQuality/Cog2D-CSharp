@@ -11,6 +11,13 @@ namespace Cog
         private Vector2 _topLeft,
             _size;
 
+        public float Left { get { return _topLeft.X; } set { _topLeft.X = value; } }
+        public float Top { get { return _topLeft.Y; } set { _topLeft.Y = value; } }
+        public float Width { get { return _size.X; } set { _size.X = value; } }
+        public float Height { get { return _size.Y; } set { _size.Y = value; } }
+        public float Right { get { return Left + Width; } }
+        public float Bottom { get { return Top + Bottom; } }
+
         public Vector2 TopLeft { get { return _topLeft; } set { _topLeft = value; } }
         public Vector2 TopRight { get { return TopLeft + new Vector2(Size.X, 0f); } }
         public Vector2 BottomLeft { get { return TopLeft + new Vector2(0f, Size.Y); } }

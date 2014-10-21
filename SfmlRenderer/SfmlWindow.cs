@@ -259,10 +259,11 @@ namespace Cog.SfmlRenderer
             InnerWindow.Draw(sprite);
         }
 
-        public void RenderTexture(ITexture texture, Vector2 windowCoords, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
+        public void RenderTexture(ITexture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
         {
             Sprite sprite = new Sprite();
             sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
+            sprite.Color = new SFML.Graphics.Color((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A);
             sprite.Origin = new SFML.System.Vector2f(origin.X, origin.Y);
             sprite.Scale = new SFML.System.Vector2f(scale.X, scale.Y);
             sprite.Texture = ((SfmlTexture)texture).Texture;

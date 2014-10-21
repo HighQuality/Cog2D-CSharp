@@ -13,7 +13,8 @@ namespace Cog
             Blue = new Color(0, 0, 255, 255),
             Red = new Color(255, 0, 0, 255),
             Green = new Color(0, 255, 0, 255),
-            Gray = new Color(128, 128, 128, 255);
+            Gray = new Color(128, 128, 128, 255),
+            Black = new Color(0, 0, 0);
 
         public int R,
             G,
