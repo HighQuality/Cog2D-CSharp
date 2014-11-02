@@ -1,5 +1,6 @@
 ﻿using Cog;
 using Cog.Modules.Content;
+using Cog.Modules.EventHost;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,12 @@ namespace TestGame
             space = CaptureKey(Keyboard.Key.Space, 0, CaptureRelayMode.NoRelay);
         }
 
-        public override void PhysicsUpdate(float deltaTime)
+        public override void PhysicsUpdate(PhysicsUpdateEvent ev)
         {
             if (space.IsDown)
                 TargetId.Value++;
-            Console.WriteLine(TargetId.Value);
 
-            base.Update(deltaTime);
+            base.PhysicsUpdate(ev);
         }
     }
 }

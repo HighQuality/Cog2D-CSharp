@@ -20,8 +20,11 @@ namespace TestGame
         {
             Engine.Initialize<SfmlRenderer>(new Cog.Image("splash.png"));
             float time = 0f;
+            
+            TestObject mainObj = null,
+                otherObj = null;
 
-            TestObject mainObj = null;
+            GameScene scene = null;
             
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
@@ -32,26 +35,33 @@ namespace TestGame
                     Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);*/
 
                 // Create and push the initial scene
-                var scene = new GameScene();
+                scene = new GameScene();
                 Engine.SceneHost.Push(scene);
 
-                mainObj = scene.CreateObject<TestObject>(new Vector2(64f, 64f));
+                var c = scene.BaseObject.AddComponenet<SpriteComponent>();
+                c.Texture = Engine.Renderer.LoadTexture("world.png");
+                c.Origin = new Vector2(300f, 300f);
+
+                mainObj = scene.CreateObject<TestObject>(scene.BaseObject, new Vector2(0f, 0f));
                 mainObj.Movement.LeftKey = Keyboard.Key.Left;
                 mainObj.Movement.RightKey = Keyboard.Key.Right;
                 mainObj.Movement.UpKey = Keyboard.Key.Up;
                 mainObj.Movement.DownKey = Keyboard.Key.Down;
+                mainObj.LocalRotation = new Angle(-45f);
+                mainObj.LocalScale = new Vector2(2f, 2f);
 
-                var w = scene.CreateObject<TestObject>(mainObj, new Vector2(32f, 32f));
-                w.Movement.LeftKey = Keyboard.Key.A;
-                w.Movement.RightKey = Keyboard.Key.D;
-                w.Movement.UpKey = Keyboard.Key.W;
-                w.Movement.DownKey = Keyboard.Key.S;
+                otherObj = scene.CreateObject<TestObject>(mainObj, new Vector2(32f, 32f));
+                otherObj.Movement.LeftKey = Keyboard.Key.A;
+                otherObj.Movement.RightKey = Keyboard.Key.D;
+                otherObj.Movement.UpKey = Keyboard.Key.W;
+                otherObj.Movement.DownKey = Keyboard.Key.S;
             });
             
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
                 time += e.DeltaTime;
-                mainObj.LocalRotation = new Angle(90f * time);
+
+                scene.BaseObject.LocalScale = new Vector2(1f + Mathf.Sin(time * 3f) * 0.5f, 1f + Mathf.Sin(time * 3f) * 0.5f);
             });
             
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>

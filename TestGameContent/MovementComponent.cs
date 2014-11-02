@@ -27,20 +27,20 @@ namespace TestGame
         {
         }
 
-        public override void PhysicsUpdate(float deltaTime)
+        public override void PhysicsUpdate(PhysicsUpdateEvent ev)
         {
             if (left != null && left.IsDown)
-                Speed.X -= MovementForce * deltaTime;
+                Speed.X -= MovementForce * ev.DeltaTime;
             if (right != null && right.IsDown)
-                Speed.X += MovementForce * deltaTime;
+                Speed.X += MovementForce * ev.DeltaTime;
             if (up != null && up.IsDown)
-                Speed.Y -= MovementForce * deltaTime;
+                Speed.Y -= MovementForce * ev.DeltaTime;
             if (down != null && down.IsDown)
-                Speed.Y += MovementForce * deltaTime;
+                Speed.Y += MovementForce * ev.DeltaTime;
 
-            Speed *= Mathf.Max(0f, 1f - deltaTime * 3f);
+            Speed *= Mathf.Max(0f, 1f - ev.DeltaTime * 3f);
 
-            base.PhysicsUpdate(deltaTime);
+            base.PhysicsUpdate(ev);
         }
     }
 }

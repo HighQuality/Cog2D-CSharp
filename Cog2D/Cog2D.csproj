@@ -98,6 +98,7 @@
     <Compile Include="Interface\Window.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="Mathf.cs" />
+    <Compile Include="Modules\Content\BaseObject.cs" />
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\ComponentSerializer.cs" />

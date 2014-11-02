@@ -19,11 +19,11 @@ namespace Cog.Modules.Content
         {
         }
 
-        public override void Draw(IRenderTarget renderTarget)
+        public override void Draw(DrawEvent ev, DrawTransformation transformation)
         {
-            renderTarget.RenderTexture(Texture, WorldCoord, Color, Vector2.One, Origin, GameObject.WorldRotation.Degree, new Rectangle(Vector2.Zero, Texture.Size));
+            ev.RenderTarget.RenderTexture(Texture, transformation.WorldCoord, Color, transformation.WorldScale, Origin, transformation.WorldRotation.Degree, new Rectangle(Vector2.Zero, Texture.Size));
 
-            base.Draw(renderTarget);
+            base.Draw(ev, transformation);
         }
     }
 }

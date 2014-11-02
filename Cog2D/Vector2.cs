@@ -44,6 +44,13 @@ namespace Cog
             this.Y = y;
         }
 
+        public Vector2 Rotate(Angle angle)
+        {
+            var r = angle.Radian;
+            return new Vector2(X * Mathf.Cos(r) - Y * Mathf.Sin(r),
+                X * Mathf.Sin(r) + Y * Mathf.Cos(r));
+        }
+
         public static Vector2 operator +(Vector2 first, Vector2 second)
         {
             return new Vector2(first.X + second.X, first.Y + second.Y);

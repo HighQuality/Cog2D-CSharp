@@ -1,5 +1,6 @@
 ﻿using Cog.Modules.EventHost;
 using Cog.Modules.Networking;
+using Cog.Modules.Renderer;
 using Cog.Scenes;
 using System;
 using System.Collections.Generic;
@@ -45,63 +46,38 @@ namespace Cog.Modules.Content
         }
 
         private List<GameObject> children;
-
-        private Vector2 _localCoord;
-        public Vector2 LocalCoord
+        
+        public Vector2 LocalCoord { get; set; }
+        public virtual Vector2 WorldCoord
         {
-            get { return _localCoord; }
+            get { return Parent.WorldCoord + (LocalCoord * Parent.WorldScale).Rotate(Parent.WorldRotation); }
+            set { LocalCoord = (value - Parent.WorldCoord).Rotate(-Parent.WorldRotation); }
+        }
+
+        public Angle LocalRotation { get; set; }
+        public virtual Angle WorldRotation
+        {
+            get { if (Parent != null) return Parent.WorldRotation + LocalRotation; return LocalRotation; }
             set
             {
                 if (Parent != null)
-                    _worldCoord = Parent.WorldCoord + new Vector2(Mathf.Cos(Parent.WorldRotation.Radian) * value.X, Mathf.Sin(Parent.WorldRotation.Radian) * value.Y);
-                else
-                    _worldCoord += value - _localCoord;
-                _localCoord = value;
-
-                if (children != null)
-                    for (int i = children.Count - 1; i >= 0; i--)
-                        children[i].ParentCoordChanged();
-            }
-        }
-
-        private Vector2 _worldCoord;
-        public Vector2 WorldCoord
-        {
-            get { return _worldCoord; }
-            set
-            {
-                if (Parent != null)
-                    LocalCoord = Parent.WorldCoord - value;
-                else
-                    LocalCoord = value;
-            }
-        }
-
-        private Angle _localRotation;
-        public Angle LocalRotation
-        {
-            get { return _localRotation; }
-            set
-            {
-                _worldRotation += value - _localRotation;
-                _localRotation = value;
-
-                if (children != null)
-                    for (int i = children.Count - 1; i >= 0; i--)
-                        children[i].ParentRotationChanged();
-            }
-        }
-
-        private Angle _worldRotation;
-        public Angle WorldRotation
-        {
-            get { return _worldRotation; }
-            set
-            {
-                if (Parent != null)
-                    LocalRotation = Parent.WorldRotation - value;
+                    LocalRotation = value - Parent.WorldRotation;
                 else
                     LocalRotation = value;
+            }
+        }
+
+        private Vector2 _localScale = Vector2.One;
+        public Vector2 LocalScale { get { return _localScale; } set { _localScale = value; } }
+        public virtual Vector2 WorldScale
+        {
+            get { if (Parent != null) return Parent.WorldScale * LocalScale; return LocalScale; }
+            set
+            {
+                if (Parent != null)
+                    LocalScale = value / Parent.WorldScale;
+                else
+                    LocalScale = value;
             }
         }
 
@@ -115,6 +91,8 @@ namespace Cog.Modules.Content
         public bool IsLocal { get { return Id < 0; } }
         public bool IsComponentsLocked { get; internal set; }
         private List<IEventListener> registeredEvents;
+
+        internal Action<DrawEvent, DrawTransformation> OnDraw;
 
         public GameObject()
         {
@@ -186,19 +164,7 @@ namespace Cog.Modules.Content
             registeredEvents.Add(listener);
             return listener;
         }
-
-        private void ParentCoordChanged()
-        {
-            _worldCoord = Parent.WorldCoord + LocalCoord;
-        }
-
-        private void ParentRotationChanged()
-        {
-            Console.WriteLine(Parent.WorldRotation.Degree);
-            _worldRotation = Parent.WorldRotation + LocalRotation;
-            WorldCoord = Parent.WorldCoord + new Vector2(Mathf.Cos(Parent.WorldRotation.Radian) * LocalCoord.X, Mathf.Sin(Parent.WorldRotation.Radian) * LocalCoord.Y);
-        }
-
+        
         internal CreateObjectMessage CreateCreationMessage()
         {
             var id = objectsDictionary[GetType()];
@@ -246,6 +212,37 @@ namespace Cog.Modules.Content
             }
 
             return obj;
+        }
+        
+        internal void Draw(DrawEvent ev, DrawTransformation transform)
+        {
+            if (children != null)
+            {
+                transform.WorldCoord += (LocalCoord * transform.ParentWorldScale).Rotate(transform.ParentWorldRotation);
+                transform.WorldRotation += LocalRotation;
+                transform.WorldScale *= LocalScale;
+
+                if (OnDraw != null)
+                    OnDraw(ev, transform);
+
+                transform.ParentWorldCoord = transform.WorldCoord;
+                transform.ParentWorldRotation = transform.WorldRotation;
+                transform.ParentWorldScale = transform.WorldScale;
+
+                int c = children.Count;
+                for (int i = 0; i < c; i++)
+                {
+                    children[i].Draw(ev, transform);
+                }
+            }
+            else if (OnDraw != null)
+            {
+                transform.WorldCoord += (LocalCoord * transform.ParentWorldScale).Rotate(transform.ParentWorldRotation);
+                transform.WorldRotation += LocalRotation;
+                transform.WorldScale *= LocalScale;
+
+                OnDraw(ev, transform);
+            }
         }
 
         internal static void InitializeCache()

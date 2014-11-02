@@ -32,11 +32,11 @@ namespace Cog.Modules.Content
         public virtual bool KeyDown(Keyboard.Key key) { return false; }
         public virtual void KeyUp(Keyboard.Key key) { }
         [ComponentEvent(true)]
-        public virtual void Update(float deltaTime) { }
+        public virtual void Update(UpdateEvent ev) { }
         [ComponentEvent(true)]
-        public virtual void PhysicsUpdate(float deltaTime) { }
+        public virtual void PhysicsUpdate(PhysicsUpdateEvent ev) { }
         [ComponentEvent(true)]
-        public virtual void Draw(IRenderTarget renderTarget) { }
+        public virtual void Draw(DrawEvent ev, DrawTransformation transformation) { }
         [ComponentEvent(true)]
         public virtual void DrawInterface(IRenderTarget renderTarget) { }
 
@@ -133,18 +133,18 @@ namespace Cog.Modules.Content
                 // All tests were passed, add the method regitrator
                 string func = method.Name;
                 if (func == "Update")
-                    registrator += (ev, comp) => comp.RegisterEvent<UpdateEvent>(0, e => comp.Update(e.DeltaTime));
+                    registrator += (ev, comp) => comp.RegisterEvent<UpdateEvent>(0, e => comp.Update(e));
                 else if (func == "PhysicsUpdate")
-                    registrator += (ev, comp) => comp.RegisterEvent<PhysicsUpdateEvent>(0, e => comp.PhysicsUpdate(e.DeltaTime));
+                    registrator += (ev, comp) => comp.RegisterEvent<PhysicsUpdateEvent>(0, e => comp.PhysicsUpdate(e));
                 else if (func == "Draw")
-                    registrator += (ev, comp) => comp.RegisterEvent<DrawEvent>(0, e => comp.Draw(e.RenderTarget));
+                    registrator += (ev, comp) => { comp.GameObject.OnDraw += (e, t) => { comp.Draw(e, t); }; };
                 else if (func == "KeyDown")
                     registrator += (ev, comp) => comp.RegisterEvent<KeyDownEvent>(0, e => { if (comp.KeyDown(e.Key)) { e.KeyUpEvent = () => comp.KeyUp(e.Key); e.Intercept = true; } });
                 else if (func == "DrawInterface")
                     registrator += (ev, comp) => comp.RegisterEvent<DrawInterfaceEvent>(0, e => comp.DrawInterface(e.RenderTarget));
                 else
                     Console.WriteLine("Tried to register function with no registration handler: " + func);
-            }
+                }
 
             // Cache the registerer
             RegistratorCache.Add(type, registrator);

@@ -33,6 +33,11 @@ namespace Cog
             return new Angle(first.degree + second.degree);
         }
 
+        public static Angle operator-(Angle first)
+        {
+            return new Angle(-first.degree);
+        }
+
         public static Angle operator-(Angle first, Angle second)
         {
             return new Angle(first.degree - second.degree);

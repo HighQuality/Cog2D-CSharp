@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace Cog
 {
-    public struct Transformation
+    public struct DrawTransformation
     {
-        public Angle Rotation;
-        public Vector2 Position;
-        public Vector2 Scale;
+        public Vector2 WorldCoord,
+            ParentWorldCoord;
+        public Vector2 WorldScale,
+            ParentWorldScale;
+        public Angle WorldRotation,
+            ParentWorldRotation;
     }
 }

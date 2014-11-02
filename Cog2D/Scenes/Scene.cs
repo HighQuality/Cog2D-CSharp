@@ -23,6 +23,7 @@ namespace Cog.Scenes
         private List<EventIdentifier> toBeRemoved = new List<EventIdentifier>();
         private float eventStrengthUpdateTimer = 0f;
         public GameInterface Interface;
+        public BaseObject BaseObject { get; private set; }
 
         public Scene(string name)
         {
@@ -33,11 +34,26 @@ namespace Cog.Scenes
             Interface.Size = Engine.Resolution;
 
             AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { Update(e); Interface.TriggerUpdate(e); } }));
+            AddEventStrength<DrawEvent>(EventModule.RegisterEvent<DrawEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Draw(e); }));
             AddEventStrength<DrawInterfaceEvent>(EventModule.RegisterEvent<DrawInterfaceEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Interface.TriggerDraw(e, new Vector2()); }));
+
+            // Create an object of this type without invoking the constructor
+            BaseObject = (BaseObject)FormatterServices.GetUninitializedObject(typeof(BaseObject));
+            BaseObject.Scene = this;
+            BaseObject.Id = 0;
+            // Invoke the constructor, new()-constraint ensures an empty one exists
+            typeof(BaseObject).GetConstructor(new Type[0]).Invoke(BaseObject, new object[0]);
+
+            //BaseObject.LocalCoord = new Vector2(320f, 240f);
+
+            ObjectDictionary.Add(BaseObject.Id, BaseObject);
+            Objects.AddLast(BaseObject);
         }
 
-        public void Update(UpdateEvent args)
+        private void Update(UpdateEvent args)
         {
+            BaseObject.LocalRotation -= Angle.FromDegree(args.DeltaTime * 30f);
+
             var current = Objects.First;
             
             while (current != null)
@@ -79,16 +95,12 @@ namespace Cog.Scenes
             }
         }
 
-        public T CreateObject<T>()
-            where T : GameObject, new()
+        public void Draw(DrawEvent ev)
         {
-            return CreateObject<T>(null, new Vector2());
-        }
-
-        public T CreateObject<T>(Vector2 worldCoord)
-            where T : GameObject, new()
-        {
-            return CreateObject<T>(null, worldCoord);
+            DrawTransformation transform = new DrawTransformation();
+            transform.WorldScale = Vector2.One;
+            transform.ParentWorldScale = Vector2.One;
+            BaseObject.Draw(ev, transform);
         }
 
         public T CreateObject<T>(GameObject parent, Vector2 localCord)
@@ -102,7 +114,9 @@ namespace Cog.Scenes
         {
             if (Engine.IsNetworkGame && !Engine.IsServer)
                 throw new Exception("Only the server can create global objects!");
-
+            if (parent == null)
+                throw new Exception("\"parent\" may not be null!, use Scene.BaseObject instead");
+            
             // Create an object of this type without invoking the constructor
             T obj = (T)FormatterServices.GetUninitializedObject(typeof(T));
             obj.Scene = this;

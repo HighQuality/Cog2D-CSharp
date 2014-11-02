@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cog.Modules.EventHost;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,11 +11,11 @@ namespace Cog.Modules.Content
     {
         public Vector2 Speed;
 
-        public override void PhysicsUpdate(float deltaTime)
+        public override void PhysicsUpdate(PhysicsUpdateEvent ev)
         {
-            LocalCoord += new Vector2(Speed.X * deltaTime, Speed.Y * deltaTime);
+            LocalCoord += new Vector2(Speed.X * ev.DeltaTime, Speed.Y * ev.DeltaTime);
 
-            base.Update(deltaTime);
+            base.PhysicsUpdate(ev);
         }
     }
 }
