@@ -18,9 +18,93 @@ namespace Cog.Modules.Content
         private static UInt16 nextObjectId;
 
         public string ObjectName;
-        public GameObject Parent;
-        public Vector2 LocalCoord { get; set; }
-        public Vector2 WorldCoord { get { if (Parent != null) return Parent.WorldCoord + LocalCoord; return LocalCoord; } set { if (Parent != null) LocalCoord = value - Parent.WorldCoord; LocalCoord = value; } }
+        private GameObject _parent;
+        public GameObject Parent
+        {
+            get { return _parent; }
+            set
+            {
+                if (_parent != null)
+                    _parent.children.Remove(this);
+                _parent = value;
+                if (_parent != null)
+                {
+                    if (_parent.children == null)
+                        _parent.children = new List<GameObject>();
+                    _parent.children.Add(this);
+                    // Our local coordinate isn't updated yet
+                    LocalCoord = _parent.WorldCoord - WorldCoord;
+                    LocalRotation = _parent.WorldRotation - WorldRotation;
+                }
+                else
+                {
+                    LocalCoord = WorldCoord;
+                    LocalRotation = WorldRotation;
+                }
+            }
+        }
+
+        private List<GameObject> children;
+
+        private Vector2 _localCoord;
+        public Vector2 LocalCoord
+        {
+            get { return _localCoord; }
+            set
+            {
+                if (Parent != null)
+                    _worldCoord = Parent.WorldCoord + new Vector2(Mathf.Cos(Parent.WorldRotation.Radian) * value.X, Mathf.Sin(Parent.WorldRotation.Radian) * value.Y);
+                else
+                    _worldCoord += value - _localCoord;
+                _localCoord = value;
+
+                if (children != null)
+                    for (int i = children.Count - 1; i >= 0; i--)
+                        children[i].ParentCoordChanged();
+            }
+        }
+
+        private Vector2 _worldCoord;
+        public Vector2 WorldCoord
+        {
+            get { return _worldCoord; }
+            set
+            {
+                if (Parent != null)
+                    LocalCoord = Parent.WorldCoord - value;
+                else
+                    LocalCoord = value;
+            }
+        }
+
+        private Angle _localRotation;
+        public Angle LocalRotation
+        {
+            get { return _localRotation; }
+            set
+            {
+                _worldRotation += value - _localRotation;
+                _localRotation = value;
+
+                if (children != null)
+                    for (int i = children.Count - 1; i >= 0; i--)
+                        children[i].ParentRotationChanged();
+            }
+        }
+
+        private Angle _worldRotation;
+        public Angle WorldRotation
+        {
+            get { return _worldRotation; }
+            set
+            {
+                if (Parent != null)
+                    LocalRotation = Parent.WorldRotation - value;
+                else
+                    LocalRotation = value;
+            }
+        }
+
         public Vector2 Size { get; set; }
         public Dictionary<Type, ObjectComponent> Components = new Dictionary<Type, ObjectComponent>();
         public Scene Scene { get; internal set; }
@@ -101,6 +185,18 @@ namespace Cog.Modules.Content
                 registeredEvents = new List<IEventListener>();
             registeredEvents.Add(listener);
             return listener;
+        }
+
+        private void ParentCoordChanged()
+        {
+            _worldCoord = Parent.WorldCoord + LocalCoord;
+        }
+
+        private void ParentRotationChanged()
+        {
+            Console.WriteLine(Parent.WorldRotation.Degree);
+            _worldRotation = Parent.WorldRotation + LocalRotation;
+            WorldCoord = Parent.WorldCoord + new Vector2(Mathf.Cos(Parent.WorldRotation.Radian) * LocalCoord.X, Mathf.Sin(Parent.WorldRotation.Radian) * LocalCoord.Y);
         }
 
         internal CreateObjectMessage CreateCreationMessage()

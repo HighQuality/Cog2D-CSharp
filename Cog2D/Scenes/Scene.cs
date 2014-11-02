@@ -2,7 +2,7 @@
 using Cog.Modules.Content;
 using Cog.Modules.EventHost;
 using Cog.Modules.Renderer;
-using Cog2D.Interface;
+using Cog.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,13 +85,19 @@ namespace Cog.Scenes
             return CreateObject<T>(null, new Vector2());
         }
 
-        public T CreateObject<T>(Vector2 position)
+        public T CreateObject<T>(Vector2 worldCoord)
             where T : GameObject, new()
         {
-            return CreateObject<T>(null, position);
+            return CreateObject<T>(null, worldCoord);
         }
 
-        public T CreateObject<T>(CogClient owner, Vector2 position)
+        public T CreateObject<T>(GameObject parent, Vector2 localCord)
+            where T : GameObject, new()
+        {
+            return CreateObject<T>(null, parent, localCord);
+        }
+
+        public T CreateObject<T>(CogClient owner, GameObject parent, Vector2 localCoord)
             where T : GameObject, new()
         {
             if (Engine.IsNetworkGame && !Engine.IsServer)
@@ -102,6 +108,8 @@ namespace Cog.Scenes
             obj.Scene = this;
             obj.Owner = owner;
             obj.Id = Engine.GetGlobalId();
+            obj.Parent = parent;
+            obj.LocalCoord = localCoord;
             // Invoke the constructor, new()-constraint ensures an empty one exists
             typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
             

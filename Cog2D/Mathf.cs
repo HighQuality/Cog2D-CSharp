@@ -8,6 +8,8 @@ namespace Cog
 {
     public static class Mathf
     {
+        public const float Pi = (float)Math.PI;
+
         public static float Min(float value1, float value2)
         {
             return value1 < value2 ? value1 : value2;

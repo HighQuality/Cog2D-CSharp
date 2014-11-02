@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cog2D.Interface
+namespace Cog.Interface
 {
     public interface IInterfaceElement
     {

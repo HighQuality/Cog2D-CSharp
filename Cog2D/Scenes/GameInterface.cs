@@ -1,4 +1,4 @@
-﻿using Cog2D.Interface;
+﻿using Cog.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;

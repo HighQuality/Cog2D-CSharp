@@ -12,18 +12,36 @@ namespace Cog.Modules.Content
         private EventListener<KeyDownEvent> listener;
         public bool IsDown { get; private set; }
         public CaptureRelayMode RelayMode;
-        public Keyboard.Key Key { get; private set; }
+
+        private readonly int priority;
+        private GameObject baseObject;
+
+        private Keyboard.Key _key;
+        public Keyboard.Key Key
+        {
+            get { return _key; }
+            set
+            {
+                _key = value;
+
+                if (listener != null)
+                    listener.Cancel();
+                listener = baseObject.RegisterEvent<KeyDownEvent>(Key, priority, KeyDown);
+            }
+        }
 
         internal KeyCapture(GameObject obj, Keyboard.Key key, int priority, CaptureRelayMode relayMode)
         {
+            this.baseObject = obj;
+            this.priority = priority;
             this.Key = key;
-            listener = obj.RegisterEvent<KeyDownEvent>(Key, priority, KeyDown);
             this.RelayMode = relayMode;
+        }
 
-            if (Engine.IsServer && obj.Owner != null)
-            {
-
-            }
+        public void StopListen()
+        {
+            listener.Cancel();
+            IsDown = false;
         }
 
         private void KeyDown(KeyDownEvent args)

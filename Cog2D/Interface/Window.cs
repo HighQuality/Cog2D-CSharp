@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Cog.Modules.EventHost;
 
-namespace Cog2D.Interface
+namespace Cog.Interface
 {
     public class Window : InterfaceElement
     {

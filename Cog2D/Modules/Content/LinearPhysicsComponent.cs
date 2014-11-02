@@ -12,7 +12,7 @@ namespace Cog.Modules.Content
 
         public override void PhysicsUpdate(float deltaTime)
         {
-            WorldCoord += new Vector2(Speed.X * deltaTime, Speed.Y * deltaTime);
+            LocalCoord += new Vector2(Speed.X * deltaTime, Speed.Y * deltaTime);
 
             base.Update(deltaTime);
         }

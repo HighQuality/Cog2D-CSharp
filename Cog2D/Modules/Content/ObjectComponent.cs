@@ -21,6 +21,7 @@ namespace Cog.Modules.Content
 
         private List<IEventListener> registeredFunctions; public GameObject GameObject { get; internal set; }
         public Scene Scene { get { return GameObject.Scene; } }
+        public Vector2 LocalCoord { get { return GameObject.LocalCoord; } set { GameObject.LocalCoord = value; } }
         public Vector2 WorldCoord { get { return GameObject.WorldCoord; } set { GameObject.WorldCoord = value; } }
 
         public ObjectComponent()

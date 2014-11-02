@@ -11,7 +11,9 @@ namespace Cog.Modules.Content
     public class SpriteComponent : ObjectComponent
     {
         public ITexture Texture;
-        public Vector2 CoordOffset;
+        public Vector2 Origin,
+            Scale;
+        public Color Color = Color.White;
 
         public SpriteComponent()
         {
@@ -19,7 +21,7 @@ namespace Cog.Modules.Content
 
         public override void Draw(IRenderTarget renderTarget)
         {
-            renderTarget.RenderTexture(Texture, WorldCoord - CoordOffset);
+            renderTarget.RenderTexture(Texture, WorldCoord, Color, Vector2.One, Origin, GameObject.WorldRotation.Degree, new Rectangle(Vector2.Zero, Texture.Size));
 
             base.Draw(renderTarget);
         }
