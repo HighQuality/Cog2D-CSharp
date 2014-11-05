@@ -231,6 +231,17 @@ namespace Cog.SfmlRenderer
             }
         }
         
+        public void SetTransformation(Vector2 center, Vector2 scale, Angle rotation)
+        {
+            var size = new SFML.System.Vector2f();
+            size.X = (Resolution.X / scale.X);
+            size.Y = (Resolution.Y / scale.Y);
+            var view = new View(new SFML.System.Vector2f(center.X, center.Y), size);
+            view.Rotation = rotation.Degree;
+
+            InnerWindow.SetView(view);
+        }
+
         public void Clear(Color color)
         {
             InnerWindow.Clear(new SFML.Graphics.Color((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A));

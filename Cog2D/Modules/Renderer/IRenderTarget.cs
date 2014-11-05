@@ -8,7 +8,10 @@ namespace Cog.Modules.Renderer
 {
     public interface IRenderTarget
     {
+        void SetTransformation(Vector2 center, Vector2 scale, Angle angle);
         void RenderTexture(ITexture texture, Vector2 windowCoords);
         void RenderTexture(ITexture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect);
+
+        void Clear(Color color);
     }
 }

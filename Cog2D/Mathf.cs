@@ -8,7 +8,10 @@ namespace Cog
 {
     public static class Mathf
     {
-        public const float Pi = (float)Math.PI;
+        public const float Pi = (float)Math.PI,
+            TwoPi = Pi * 2f,
+            HalfPi = Pi / 2f,
+            QuarterPi = Pi / 4f;
 
         public static float Min(float value1, float value2)
         {

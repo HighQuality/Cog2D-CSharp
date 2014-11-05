@@ -23,7 +23,22 @@ namespace Cog.Scenes
         private List<EventIdentifier> toBeRemoved = new List<EventIdentifier>();
         private float eventStrengthUpdateTimer = 0f;
         public GameInterface Interface;
-        public BaseObject BaseObject { get; private set; }
+        
+        internal LinkedList<GameObject> BaseObjects = new LinkedList<GameObject>();
+
+        private Camera _camera;
+        public Camera Camera
+        {
+            get { return _camera; }
+            set
+            {
+                if (_camera != null)
+                    _camera.Unbind();
+                _camera = value;
+                if (_camera != null)
+                    _camera.Bind();
+            }
+        }
 
         public Scene(string name)
         {
@@ -36,24 +51,12 @@ namespace Cog.Scenes
             AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { Update(e); Interface.TriggerUpdate(e); } }));
             AddEventStrength<DrawEvent>(EventModule.RegisterEvent<DrawEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Draw(e); }));
             AddEventStrength<DrawInterfaceEvent>(EventModule.RegisterEvent<DrawInterfaceEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Interface.TriggerDraw(e, new Vector2()); }));
-
-            // Create an object of this type without invoking the constructor
-            BaseObject = (BaseObject)FormatterServices.GetUninitializedObject(typeof(BaseObject));
-            BaseObject.Scene = this;
-            BaseObject.Id = 0;
-            // Invoke the constructor, new()-constraint ensures an empty one exists
-            typeof(BaseObject).GetConstructor(new Type[0]).Invoke(BaseObject, new object[0]);
-
-            //BaseObject.LocalCoord = new Vector2(320f, 240f);
-
-            ObjectDictionary.Add(BaseObject.Id, BaseObject);
-            Objects.AddLast(BaseObject);
+            
+            Camera = CreateObject<Camera>(new Vector2());
         }
 
         private void Update(UpdateEvent args)
         {
-            BaseObject.LocalRotation -= Angle.FromDegree(args.DeltaTime * 30f);
-
             var current = Objects.First;
             
             while (current != null)
@@ -100,7 +103,19 @@ namespace Cog.Scenes
             DrawTransformation transform = new DrawTransformation();
             transform.WorldScale = Vector2.One;
             transform.ParentWorldScale = Vector2.One;
-            BaseObject.Draw(ev, transform);
+
+            var it = BaseObjects.First;
+            while (it != null)
+            {
+                it.Value.Draw(ev, transform);
+                it = it.Next;
+            }
+        }
+
+        public T CreateObject<T>(Vector2 localCord)
+            where T : GameObject, new()
+        {
+            return CreateObject<T>(null, null, localCord);
         }
 
         public T CreateObject<T>(GameObject parent, Vector2 localCord)
@@ -114,21 +129,25 @@ namespace Cog.Scenes
         {
             if (Engine.IsNetworkGame && !Engine.IsServer)
                 throw new Exception("Only the server can create global objects!");
-            if (parent == null)
-                throw new Exception("\"parent\" may not be null!, use Scene.BaseObject instead");
             
             // Create an object of this type without invoking the constructor
             T obj = (T)FormatterServices.GetUninitializedObject(typeof(T));
             obj.Scene = this;
             obj.Owner = owner;
             obj.Id = Engine.GetGlobalId();
-            obj.Parent = parent;
+            obj.InitialSetParent(parent);
             obj.LocalCoord = localCoord;
-            // Invoke the constructor, new()-constraint ensures an empty one exists
-            typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
-            
+
+            // Register the new object
             ObjectDictionary.Add(obj.Id, obj);
             Objects.AddLast(obj);
+
+            // If we don't have a parent we need to register this object to ensure it and it's children are drawn
+            if (parent == null)
+                BaseObjects.AddLast(obj);
+
+            // Invoke the constructor, new()-constraint ensures an empty one exists
+            typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
 
             // Serialize and send to clients that are subscribed to this scene
             if (Engine.IsServer)

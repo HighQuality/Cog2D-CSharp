@@ -8,17 +8,13 @@ using System.Threading.Tasks;
 
 namespace TestGame
 {
-    class TestObject : GameObject
+    class SpriteObject : GameObject
     {
         public SpriteComponent Sprite;
-        public MovementComponent Movement;
 
-        public TestObject()
+        public SpriteObject()
         {
             Sprite = AddComponent<SpriteComponent>();
-            Sprite.Texture = Engine.Renderer.LoadTexture("rectangle.png");
-            Sprite.Origin = Sprite.Texture.Size / 2f;
-            Movement = AddComponent<MovementComponent>();
         }
     }
 }

@@ -98,7 +98,7 @@
     <Compile Include="Interface\Window.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="Mathf.cs" />
-    <Compile Include="Modules\Content\BaseObject.cs" />
+    <Compile Include="Modules\Content\Camera.cs" />
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\ComponentSerializer.cs" />
@@ -111,6 +111,7 @@
     <Compile Include="Modules\Content\SpriteComponent.cs" />
     <Compile Include="Modules\Content\Synchronized.cs" />
     <Compile Include="Modules\Content\SynchronizedEditPermission.cs" />
+    <Compile Include="Modules\EventHost\BeginDrawEvent.cs" />
     <Compile Include="Modules\EventHost\ButtonDownEvent.cs" />
     <Compile Include="Modules\EventHost\CloseButtonEvent.cs" />
     <Compile Include="Modules\EventHost\ComponentEventAttribute.cs" />

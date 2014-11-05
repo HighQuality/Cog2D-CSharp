@@ -23,24 +23,40 @@ namespace Cog.Modules.Content
         public GameObject Parent
         {
             get { return _parent; }
+            // PARENT IS ALSO SET THROUGH InitialSetParent FUNCTION WITHOUT INVOKING THIS FUNCTION
             set
             {
                 if (_parent != null)
+                {
                     _parent.children.Remove(this);
+
+                    // If we had a parent but don't anymore
+                    if (value == null)
+                    {
+                        // We're now a base object
+                        Scene.BaseObjects.AddLast(this);
+                    }
+                }
+                else if (value != null)
+                {
+                    // If we didn't have a parent already and was assigned one, iterate through the base object LinkedList backwards and get rid of our entry
+                    var it = Scene.BaseObjects.Last;
+                    while (it != null)
+                    {
+                        if (it.Value == this)
+                        {
+                            Scene.BaseObjects.Remove(it);
+                            break;
+                        }
+                        it = it.Previous;
+                    }
+                }
                 _parent = value;
                 if (_parent != null)
                 {
                     if (_parent.children == null)
                         _parent.children = new List<GameObject>();
                     _parent.children.Add(this);
-                    // Our local coordinate isn't updated yet
-                    LocalCoord = _parent.WorldCoord - WorldCoord;
-                    LocalRotation = _parent.WorldRotation - WorldRotation;
-                }
-                else
-                {
-                    LocalCoord = WorldCoord;
-                    LocalRotation = WorldRotation;
                 }
             }
         }
@@ -50,20 +66,36 @@ namespace Cog.Modules.Content
         public Vector2 LocalCoord { get; set; }
         public virtual Vector2 WorldCoord
         {
-            get { return Parent.WorldCoord + (LocalCoord * Parent.WorldScale).Rotate(Parent.WorldRotation); }
-            set { LocalCoord = (value - Parent.WorldCoord).Rotate(-Parent.WorldRotation); }
+            get
+            {
+                if (Parent == null)
+                    return LocalCoord;
+                return Parent.WorldCoord + (LocalCoord * Parent.WorldScale).Rotate(Parent.WorldRotation);
+            }
+            set
+            {
+                if (Parent == null)
+                    LocalCoord = value;
+                else
+                    LocalCoord = (value - Parent.WorldCoord).Rotate(-Parent.WorldRotation) / Parent.WorldScale;
+            }
         }
 
         public Angle LocalRotation { get; set; }
         public virtual Angle WorldRotation
         {
-            get { if (Parent != null) return Parent.WorldRotation + LocalRotation; return LocalRotation; }
+            get
+            {
+                if (Parent == null)
+                    return LocalRotation;
+                return Parent.WorldRotation + LocalRotation;
+            }
             set
             {
-                if (Parent != null)
-                    LocalRotation = value - Parent.WorldRotation;
-                else
+                if (Parent == null)
                     LocalRotation = value;
+                else
+                    LocalRotation = value - Parent.WorldRotation;
             }
         }
 
@@ -71,13 +103,18 @@ namespace Cog.Modules.Content
         public Vector2 LocalScale { get { return _localScale; } set { _localScale = value; } }
         public virtual Vector2 WorldScale
         {
-            get { if (Parent != null) return Parent.WorldScale * LocalScale; return LocalScale; }
+            get
+            {
+                if (Parent == null)
+                    return LocalScale;
+                return Parent.WorldScale * LocalScale;
+            }
             set
             {
-                if (Parent != null)
-                    LocalScale = value / Parent.WorldScale;
-                else
+                if (Parent == null)
                     LocalScale = value;
+                else
+                    LocalScale = value / Parent.WorldScale;
             }
         }
 
@@ -107,7 +144,7 @@ namespace Cog.Modules.Content
             return false;
         }
 
-        public T AddComponenet<T>()
+        public T AddComponent<T>()
             where T : ObjectComponent, new()
         {
             if (IsComponentsLocked)
@@ -165,6 +202,22 @@ namespace Cog.Modules.Content
             return listener;
         }
         
+        /// <summary>
+        /// Sets the parent witout triggering Parent's setter.
+        /// Only to be used internally by the engine when the object is first created
+        /// </summary>
+        internal void InitialSetParent(GameObject parent)
+        {
+            this._parent = parent;
+            
+            if (parent != null)
+            {
+                if (parent.children == null)
+                    parent.children = new List<GameObject>();
+                parent.children.Add(this);
+            }
+        }
+
         internal CreateObjectMessage CreateCreationMessage()
         {
             var id = objectsDictionary[GetType()];
@@ -228,12 +281,10 @@ namespace Cog.Modules.Content
                 transform.ParentWorldCoord = transform.WorldCoord;
                 transform.ParentWorldRotation = transform.WorldRotation;
                 transform.ParentWorldScale = transform.WorldScale;
-
+                
                 int c = children.Count;
                 for (int i = 0; i < c; i++)
-                {
                     children[i].Draw(ev, transform);
-                }
             }
             else if (OnDraw != null)
             {

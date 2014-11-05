@@ -237,6 +237,8 @@ namespace Cog
                 }
                 EventHost.GetEvent<UpdateEvent>().Trigger(new UpdateEvent(null, deltaTime));
 
+                EventHost.GetEvent<BeginDrawEvent>().Trigger(new BeginDrawEvent(null, Window.RenderTarget));
+
                 Window.Clear(Color.CornflowerBlue);
 
                 EventHost.GetEvent<DrawEvent>().Trigger(new DrawEvent(null, Window.RenderTarget));

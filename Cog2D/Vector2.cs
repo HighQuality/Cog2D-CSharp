@@ -25,11 +25,39 @@ namespace Cog
         /// </summary>
         public float Y;
 
+        /// <summary>
+        /// Gets or sets the length of this vector
+        /// </summary>
         public float Length
         {
             get
             {
                 return Mathf.Sqrt(Mathf.Pow(X, 2f) + Mathf.Pow(Y, 2f));
+            }
+
+            set
+            {
+                this = Unit * value;
+            }
+        }
+        
+        /// <summary>
+        /// Gets or sets the angle of this vector
+        /// </summary>
+        public Angle Angle
+        {
+            get { return new Angle(this); }
+            set { this = Rotate(value - Angle); }
+        }
+
+        /// <summary>
+        /// Gets a Vector2 that points in the same direction and is one unit long
+        /// </summary>
+        public Vector2 Unit
+        {
+            get
+            {
+                return new Angle(this).Unit;
             }
         }
 
