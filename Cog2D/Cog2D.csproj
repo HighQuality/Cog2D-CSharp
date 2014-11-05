@@ -98,6 +98,9 @@
     <Compile Include="Interface\Window.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="Mathf.cs" />
+    <Compile Include="Modules\Audio\IAudioModule.cs" />
+    <Compile Include="Modules\Audio\ISoundEffect.cs" />
+    <Compile Include="Modules\Audio\ISoundInstance.cs" />
     <Compile Include="Modules\Content\Camera.cs" />
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
