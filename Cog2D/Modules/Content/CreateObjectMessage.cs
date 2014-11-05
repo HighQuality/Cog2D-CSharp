@@ -10,16 +10,12 @@ namespace Cog.Modules.Content
     class CreateObjectMessage : NetworkMessage
     {
         public UInt16 ObjectType;
-        public UInt16[] Components;
-        public byte[][] ComponentDatas;
 
-        public CreateObjectMessage(UInt16 objectType, UInt16[] components, byte[][] componentDatas)
+        public CreateObjectMessage(UInt16 objectType)
         {
             if (!Engine.Permissions.CreateGlobalObjects)
                 throw new Exception("You may not create global objects!");
             this.ObjectType = objectType;
-            this.Components = components;
-            this.ComponentDatas = componentDatas;
         }
 
         public override void Received()

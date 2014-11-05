@@ -16,8 +16,6 @@ namespace TestGame
 
         public Dot()
         {
-            c = AddComponent<SpriteComponent>();
-
             if (texture == null)
             {
                 var img = new Image(1, 1);
@@ -25,7 +23,7 @@ namespace TestGame
                 texture = Engine.Renderer.TextureFromImage(img);
             }
 
-            c.Texture = texture;
+            c = SpriteComponent.RegisterOn(this, texture);
         }
     }
 }

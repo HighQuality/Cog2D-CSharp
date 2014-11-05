@@ -30,7 +30,7 @@ namespace Cog.Modules.Content
             }
         }
 
-        internal KeyCapture(GameObject obj, Keyboard.Key key, int priority, CaptureRelayMode relayMode)
+        public KeyCapture(GameObject obj, Keyboard.Key key, int priority, CaptureRelayMode relayMode)
         {
             this.baseObject = obj;
             this.priority = priority;

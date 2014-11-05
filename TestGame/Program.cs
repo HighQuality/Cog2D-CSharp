@@ -43,22 +43,24 @@ namespace TestGame
                 baseObj.Sprite.Origin = new Vector2(300f, 300f);
 
                 mainObj = scene.CreateObject<TestObject>(baseObj, new Vector2(0f, 0f));
-                mainObj.Movement.LeftKey = Keyboard.Key.Left;
-                mainObj.Movement.RightKey = Keyboard.Key.Right;
-                mainObj.Movement.UpKey = Keyboard.Key.Up;
-                mainObj.Movement.DownKey = Keyboard.Key.Down;
+                mainObj.Movement.Left = new KeyCapture(mainObj, Keyboard.Key.Left, 0, CaptureRelayMode.NoRelay);
+                mainObj.Movement.Right = new KeyCapture(mainObj, Keyboard.Key.Right, 0, CaptureRelayMode.NoRelay);
+                mainObj.Movement.Up = new KeyCapture(mainObj, Keyboard.Key.Up, 0, CaptureRelayMode.NoRelay);
+                mainObj.Movement.Down = new KeyCapture(mainObj, Keyboard.Key.Down, 0, CaptureRelayMode.NoRelay);
                 mainObj.LocalRotation = new Angle(-45f);
 
                 otherObj = scene.CreateObject<TestObject>(baseObj, new Vector2(0f, 0f));
-                otherObj.Movement.LeftKey = Keyboard.Key.A;
-                otherObj.Movement.RightKey = Keyboard.Key.D;
-                otherObj.Movement.UpKey = Keyboard.Key.W;
-                otherObj.Movement.DownKey = Keyboard.Key.S;
+                otherObj.Movement.Left = new KeyCapture(mainObj, Keyboard.Key.A, 0, CaptureRelayMode.NoRelay);
+                otherObj.Movement.Right = new KeyCapture(mainObj, Keyboard.Key.D, 0, CaptureRelayMode.NoRelay);
+                otherObj.Movement.Up = new KeyCapture(mainObj, Keyboard.Key.W, 0, CaptureRelayMode.NoRelay);
+                otherObj.Movement.Down = new KeyCapture(mainObj, Keyboard.Key.S, 0, CaptureRelayMode.NoRelay);
+                otherObj.Parent = mainObj;
             });
             
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
                 scene.Camera.WorldCoord = (mainObj.WorldCoord + otherObj.WorldCoord) / 2f;
+                scene.Camera.WorldRotation = otherObj.WorldRotation;
 
                 time += e.DeltaTime;
             });

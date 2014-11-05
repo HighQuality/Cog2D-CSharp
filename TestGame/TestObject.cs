@@ -15,10 +15,8 @@ namespace TestGame
 
         public TestObject()
         {
-            Sprite = AddComponent<SpriteComponent>();
-            Sprite.Texture = Engine.Renderer.LoadTexture("rectangle.png");
-            Sprite.Origin = Sprite.Texture.Size / 2f;
-            Movement = AddComponent<MovementComponent>();
+            Sprite = SpriteComponent.RegisterOn(this, Engine.Renderer.LoadTexture("rectangle.png"));
+            Movement = MovementComponent.RegisterOn(this);
         }
     }
 }

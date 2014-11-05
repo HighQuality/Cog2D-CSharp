@@ -14,7 +14,7 @@ namespace TestGame
 
         public SpriteObject()
         {
-            Sprite = AddComponent<SpriteComponent>();
+            Sprite = SpriteComponent.RegisterOn(this, null);
         }
     }
 }

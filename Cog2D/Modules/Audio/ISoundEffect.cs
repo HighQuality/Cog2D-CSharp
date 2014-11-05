@@ -18,9 +18,5 @@ namespace Cog.Modules.Audio
         /// Creates and plays an instance of the sound.
         /// </summary>
         ISoundInstance Play();
-        /// <summary>
-        /// Disposes the sound effect from memory freeing it's used resources
-        /// </summary>
-        void Dispose();
     }
 }

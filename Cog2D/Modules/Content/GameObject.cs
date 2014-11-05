@@ -119,14 +119,12 @@ namespace Cog.Modules.Content
         }
 
         public Vector2 Size { get; set; }
-        public Dictionary<Type, ObjectComponent> Components = new Dictionary<Type, ObjectComponent>();
         public Scene Scene { get; internal set; }
         public bool DoRemove { get; private set; }
         public CogClient Owner { get; internal set; }
         public long Id { get; internal set; }
         public bool IsGlobal { get { return Id > 0; } }
         public bool IsLocal { get { return Id < 0; } }
-        public bool IsComponentsLocked { get; internal set; }
         private List<IEventListener> registeredEvents;
 
         internal Action<DrawEvent, DrawTransformation> OnDraw;
@@ -143,38 +141,9 @@ namespace Cog.Modules.Content
                 return Owner.IsKeyDown(key);
             return false;
         }
-
-        public T AddComponent<T>()
-            where T : ObjectComponent, new()
-        {
-            if (IsComponentsLocked)
-                throw new Exception("You may not add a component to this object at this time!");
-            if (Components.ContainsKey(typeof(T)))
-                throw new InvalidOperationException("The Game Object \"" + ObjectName + "\" already contains a \"" + typeof(T).FullName + "\" component");
-            // Create a new instance of T without invoking the constructor
-            T component = (T)FormatterServices.GetUninitializedObject(typeof(T));
-            // Set the object that this component is meant to interact with
-            component.GameObject = this;
-            // Invokes the default construtor; new()-constraint ensures a constructor with 0 parameters exist
-            typeof(T).GetConstructor(new Type[0]).Invoke((object)component, new object[0]);
-            Components.Add(typeof(T), component);
-
-            // Register the component's events
-            component.RegisterFunctions(Scene.EventModule);
-
-            return component;
-        }
                 
         public void Remove()
         {
-            foreach (var component in Components)
-            {
-                component.Value.ComponentRemoved();
-                component.Value.ObjectRemoved();
-                component.Value.DeregisterFunctions();
-            }
-            Components.Clear();
-
             if (registeredEvents != null)
             {
                 for (int i = registeredEvents.Count - 1; i >= 0; i--)
@@ -222,47 +191,13 @@ namespace Cog.Modules.Content
         {
             var id = objectsDictionary[GetType()];
 
-            UInt16[] componentIds = new ushort[Components.Count];
-            byte[][] componentDatas = new byte[Components.Count][];
-
-            int componentNumber = 0;
-            foreach (var component in Components.Values)
-            {
-                var type = component.GetType();
-                var serializer = ObjectComponent.GetSerializer(type);
-                componentIds[componentNumber] = serializer.Id;
-                using (MemoryStream stream = new MemoryStream())
-                {
-                    using (BinaryWriter writer = new BinaryWriter(stream))
-                    {
-                        serializer.Serialize(component, writer);
-                    }
-                    componentDatas[componentNumber] = stream.ToArray();
-                }
-
-                componentNumber++;
-            }
-
-            return new CreateObjectMessage(id, componentIds, componentDatas);
+            return new CreateObjectMessage(id);
         }
 
         internal static GameObject CreateFromMessage(CreateObjectMessage message)
         {
             Type objectType = objectsArray[message.ObjectType];
             GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(objectType);
-
-            for (UInt16 i = 0; i < message.Components.Length; i++)
-            {
-                ObjectComponent comp = (ObjectComponent)FormatterServices.GetUninitializedObject(ObjectComponent.GetSerializer(message.Components[i]).Type);
-
-                using (MemoryStream stream = new MemoryStream(message.ComponentDatas[i]))
-                {
-                    using (BinaryReader reader = new BinaryReader(stream))
-                    {
-                        ObjectComponent.GetSerializer(i).Deserialize(comp, reader);
-                    }
-                }
-            }
 
             return obj;
         }

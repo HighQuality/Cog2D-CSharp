@@ -7,15 +7,26 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Content
 {
-    public class LinearPhysicsComponent : ObjectComponent
+    public class LinearPhysicsComponent
     {
+        public GameObject GameObject;
         public Vector2 Speed;
 
-        public override void PhysicsUpdate(PhysicsUpdateEvent ev)
+        public static LinearPhysicsComponent RegisterOn(GameObject obj)
         {
-            LocalCoord += new Vector2(Speed.X * ev.DeltaTime, Speed.Y * ev.DeltaTime);
+            var c = new LinearPhysicsComponent(obj);
+            obj.RegisterEvent<PhysicsUpdateEvent>(0, c.PhysicsUpdate);
+            return c;
+        }
 
-            base.PhysicsUpdate(ev);
+        public LinearPhysicsComponent(GameObject gameObject)
+        {
+            this.GameObject = gameObject;
+        }
+
+        public virtual void PhysicsUpdate(PhysicsUpdateEvent ev)
+        {
+            GameObject.LocalCoord += new Vector2(Speed.X * ev.DeltaTime, Speed.Y * ev.DeltaTime);
         }
     }
 }

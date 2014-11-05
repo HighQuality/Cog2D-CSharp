@@ -102,7 +102,6 @@ namespace Cog
             DesiredResolution = new Vector2(640f, 480f);
 
             GameObject.InitializeCache();
-            ObjectComponent.InitializeCache();
             Mouse.Initialize();
 
             Debug.Event("Loading Assemblies...");
@@ -173,27 +172,20 @@ namespace Cog
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             // Cache event registrators for Object Components
-            ObjectComponent.RegistratorCache = new Dictionary<Type, Action<EventModule, ObjectComponent>>();
-            Debug.Event("Pre-Caching GameObjects / ObjectComponents...");
+            Debug.Event("Pre-Caching GameObjects...");
             watch.Restart();
             foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
             {
                 foreach (var type in assembly.GetTypes().OrderBy(o => o.FullName))
                 {
-                    if (typeof(ObjectComponent).IsAssignableFrom(type))
-                    {
-                        Debug.Info(type.FullName);
-                        ObjectComponent.CreateEventRegistrator(type);
-                        ObjectComponent.CreateSerializer(type);
-                    }
-                    else if (typeof(GameObject).IsAssignableFrom(type))
+                    if (typeof(GameObject).IsAssignableFrom(type))
                     {
                         Debug.Info(type.FullName);
                         GameObject.CreateCache(type);
                     }
                 }
             }
-            Debug.Success("Finished Pre-Caching GameObjects / ObjectComponents! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+            Debug.Success("Finished Pre-Caching GameObjects! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             Debug.Event("Caching Network Events...");
             watch.Restart();

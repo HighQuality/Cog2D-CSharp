@@ -16,9 +16,8 @@ namespace TestGame
         
         public PlayerObject()
         {
-            MovementComponent = AddComponent<MovementComponent>();
-            SpriteComponent = AddComponent<SpriteComponent>();
-            // SpriteComponent.Texture = Engine.Renderer.LoadTexture("texture.png");
+            MovementComponent = MovementComponent.RegisterOn(this);
+            SpriteComponent = SpriteComponent.RegisterOn(this, Engine.Renderer.LoadTexture("texture.png"));
         }
     }
 }

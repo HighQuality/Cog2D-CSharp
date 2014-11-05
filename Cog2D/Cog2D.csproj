@@ -104,10 +104,8 @@
     <Compile Include="Modules\Content\Camera.cs" />
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
-    <Compile Include="Modules\Content\ComponentSerializer.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
     <Compile Include="Modules\Content\KeyCapture.cs" />
-    <Compile Include="Modules\Content\ObjectComponent.cs" />
     <Compile Include="Modules\Content\GameObject.cs" />
     <Compile Include="Modules\Content\IContentModule.cs" />
     <Compile Include="Modules\Content\LinearPhysicsComponent.cs" />
