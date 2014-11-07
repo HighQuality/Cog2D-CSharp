@@ -105,6 +105,7 @@
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
+    <Compile Include="Modules\Content\IBoundingBox.cs" />
     <Compile Include="Modules\Content\KeyCapture.cs" />
     <Compile Include="Modules\Content\GameObject.cs" />
     <Compile Include="Modules\Content\IContentModule.cs" />
@@ -139,6 +140,9 @@
     <Compile Include="Modules\Networking\StringCacheMessage.cs" />
     <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
     <Compile Include="Modules\Renderer\BitmapFont.cs" />
+    <Compile Include="Modules\Resources\IResource.cs" />
+    <Compile Include="Modules\Resources\ResourceAttribute.cs" />
+    <Compile Include="Modules\Resources\ResourceContainer.cs" />
     <Compile Include="NoSerializerException.cs" />
     <Compile Include="Modules\Networking\TcpSocket.cs" />
     <Compile Include="Modules\Networking\ClientModule.cs" />
