@@ -44,7 +44,10 @@ namespace TestGame
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
                 time += e.DeltaTime;
-                scene.Camera.LocalCoord = new Vector2(Mathf.Sin(time) * 800f, 0f);
+                if (Engine.Window.IsKeyDown(Keyboard.Key.A))
+                    scene.Camera.LocalCoord += new Vector2(100f * e.DeltaTime, 0f);
+                if (Engine.Window.IsKeyDown(Keyboard.Key.D))
+                    scene.Camera.LocalCoord -= new Vector2(100f * e.DeltaTime, 0f);
             });
             
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>

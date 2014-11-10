@@ -36,8 +36,16 @@ namespace Cog.Modules.Content
                     {
                         // We're now a base object
                         Scene.BaseObjects.AddLast(this);
-                        // Register us for draw calls
-                        DrawTreeEntry = Scene.DrawTree.Insert(this, BoundingBox);
+                        HashSet<GameObject> objectSet;
+                        DrawCell cell;
+                        cell.X = (int)LocalCoord.X / DrawCell.DrawCellSize;
+                        cell.Y = (int)LocalCoord.Y / DrawCell.DrawCellSize;
+                        if (!Scene.DrawCells.TryGetValue(cell, out objectSet))
+                        {
+                            objectSet = new HashSet<GameObject>();
+                            Scene.DrawCells.Add(cell, objectSet);
+                        }
+                        objectSet.Add(this);
                     }
                 }
                 else if (value != null)
@@ -54,7 +62,16 @@ namespace Cog.Modules.Content
                         it = it.Previous;
                     }
 
-                    DrawTreeEntry.Owner.Remove(DrawTreeEntry);
+                    HashSet<GameObject> objectSet;
+                    DrawCell cell;
+                    cell.X = (int)LocalCoord.X / DrawCell.DrawCellSize;
+                    cell.Y = (int)LocalCoord.Y / DrawCell.DrawCellSize;
+                    if (Scene.DrawCells.TryGetValue(cell, out objectSet))
+                    {
+                        objectSet.Remove(this);
+                        if (objectSet.Count == 0)
+                            Scene.DrawCells.Remove(cell);
+                    }
                 }
 
                 _parent = value;
@@ -69,18 +86,39 @@ namespace Cog.Modules.Content
 
         private List<GameObject> children;
 
-        internal bool WasMoved;
         private Vector2 _localCoord;
         public Vector2 LocalCoord
         {
             get { return _localCoord; }
             set
             {
-                if (Parent == null && !WasMoved && _localCoord != value)
+                if (Parent == null)
                 {
-                    // Queue this item to be replaced within the draw QuadTree
-                    Scene.MovedObjects.Push(this);
-                    WasMoved = true;
+                    DrawCell currentCell,
+                        newCell;
+                    currentCell.X = ((int)_localCoord.X / DrawCell.DrawCellSize);
+                    currentCell.Y = ((int)_localCoord.Y / DrawCell.DrawCellSize);
+                    newCell.X = ((int)value.X / DrawCell.DrawCellSize);
+                    newCell.Y = ((int)value.Y / DrawCell.DrawCellSize);
+
+                    if (newCell.X != currentCell.X || newCell.Y != currentCell.Y)
+                    {
+                        HashSet<GameObject> objectSet;
+                        // Remove our current entry
+                        if (Scene.DrawCells.TryGetValue(currentCell, out objectSet))
+                        {
+                            objectSet.Remove(this);
+                            if (objectSet.Count == 0)
+                                Scene.DrawCells.Remove(currentCell);
+                        }
+                        // Add our new entry
+                        if (!Scene.DrawCells.TryGetValue(newCell, out objectSet))
+                        {
+                            objectSet = new HashSet<GameObject>();
+                            Scene.DrawCells.Add(newCell, objectSet);
+                        }
+                        objectSet.Add(this);
+                    }
                 }
                 _localCoord = value;
             }
@@ -140,8 +178,6 @@ namespace Cog.Modules.Content
         }
 
         public ResourceCollection Resources { get; private set; }
-
-        public QuadTreeEntry<GameObject> DrawTreeEntry;
 
         public Rectangle BoundingBox { get { return new Rectangle(WorldCoord, Size); } }
         public Vector2 Size { get; set; }
@@ -232,6 +268,8 @@ namespace Cog.Modules.Content
         
         internal void Draw(DrawEvent ev, DrawTransformation transform)
         {
+            Console.WriteLine(ObjectName);
+
             if (children != null)
             {
                 transform.WorldCoord += (LocalCoord * transform.ParentWorldScale).Rotate(transform.ParentWorldRotation);

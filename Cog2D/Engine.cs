@@ -25,7 +25,7 @@ namespace Cog
         public const string EngineVersion = "Cog2D v1 (Pre-Production)";
         private static Random random;
         private static Dictionary<string, Assembly> loadedAssemblies;
-        internal static Window Window;
+        public static Window Window;
 
         /// <summary>
         /// The current render engine

@@ -44,7 +44,7 @@ namespace Cog.Scenes
         }
 
         internal Stack<GameObject> MovedObjects = new Stack<GameObject>();
-        internal QuadTree<GameObject> DrawTree = new QuadTree<GameObject>(new Vector2(-2048f, -2048f), 4096);
+        internal Dictionary<DrawCell, HashSet<GameObject>> DrawCells = new Dictionary<DrawCell, HashSet<GameObject>>();
 
         public Scene(string name)
         {
@@ -121,12 +121,27 @@ namespace Cog.Scenes
             transform.WorldScale = Vector2.One;
             transform.ParentWorldScale = Vector2.One;
 
-            Vector2 cameraSize = Engine.Resolution * Camera.WorldScale;
-            DrawTree.Query(new Rectangle(Camera.WorldCoord - cameraSize / 2f, cameraSize), e =>
+            Vector2 cameraSize = Engine.Resolution * Camera.WorldScale * 0.5f;
+            Vector2 cameraPosition = Camera.WorldCoord - cameraSize / 2f;
+            int x1 = (int)cameraPosition.X / DrawCell.DrawCellSize,
+                y1 = (int)cameraPosition.Y / DrawCell.DrawCellSize,
+                x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize) + 1,
+                y2 = x2 + (int)Math.Ceiling(cameraSize.Y / DrawCell.DrawCellSize) + 1;
+
+            for (int x = x1; x < x2; x++)
             {
-                Console.WriteLine(e.ObjectName);
-                e.Draw(ev, transform);
-            });
+                for (int y = 0; y < y2; y++)
+                {
+                    HashSet<GameObject> objectSet;
+                    DrawCell cell;
+                    cell.X = x;
+                    cell.Y = y;
+
+                    if (DrawCells.TryGetValue(cell, out objectSet))
+                        foreach (var obj in objectSet)
+                            obj.Draw(ev, transform);
+                }
+            }
         }
 
         public T CreateObject<T>(Vector2 localCord)
@@ -163,7 +178,16 @@ namespace Cog.Scenes
             if (parent == null)
             {
                 BaseObjects.AddLast(obj);
-                obj.DrawTreeEntry = DrawTree.Insert(obj, obj.BoundingBox);
+                HashSet<GameObject> objectSet;
+                DrawCell cell;
+                cell.X = (int)localCoord.X / DrawCell.DrawCellSize;
+                cell.Y = (int)localCoord.Y / DrawCell.DrawCellSize;
+                if (!DrawCells.TryGetValue(cell, out objectSet))
+                {
+                    objectSet = new HashSet<GameObject>();
+                    DrawCells.Add(cell, objectSet);
+                }
+                objectSet.Add(obj);
             }
 
             // Invoke the constructor, new()-constraint ensures an empty one exists

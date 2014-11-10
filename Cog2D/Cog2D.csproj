@@ -159,6 +159,7 @@
     <Compile Include="Modules\Networking\NetworkIgnoreAttribute.cs" />
     <Compile Include="Modules\Networking\ServerModule.cs" />
     <Compile Include="Modules\Content\QuadTreeEntry.cs" />
+    <Compile Include="Scenes\DrawCell.cs" />
     <Compile Include="Scenes\GameInterface.cs" />
     <Compile Include="SplashScreen.cs">
       <SubType>Form</SubType>
