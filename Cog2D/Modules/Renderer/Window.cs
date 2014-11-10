@@ -7,62 +7,62 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Renderer
 {
-    public interface IWindow
+    public abstract class Window
     {
         /// <summary>
         /// Gets or Sets the title of the window
         /// </summary>
-        string Title { get; set; }
+        public abstract string Title { get; set; }
         /// <summary>
         /// Gets or Sets the size of the window
         /// </summary>
-        Vector2 Resolution { get; set; }
+        public abstract Vector2 Resolution { get; set; }
         /// <summary>
         /// Gets or Sets the position of the window
         /// </summary>
-        Vector2 Position { get; set; }
+        public abstract Vector2 Position { get; set; }
         /// <summary>
         /// Gets or Sets the visibility of the window
         /// </summary>
-        bool Visible { get; set; }
+        public abstract bool Visible { get; set; }
         /// <summary>
         /// Gets if the window is still open
         /// </summary>
-        bool IsOpen { get; }
-        bool VerticalSynchronization { get; set; }
+        public abstract bool IsOpen { get; }
+        public abstract bool VerticalSynchronization { get; set; }
 
         /// <summary>
         /// Gets the current render target
         /// </summary>
-        IRenderTarget RenderTarget { get; }
+        public abstract IRenderTarget RenderTarget { get; }
 
         /// <summary>
         /// Commands the window to dispatch it's queued events
         /// </summary>
-        void DispatchEvents();
+        public abstract void DispatchEvents();
         /// <summary>
         /// Commands the window to clear the back buffer to the specified color
         /// </summary>
         /// <param name="color">The color to clear to</param>
-        void Clear(Color color);
+        public abstract void Clear(Color color);
         /// <summary>
         /// Commands the window to switch the backbuffer displaying rendered content
         /// </summary>
-        void Display();
+        public abstract void Display();
         /// <summary>
         /// Closes the window
         /// </summary>
-        void Close();
+        public abstract void Close();
 
         /// <summary>
         /// Commands the window to apply changes.
         /// Depending on the renderer, changes may be applied before this method is called.
         /// </summary>
-        void ApplyChanges();
+        public abstract void ApplyChanges();
 
         /// <summary>
         /// Checks whether a key is down or not.
         /// </summary>
-        bool IsKeyDown(Keyboard.Key key);
+        public abstract bool IsKeyDown(Keyboard.Key key);
     }
 }

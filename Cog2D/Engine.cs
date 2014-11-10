@@ -15,6 +15,7 @@ using Cog.Modules.Content;
 using System.Net.Sockets;
 using Cog.Modules.Networking;
 using System.Threading;
+using Cog.Modules.Resources;
 
 namespace Cog
 {
@@ -24,20 +25,24 @@ namespace Cog
         public const string EngineVersion = "Cog2D v1 (Pre-Production)";
         private static Random random;
         private static Dictionary<string, Assembly> loadedAssemblies;
-        internal static IWindow Window;
+        internal static Window Window;
 
         /// <summary>
         /// The current render engine
         /// </summary>
-        public static IRenderModule Renderer { get; private set; }
+        public static RenderModule Renderer { get; private set; }
         /// <summary>
-        /// The current event host
+        /// Gets the current event host
         /// </summary>
         public static EventModule EventHost { get; private set; }
         /// <summary>
-        /// The current scene manager
+        /// Gets the current scene manager
         /// </summary>
         public static SceneManager SceneHost { get; private set; }
+        /// <summary>
+        /// Gets the current resource manager
+        /// </summary>
+        public static ResourceManager ResourceHost { get; private set; }
 
         public static ClientModule ClientModule { get; private set; }
         public static ServerModule ServerModule { get; private set; }
@@ -63,13 +68,13 @@ namespace Cog
         /// Otherwise gets the window's actual resolution.
         /// </summary>
         public static Vector2 Resolution { get { if (Window != null) return Window.Resolution; return DesiredResolution; } }
-
+        
         /// <summary>
         /// Initializes Cog2D making it's modules available for use
         /// </summary>
         /// <typeparam name="TRenderer"></typeparam>
         public static void Initialize<TRenderer>(Image splashScreenImage)
-            where TRenderer : IRenderModule, new()
+            where TRenderer : RenderModule, new()
         {
             EventHost = new EventModule();
 
@@ -192,8 +197,12 @@ namespace Cog
             NetworkMessage.BuildCache(loadedAssemblies.Values);
             Debug.Success("Finished Caching Network Events! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
+            Debug.Event("Initializing Core Modules...");
+            watch.Restart();
+            ResourceHost = new ResourceManager();
             SceneHost = new SceneManager();
             Renderer = new TRenderer();
+            Debug.Success("Finished Initializing Core Modules! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             Debug.Success("Cog2D has been initialized! ({0}ms)", entireLoadTime.Elapsed.TotalMilliseconds);
         }

@@ -7,14 +7,21 @@ using System.Threading.Tasks;
 
 namespace Cog.SfmlRenderer
 {
-    public class SfmlTexture : ITexture
+    public class SfmlTexture : Texture
     {
         internal SFML.Graphics.Texture Texture;
-        public Vector2 Size { get { return new Vector2(Texture.Size.X, Texture.Size.Y); } }
+        public override Vector2 Size { get { return new Vector2(Texture.Size.X, Texture.Size.Y); } }
 
         internal SfmlTexture(string filename)
         {
             this.Texture = new SFML.Graphics.Texture(filename);
+            IsLoaded = true;
+        }
+
+        internal SfmlTexture(byte[] data)
+        {
+            this.Texture = new SFML.Graphics.Texture(data);
+            IsLoaded = true;
         }
 
         internal SfmlTexture(Image image)
@@ -29,6 +36,30 @@ namespace Cog.SfmlRenderer
                 }
             }
             this.Texture = new SFML.Graphics.Texture(sfmlImage);
+
+            IsLoaded = true;
+            IsDynamic = true;
+        }
+
+        private void Dispose(bool disposed)
+        {
+            if (disposed)
+            {
+                Texture.Dispose();
+                Texture = null;
+                IsLoaded = false;
+            }
+        }
+
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~SfmlTexture()
+        {
+            Dispose(false);
         }
     }
 }

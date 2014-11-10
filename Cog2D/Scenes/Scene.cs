@@ -4,11 +4,13 @@ using Cog.Modules.EventHost;
 using Cog.Modules.Renderer;
 using Cog.Interface;
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using Cog.Modules.Resources;
 
 namespace Cog.Scenes
 {
@@ -23,6 +25,7 @@ namespace Cog.Scenes
         private List<EventIdentifier> toBeRemoved = new List<EventIdentifier>();
         private float eventStrengthUpdateTimer = 0f;
         public GameInterface Interface;
+        private List<Resource> loadedResources = new List<Resource>();
         
         internal LinkedList<GameObject> BaseObjects = new LinkedList<GameObject>();
 
@@ -40,6 +43,9 @@ namespace Cog.Scenes
             }
         }
 
+        internal Stack<GameObject> MovedObjects = new Stack<GameObject>();
+        internal QuadTree<GameObject> DrawTree = new QuadTree<GameObject>(new Vector2(-2048f, -2048f), 4096);
+
         public Scene(string name)
         {
             // Randomize an offset for the event strength update timer
@@ -49,6 +55,7 @@ namespace Cog.Scenes
             Interface.Size = Engine.Resolution;
 
             AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { Update(e); Interface.TriggerUpdate(e); } }));
+            AddEventStrength<BeginDrawEvent>(EventModule.RegisterEvent<BeginDrawEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { BeginDraw(e); } }));
             AddEventStrength<DrawEvent>(EventModule.RegisterEvent<DrawEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Draw(e); }));
             AddEventStrength<DrawInterfaceEvent>(EventModule.RegisterEvent<DrawInterfaceEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Interface.TriggerDraw(e, new Vector2()); }));
             
@@ -98,18 +105,28 @@ namespace Cog.Scenes
             }
         }
 
+        public void BeginDraw(BeginDrawEvent ev)
+        {
+            while (MovedObjects.Count > 0)
+            {
+                var obj = MovedObjects.Pop();
+
+                
+            }
+        }
+
         public void Draw(DrawEvent ev)
         {
             DrawTransformation transform = new DrawTransformation();
             transform.WorldScale = Vector2.One;
             transform.ParentWorldScale = Vector2.One;
 
-            var it = BaseObjects.First;
-            while (it != null)
+            Vector2 cameraSize = Engine.Resolution * Camera.WorldScale;
+            DrawTree.Query(new Rectangle(Camera.WorldCoord - cameraSize / 2f, cameraSize), e =>
             {
-                it.Value.Draw(ev, transform);
-                it = it.Next;
-            }
+                Console.WriteLine(e.ObjectName);
+                e.Draw(ev, transform);
+            });
         }
 
         public T CreateObject<T>(Vector2 localCord)
@@ -144,7 +161,10 @@ namespace Cog.Scenes
 
             // If we don't have a parent we need to register this object to ensure it and it's children are drawn
             if (parent == null)
+            {
                 BaseObjects.AddLast(obj);
+                obj.DrawTreeEntry = DrawTree.Insert(obj, obj.BoundingBox);
+            }
 
             // Invoke the constructor, new()-constraint ensures an empty one exists
             typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
@@ -176,6 +196,15 @@ namespace Cog.Scenes
             while (current != null);
 
             Objects.Clear();
+        }
+
+        public void Preload<T>()
+            where T : GameObject
+        {
+            foreach (var attribute in typeof(T).GetCustomAttributes<ResourceAttribute>())
+            {
+                //var container = Engine.GetResourceContainer(attribute.ContainerName);
+            }
         }
 
         public void AddEventStrength<T>(EventListener<T> listener)

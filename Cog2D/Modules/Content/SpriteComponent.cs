@@ -11,12 +11,12 @@ namespace Cog.Modules.Content
     public class SpriteComponent
     {
         public GameObject GameObject;
-        public ITexture Texture;
+        public Texture Texture;
         public Vector2 Origin,
             Scale;
         public Color Color = Color.White;
 
-        public static SpriteComponent RegisterOn(GameObject gameObject, ITexture texture)
+        public static SpriteComponent RegisterOn(GameObject gameObject, Texture texture)
         {
             var c = new SpriteComponent(gameObject);
             if (texture != null)

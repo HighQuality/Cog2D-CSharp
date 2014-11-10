@@ -8,19 +8,24 @@ using System.Threading.Tasks;
 
 namespace Cog.SfmlRenderer
 {
-    public class SfmlRenderer : IRenderModule
+    public class SfmlRenderer : RenderModule
     {
-        public IWindow CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
+        public override Window CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
         {
             return new SfmlWindow(title, width, height, style, eventHost);
         }
 
-        public ITexture LoadTexture(string filename)
+        public override Texture LoadTexture(string filename)
         {
             return new SfmlTexture(filename);
         }
 
-        public ITexture TextureFromImage(Image image)
+        public override Texture LoadTexture(byte[] data)
+        {
+            return new SfmlTexture(data);
+        }
+
+        public override Texture TextureFromImage(Image image)
         {
             return new SfmlTexture(image);
         }

@@ -11,6 +11,7 @@ using Cog.Modules.Content;
 using System.Threading;
 using Cog.Modules.Networking;
 using Cog.Interface;
+using System.IO;
 
 namespace TestGame
 {
@@ -20,9 +21,8 @@ namespace TestGame
         {
             Engine.Initialize<SfmlRenderer>(new Cog.Image("splash.png"));
             float time = 0f;
-            
-            TestObject mainObj = null,
-                otherObj = null;
+
+            var container = Engine.ResourceHost.Load("main", "resources.crc");
 
             GameScene scene = null;
             
@@ -38,31 +38,13 @@ namespace TestGame
                 scene = new GameScene();
                 Engine.SceneHost.Push(scene);
 
-                var baseObj = scene.CreateObject<SpriteObject>(Vector2.Zero);
-                baseObj.Sprite.Texture = Engine.Renderer.LoadTexture("world.png");
-                baseObj.Sprite.Origin = new Vector2(300f, 300f);
-
-                mainObj = scene.CreateObject<TestObject>(baseObj, new Vector2(0f, 0f));
-                mainObj.Movement.Left = new KeyCapture(mainObj, Keyboard.Key.Left, 0, CaptureRelayMode.NoRelay);
-                mainObj.Movement.Right = new KeyCapture(mainObj, Keyboard.Key.Right, 0, CaptureRelayMode.NoRelay);
-                mainObj.Movement.Up = new KeyCapture(mainObj, Keyboard.Key.Up, 0, CaptureRelayMode.NoRelay);
-                mainObj.Movement.Down = new KeyCapture(mainObj, Keyboard.Key.Down, 0, CaptureRelayMode.NoRelay);
-                mainObj.LocalRotation = new Angle(-45f);
-
-                otherObj = scene.CreateObject<TestObject>(baseObj, new Vector2(0f, 0f));
-                otherObj.Movement.Left = new KeyCapture(mainObj, Keyboard.Key.A, 0, CaptureRelayMode.NoRelay);
-                otherObj.Movement.Right = new KeyCapture(mainObj, Keyboard.Key.D, 0, CaptureRelayMode.NoRelay);
-                otherObj.Movement.Up = new KeyCapture(mainObj, Keyboard.Key.W, 0, CaptureRelayMode.NoRelay);
-                otherObj.Movement.Down = new KeyCapture(mainObj, Keyboard.Key.S, 0, CaptureRelayMode.NoRelay);
-                otherObj.Parent = mainObj;
+                scene.CreateObject<TestObject>(new Vector2(0f, 0f));
             });
             
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
-                scene.Camera.WorldCoord = (mainObj.WorldCoord + otherObj.WorldCoord) / 2f;
-                scene.Camera.WorldRotation = otherObj.WorldRotation;
-
                 time += e.DeltaTime;
+                scene.Camera.LocalCoord = new Vector2(Mathf.Sin(time) * 800f, 0f);
             });
             
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>

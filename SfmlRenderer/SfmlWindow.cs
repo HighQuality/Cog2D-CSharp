@@ -9,23 +9,23 @@ using System.Threading.Tasks;
 
 namespace Cog.SfmlRenderer
 {
-    public class SfmlWindow : IWindow, IRenderTarget
+    public class SfmlWindow : Window, Modules.Renderer.IRenderTarget
     {
         internal RenderWindow InnerWindow;
 
         private Dictionary<SFML.Window.Keyboard.Key, Action> keyUpEvents = new Dictionary<SFML.Window.Keyboard.Key, Action>();
         public LinkedList<SFML.Window.Keyboard.Key> pressedKeys = new LinkedList<SFML.Window.Keyboard.Key>();
         private string _title;
-        public string Title { get { return _title; } set { _title = value; InnerWindow.SetTitle(_title); } }
-        public Vector2 Resolution { get { var size = InnerWindow.Size; return new Vector2((float)size.X, (float)size.Y); } set { InnerWindow.Size = new SFML.System.Vector2u((uint)value.X, (uint)value.Y); } }
-        public Vector2 Position { get { var position = InnerWindow.Position; return new Vector2((float)position.X, (float)position.Y); } set { InnerWindow.Position = new SFML.System.Vector2i((int)value.X, (int)value.Y); } }
+        public override string Title { get { return _title; } set { _title = value; InnerWindow.SetTitle(_title); } }
+        public override Vector2 Resolution { get { var size = InnerWindow.Size; return new Vector2((float)size.X, (float)size.Y); } set { InnerWindow.Size = new SFML.System.Vector2u((uint)value.X, (uint)value.Y); } }
+        public override Vector2 Position { get { var position = InnerWindow.Position; return new Vector2((float)position.X, (float)position.Y); } set { InnerWindow.Position = new SFML.System.Vector2i((int)value.X, (int)value.Y); } }
         private bool _visible;
-        public bool Visible { get { return _visible; } set { _visible = value; InnerWindow.SetVisible(value); } }
-        public bool IsOpen { get { return InnerWindow.IsOpen; } }
+        public override bool Visible { get { return _visible; } set { _visible = value; InnerWindow.SetVisible(value); } }
+        public override bool IsOpen { get { return InnerWindow.IsOpen; } }
         bool _vsync;
-        public bool VerticalSynchronization { get { return _vsync; } set { _vsync = value; InnerWindow.SetVerticalSyncEnabled(_vsync); } }
-        
-        public IRenderTarget RenderTarget { get { return this; } }
+        public override bool VerticalSynchronization { get { return _vsync; } set { _vsync = value; InnerWindow.SetVerticalSyncEnabled(_vsync); } }
+
+        public override IRenderTarget RenderTarget { get { return this; } }
 
         public EventModule EventHost;
         private bool[] mouseButtons = new bool[(int)SFML.Window.Mouse.Button.ButtonCount];
@@ -200,7 +200,7 @@ namespace Cog.SfmlRenderer
             }
         }
 
-        public void DispatchEvents()
+        public override void DispatchEvents()
         {
             InnerWindow.DispatchEvents();
 
@@ -242,26 +242,26 @@ namespace Cog.SfmlRenderer
             InnerWindow.SetView(view);
         }
 
-        public void Clear(Color color)
+        public override void Clear(Color color)
         {
             InnerWindow.Clear(new SFML.Graphics.Color((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A));
         }
 
-        public void Display()
+        public override void Display()
         {
             InnerWindow.Display();
         }
 
-        public void Close()
+        public override void Close()
         {
             InnerWindow.Close();
         }
 
-        public void ApplyChanges()
+        public override void ApplyChanges()
         {
         }
         
-        public void RenderTexture(ITexture texture, Vector2 windowCoords)
+        public void RenderTexture(Modules.Renderer.Texture texture, Vector2 windowCoords)
         {
             Sprite sprite = new Sprite();
             sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
@@ -270,7 +270,7 @@ namespace Cog.SfmlRenderer
             InnerWindow.Draw(sprite);
         }
 
-        public void RenderTexture(ITexture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
+        public void RenderTexture(Modules.Renderer.Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
         {
             Sprite sprite = new Sprite();
             sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
@@ -283,7 +283,7 @@ namespace Cog.SfmlRenderer
             InnerWindow.Draw(sprite);
         }
 
-        public bool IsKeyDown(Keyboard.Key key)
+        public override bool IsKeyDown(Keyboard.Key key)
         {
             return pressedKeys.Contains(CogKeyToSfml(key));
         }

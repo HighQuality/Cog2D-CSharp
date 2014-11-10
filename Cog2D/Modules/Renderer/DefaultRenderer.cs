@@ -7,19 +7,24 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Renderer
 {
-    public class DefaultRenderer : IRenderModule
+    public class DefaultRenderer : RenderModule
     {
-        public IWindow CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
+        public override Window CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
         {
             return null;
         }
 
-        public ITexture LoadTexture(string filename)
+        public override Texture LoadTexture(string filename)
         {
             return null;
         }
 
-        public ITexture TextureFromImage(Image image)
+        public override Texture LoadTexture(byte[] data)
+        {
+            return null;
+        }
+
+        public override Texture TextureFromImage(Image image)
         {
             return null;
         }

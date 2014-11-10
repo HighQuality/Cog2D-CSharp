@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cog.Modules.Resources;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Renderer
 {
-    public interface ITexture
+    public abstract class Texture : Resource
     {
-        Vector2 Size { get; }
+        public abstract Vector2 Size { get; }
     }
 }

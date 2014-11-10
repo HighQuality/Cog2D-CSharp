@@ -4,43 +4,38 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.SQLite;
 
 namespace Cog.Modules.Resources
 {
-    public class ResourceContainer : IDisposable
+    public abstract class ResourceContainer : IDisposable
     {
-        private FileStream stream;
+        public string Name { get; private set; }
+        public string Path { get; private set; }
+        internal List<Resource> LoadedResources = new List<Resource>();
 
-        private ResourceContainer()
+        internal ResourceContainer(string name, string path)
         {
-            throw new NotImplementedException();
-            stream = new FileStream("", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-        }
-
-        public void PreloadAll()
-        {
-            throw new NotImplementedException();
+            this.Name = name;
+            this.Path = path;
         }
 
-        public void Preload(string file)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void PreloadAll();
+        public abstract void Preload(string file);
+        public abstract Resource Load(string file);
+        public abstract byte[] ReadData(string file);
 
-        public IResource Load(string file)
+        public void Import(string file, string externalFile)
         {
-            throw new NotImplementedException();
+            Import(file, File.ReadAllBytes(externalFile));
         }
-        
-        public void Import(string internalFile, string externalFilename)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public void SetFileData(string file, byte[] data)
-        {
+        public abstract void Import(string file, byte[] data);
 
+        public void Update(string file, string externalFile)
+        {
+            Update(file, File.ReadAllBytes(externalFile));
         }
+        public abstract void Update(string file, byte[] data);
 
         /// <summary>
         /// Loads a Resource Container from a dictionary
@@ -51,20 +46,7 @@ namespace Cog.Modules.Resources
         {
             throw new NotImplementedException();
         }
-
-        /// <summary>
-        /// Loads a Resource Container from a Cog2D Resource Container file (.crc)
-        /// </summary>
-        /// <param name="containerName">The name used to identify this resource container during runtime</param>
-        /// <param name="filename">The path to the file to load</param>
-        public static ResourceContainer LoadFile(string containerName, string filename)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+        
+        public abstract void Dispose();
     }
 }

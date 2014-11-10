@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Renderer
 {
-    public interface IRenderModule
+    public abstract class RenderModule
     {
         /// <summary>
         /// Creates a Window with the specified parameters
@@ -17,21 +17,25 @@ namespace Cog.Modules.Renderer
         /// <param name="height">The Inner Height in pixels</param>
         /// <param name="style">The style of the window</param>
         /// <returns>Instantiated Window</returns>
-        IWindow CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost);
+        public abstract Window CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost);
 
         /// <summary>
         /// Loads a texture from the specified filename.
-        /// Cache has priority.
         /// </summary>
         /// <param name="filename">The filename of the texture to load</param>
         /// <returns>An interface to the texture</returns>
-        ITexture LoadTexture(string filename);
+        public abstract Texture LoadTexture(string filename);
+
+        /// <summary>
+        /// Loads a texture from binary data.
+        /// </summary>
+        public abstract Texture LoadTexture(byte[] data);
 
         /// <summary>
         /// Generates a texture from the specified image.
         /// </summary>
         /// <param name="image">The image to generate a texture from</param>
         /// <returns>A generated texture</returns>
-        ITexture TextureFromImage(Image image);
+        public abstract Texture TextureFromImage(Image image);
     }
 }

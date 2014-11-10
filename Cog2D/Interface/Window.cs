@@ -25,7 +25,7 @@ namespace Cog.Interface
             None
         }
 
-        private ITexture windowTexture;
+        private Texture windowTexture;
 
         private Vector2 oldMousePos;
         private bool isDragging;

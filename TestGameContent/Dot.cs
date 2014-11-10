@@ -11,7 +11,7 @@ namespace TestGame
 {
     public class Dot : GameObject
     {
-        private static ITexture texture;
+        private static Texture texture;
         SpriteComponent c;
 
         public Dot()

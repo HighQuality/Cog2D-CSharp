@@ -77,6 +77,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite">
+      <HintPath>..\extlibs\System.Data.SQLite.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
@@ -92,6 +95,7 @@
     <Compile Include="Color.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Extensions\ByteArrayExtensions.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="Interface\InterfaceElement.cs" />
     <Compile Include="Interface\Padding.cs" />
@@ -140,9 +144,12 @@
     <Compile Include="Modules\Networking\StringCacheMessage.cs" />
     <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
     <Compile Include="Modules\Renderer\BitmapFont.cs" />
-    <Compile Include="Modules\Resources\IResource.cs" />
+    <Compile Include="Modules\Resources\Resource.cs" />
     <Compile Include="Modules\Resources\ResourceAttribute.cs" />
+    <Compile Include="Modules\Resources\ResourceCollection.cs" />
     <Compile Include="Modules\Resources\ResourceContainer.cs" />
+    <Compile Include="Modules\Resources\ResourceManager.cs" />
+    <Compile Include="Modules\Resources\SQLiteContainer.cs" />
     <Compile Include="NoSerializerException.cs" />
     <Compile Include="Modules\Networking\TcpSocket.cs" />
     <Compile Include="Modules\Networking\ClientModule.cs" />
@@ -151,6 +158,7 @@
     <Compile Include="Modules\Networking\NetworkMessage.cs" />
     <Compile Include="Modules\Networking\NetworkIgnoreAttribute.cs" />
     <Compile Include="Modules\Networking\ServerModule.cs" />
+    <Compile Include="Modules\Content\QuadTreeEntry.cs" />
     <Compile Include="Scenes\GameInterface.cs" />
     <Compile Include="SplashScreen.cs">
       <SubType>Form</SubType>
@@ -162,16 +170,16 @@
     <Compile Include="Modules\Renderer\DefaultRenderer.cs" />
     <Compile Include="Modules\Renderer\DrawInterfaceEvent.cs" />
     <Compile Include="Modules\Renderer\DrawEvent.cs" />
-    <Compile Include="Modules\Renderer\IRenderModule.cs" />
+    <Compile Include="Modules\Renderer\RenderModule.cs" />
     <Compile Include="Modules\Renderer\IRenderTarget.cs" />
-    <Compile Include="Modules\Renderer\ITexture.cs" />
-    <Compile Include="Modules\Renderer\IWindow.cs" />
+    <Compile Include="Modules\Renderer\Texture.cs" />
+    <Compile Include="Modules\Renderer\Window.cs" />
     <Compile Include="Modules\Renderer\WindowStyle.cs" />
     <Compile Include="Modules\SquareClient.cs" />
     <Compile Include="Noise.cs" />
     <Compile Include="Permissions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuadTree.cs" />
+    <Compile Include="Modules\Content\QuadTree.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Scenes\Scene.cs" />
     <Compile Include="Scenes\SceneManager.cs" />

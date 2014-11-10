@@ -1,6 +1,7 @@
 ﻿using Cog.Modules.EventHost;
 using Cog.Modules.Networking;
 using Cog.Modules.Renderer;
+using Cog.Modules.Resources;
 using Cog.Scenes;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Content
 {
-    public abstract class GameObject
+    public abstract class GameObject : IBoundingBox
     {
         private static Dictionary<Type, UInt16> objectsDictionary;
         private static List<Type> objectsArray;
@@ -35,11 +36,13 @@ namespace Cog.Modules.Content
                     {
                         // We're now a base object
                         Scene.BaseObjects.AddLast(this);
+                        // Register us for draw calls
+                        DrawTreeEntry = Scene.DrawTree.Insert(this, BoundingBox);
                     }
                 }
                 else if (value != null)
                 {
-                    // If we didn't have a parent already and was assigned one, iterate through the base object LinkedList backwards and get rid of our entry
+                    // If we got a parent now get rid of our base objects and draw entries
                     var it = Scene.BaseObjects.Last;
                     while (it != null)
                     {
@@ -50,7 +53,10 @@ namespace Cog.Modules.Content
                         }
                         it = it.Previous;
                     }
+
+                    DrawTreeEntry.Owner.Remove(DrawTreeEntry);
                 }
+
                 _parent = value;
                 if (_parent != null)
                 {
@@ -62,8 +68,23 @@ namespace Cog.Modules.Content
         }
 
         private List<GameObject> children;
-        
-        public Vector2 LocalCoord { get; set; }
+
+        internal bool WasMoved;
+        private Vector2 _localCoord;
+        public Vector2 LocalCoord
+        {
+            get { return _localCoord; }
+            set
+            {
+                if (Parent == null && !WasMoved && _localCoord != value)
+                {
+                    // Queue this item to be replaced within the draw QuadTree
+                    Scene.MovedObjects.Push(this);
+                    WasMoved = true;
+                }
+                _localCoord = value;
+            }
+        }
         public virtual Vector2 WorldCoord
         {
             get
@@ -118,6 +139,11 @@ namespace Cog.Modules.Content
             }
         }
 
+        public ResourceCollection Resources { get; private set; }
+
+        public QuadTreeEntry<GameObject> DrawTreeEntry;
+
+        public Rectangle BoundingBox { get { return new Rectangle(WorldCoord, Size); } }
         public Vector2 Size { get; set; }
         public Scene Scene { get; internal set; }
         public bool DoRemove { get; private set; }
@@ -131,6 +157,8 @@ namespace Cog.Modules.Content
 
         public GameObject()
         {
+            Resources = Engine.ResourceHost.GetResourceCollection(GetType());
+            ObjectName = GetType().Name;
         }
         
         public bool KeyIsDown(Keyboard.Key key)

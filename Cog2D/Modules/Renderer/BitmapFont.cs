@@ -15,7 +15,7 @@ namespace Cog.Modules.Renderer
     {
         internal class FontRenderer
         {
-            public FontRenderer(FontFile fontFile, ITexture fontTexture)
+            public FontRenderer(FontFile fontFile, Texture fontTexture)
             {
                 FontFile = fontFile;
                 Texture = fontTexture;
@@ -30,7 +30,7 @@ namespace Cog.Modules.Renderer
 
             internal Dictionary<char, FontChar> CharacterMap;
             internal FontFile FontFile;
-            internal ITexture Texture;
+            internal Texture Texture;
 
             public void DrawString(IRenderTarget renderTarget, string text, Color color, Vector2 position)
             {
@@ -141,7 +141,7 @@ namespace Cog.Modules.Renderer
         }
 
         internal FontRenderer Renderer;
-        private ITexture texture;
+        private Texture texture;
 
         public BitmapFont(string file)
         {
