@@ -36,17 +36,7 @@ namespace Cog.Modules.Resources
             Update(file, File.ReadAllBytes(externalFile));
         }
         public abstract void Update(string file, byte[] data);
-
-        /// <summary>
-        /// Loads a Resource Container from a dictionary
-        /// </summary>
-        /// <param name="containerName">The name used to identify this resource container during runtime</param>
-        /// <param name="dictionary">The path dictionary to load from</param>
-        public static ResourceContainer LoadDictionary(string containerName, string dictionary)
-        {
-            throw new NotImplementedException();
-        }
-        
+                
         public abstract void Dispose();
     }
 }

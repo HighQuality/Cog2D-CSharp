@@ -1,0 +1,102 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.SQLite;
+using System.IO;
+using Cog.Extensions;
+
+namespace Cog.Modules.Resources
+{
+    class DictionaryContainer : ResourceContainer
+    {
+        public DictionaryContainer(string name, string path)
+            : base(name, path)
+        {
+        }
+
+        public override byte[] ReadData(string file)
+        {
+            return File.ReadAllBytes(System.IO.Path.Combine(Path, file));
+        }
+
+
+        private void UpdateData(string file, byte[] data)
+        {
+            File.WriteAllBytes(System.IO.Path.Combine(Path, file), data);
+        }
+
+        public override Resource Load(string file)
+        {
+            var data = ReadData(file);
+            var extension = System.IO.Path.GetExtension(file).ToLower();
+            Resource resource = null;
+            string resourceType;
+
+            if (extension == ".png")
+            {
+                resource = Engine.Renderer.LoadTexture(data);
+                resourceType = "Texture";
+            }
+            else
+                throw new NotImplementedException("Resource Type \"" + extension + "\" not implemented!");
+
+            Console.WriteLine("Resource {0} ({1}) in container {2} loaded!", file, resourceType, Name);
+
+            resource.Container = this;
+            LoadedResources.Add(resource);
+
+            return resource;
+        }
+
+        public override void Preload(string file)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void PreloadAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Import(string file, byte[] data)
+        {
+            File.WriteAllBytes(System.IO.Path.Combine(Path, file), data);
+        }
+
+        public override void Update(string file, byte[] data)
+        {
+            File.WriteAllBytes(System.IO.Path.Combine(Path, file), data);
+        }
+
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+            }
+        }
+
+        ~DictionaryContainer()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Loads a Resource Container from a Cog2D Resource Container file (.crc)
+        /// </summary>
+        /// <param name="containerName">The name used to identify this resource container during runtime</param>
+        /// <param name="filename">The path to the file to load</param>
+        internal static ResourceContainer LoadDictionary(string containerName, string dictionary)
+        {
+            var container = new DictionaryContainer(containerName, dictionary);
+            return container;
+        }
+    }
+}

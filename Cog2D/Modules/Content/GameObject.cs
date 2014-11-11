@@ -268,8 +268,6 @@ namespace Cog.Modules.Content
         
         internal void Draw(DrawEvent ev, DrawTransformation transform)
         {
-            Console.WriteLine(ObjectName);
-
             if (children != null)
             {
                 transform.WorldCoord += (LocalCoord * transform.ParentWorldScale).Rotate(transform.ParentWorldRotation);

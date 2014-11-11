@@ -68,12 +68,29 @@ namespace Cog
         /// Otherwise gets the window's actual resolution.
         /// </summary>
         public static Vector2 Resolution { get { if (Window != null) return Window.Resolution; return DesiredResolution; } }
-        
+
         /// <summary>
-        /// Initializes Cog2D making it's modules available for use
+        /// Initializes Cog2D making it available for use showing the default splash screen while initializing
         /// </summary>
-        /// <typeparam name="TRenderer"></typeparam>
+        /// <typeparam name="TRenderer">The renderer to use</typeparam>
+        public static void Initialize<TRenderer>()
+            where TRenderer : RenderModule, new()
+        {
+            InnerInitialize<TRenderer>(new Image("splash.png"));
+        }
+
+        /// <summary>
+        /// Initializes Cog2D making it available for use
+        /// </summary>
+        /// <typeparam name="TRenderer">The renderer to use</typeparam>
+        /// <param name="splashScreenImage">The splash screen to show while initializing. Pass null for no splash screen.</param>
         public static void Initialize<TRenderer>(Image splashScreenImage)
+            where TRenderer : RenderModule, new()
+        {
+            InnerInitialize<TRenderer>(splashScreenImage);
+        }
+
+        private static void InnerInitialize<TRenderer>(Image splashScreenImage)
             where TRenderer : RenderModule, new()
         {
             EventHost = new EventModule();

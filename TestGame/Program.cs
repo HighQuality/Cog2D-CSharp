@@ -19,10 +19,10 @@ namespace TestGame
     {
         static void Main(string[] args)
         {
-            Engine.Initialize<SfmlRenderer>(new Cog.Image("splash.png"));
+            Engine.Initialize<SfmlRenderer>();
             float time = 0f;
 
-            var container = Engine.ResourceHost.Load("main", "resources.crc");
+            var container = Engine.ResourceHost.LoadDictionary("main", "resources");
 
             GameScene scene = null;
             

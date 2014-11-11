@@ -26,15 +26,20 @@ namespace Cog.Modules.Resources
         {
             name = name.ToLower();
             var container = SQLiteContainer.LoadFile(name, filename);
-            Debug.Info("Loaded Resource Container {0}@{1}!", name, filename);
+            Debug.Event("Loaded Resource Container {0}@{1}!", name, filename);
 
             loadedContainers.Add(name, container);
             return container;
         }
 
-        public void LoadDictionary(string name, string dictionary)
+        public ResourceContainer LoadDictionary(string name, string dictionary)
         {
-            throw new NotImplementedException();
+            name = name.ToLower();
+            var container = DictionaryContainer.LoadDictionary(name, dictionary);
+            Debug.Event("Loaded Resource Container {0}@{1}!", name, dictionary);
+
+            loadedContainers.Add(name, container);
+            return container;
         }
 
         internal ResourceCollection GetResourceCollection(Type type)
