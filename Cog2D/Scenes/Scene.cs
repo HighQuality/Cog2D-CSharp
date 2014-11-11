@@ -109,16 +109,16 @@ namespace Cog.Scenes
             transform.WorldScale = Vector2.One;
             transform.ParentWorldScale = Vector2.One;
 
-            Vector2 cameraSize = Engine.Resolution * Camera.WorldScale * 0.5f;
+            Vector2 cameraSize = Engine.Resolution * Camera.WorldScale;
             Vector2 cameraPosition = Camera.WorldCoord - cameraSize / 2f;
             int x1 = (int)cameraPosition.X / DrawCell.DrawCellSize,
                 y1 = (int)cameraPosition.Y / DrawCell.DrawCellSize,
-                x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize) + 1,
-                y2 = x2 + (int)Math.Ceiling(cameraSize.Y / DrawCell.DrawCellSize) + 1;
+                x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize),
+                y2 = x2 + (int)Math.Ceiling(cameraSize.Y / (float)DrawCell.DrawCellSize);
 
             for (int x = x1; x < x2; x++)
             {
-                for (int y = 0; y < y2; y++)
+                for (int y = y1; y < y2; y++)
                 {
                     HashSet<GameObject> objectSet;
                     DrawCell cell;
