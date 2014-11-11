@@ -14,7 +14,7 @@ using Cog.Modules.Resources;
 
 namespace Cog.Scenes
 {
-    public class Scene
+    public abstract class Scene
     {
         public string Name { get; private set; }
         public LinkedList<GameObject> Objects = new LinkedList<GameObject>();
@@ -43,7 +43,6 @@ namespace Cog.Scenes
             }
         }
 
-        internal Stack<GameObject> MovedObjects = new Stack<GameObject>();
         internal Dictionary<DrawCell, HashSet<GameObject>> DrawCells = new Dictionary<DrawCell, HashSet<GameObject>>();
 
         public Scene(string name)
@@ -55,11 +54,10 @@ namespace Cog.Scenes
             Interface.Size = Engine.Resolution;
 
             AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { Update(e); Interface.TriggerUpdate(e); } }));
-            AddEventStrength<BeginDrawEvent>(EventModule.RegisterEvent<BeginDrawEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { BeginDraw(e); } }));
             AddEventStrength<DrawEvent>(EventModule.RegisterEvent<DrawEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Draw(e); }));
             AddEventStrength<DrawInterfaceEvent>(EventModule.RegisterEvent<DrawInterfaceEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Interface.TriggerDraw(e, new Vector2()); }));
             
-            Camera = CreateObject<Camera>(new Vector2());
+            Camera = CreateLocalObject<Camera>(new Vector2());
         }
 
         private void Update(UpdateEvent args)
@@ -104,17 +102,7 @@ namespace Cog.Scenes
                 eventStrengthUpdateTimer -= 1f;
             }
         }
-
-        public void BeginDraw(BeginDrawEvent ev)
-        {
-            while (MovedObjects.Count > 0)
-            {
-                var obj = MovedObjects.Pop();
-
-                
-            }
-        }
-
+        
         public void Draw(DrawEvent ev)
         {
             DrawTransformation transform = new DrawTransformation();
@@ -204,9 +192,54 @@ namespace Cog.Scenes
             return obj;
         }
 
-        public T CreateLocalObject<T>(Vector2 position)
+        public T CreateLocalObject<T>(Vector2 localCoord)
+            where T : GameObject, new()
         {
-            throw new NotImplementedException();
+            return CreateLocalObject<T>(null, localCoord);
+        }
+
+        public T CreateLocalObject<T>(GameObject parent, Vector2 localCoord)
+            where T : GameObject, new()
+        {
+            // Create an object of this type without invoking the constructor
+            T obj = (T)FormatterServices.GetUninitializedObject(typeof(T));
+            obj.Scene = this;
+            obj.Id = Engine.GetLocalId();
+            obj.InitialSetParent(parent);
+            obj.LocalCoord = localCoord;
+
+            // Register the new object
+            ObjectDictionary.Add(obj.Id, obj);
+            Objects.AddLast(obj);
+
+            // If we don't have a parent we need to register this object to ensure it and it's children are drawn
+            if (parent == null)
+            {
+                BaseObjects.AddLast(obj);
+                HashSet<GameObject> objectSet;
+                DrawCell cell;
+                cell.X = (int)localCoord.X / DrawCell.DrawCellSize;
+                cell.Y = (int)localCoord.Y / DrawCell.DrawCellSize;
+                if (!DrawCells.TryGetValue(cell, out objectSet))
+                {
+                    objectSet = new HashSet<GameObject>();
+                    DrawCells.Add(cell, objectSet);
+                }
+                objectSet.Add(obj);
+            }
+
+            // Invoke the constructor, new()-constraint ensures an empty one exists
+            typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
+
+            // Serialize and send to clients that are subscribed to this scene
+            if (Engine.IsServer)
+            {
+                CreateObjectMessage message = obj.CreateCreationMessage();
+
+                Engine.ServerModule.Send<CreateObjectMessage>(message);
+            }
+
+            return obj;
         }
 
         public void Clear()

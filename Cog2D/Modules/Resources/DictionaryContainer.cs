@@ -44,8 +44,11 @@ namespace Cog.Modules.Resources
 
             Console.WriteLine("Resource {0} ({1}) in container {2} loaded!", file, resourceType, Name);
 
-            resource.Container = this;
-            LoadedResources.Add(resource);
+            if (resource != null)
+            {
+                resource.Container = this;
+                LoadedResources.Add(resource);
+            }
 
             return resource;
         }

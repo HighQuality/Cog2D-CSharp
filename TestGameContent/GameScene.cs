@@ -16,6 +16,8 @@ namespace TestGame
         public GameScene()
             : base("Game")
         {
+            if (Engine.IsServer)
+                CreateObject<TestObject>(new Vector2(0f, 0f));
         }
     }
 }

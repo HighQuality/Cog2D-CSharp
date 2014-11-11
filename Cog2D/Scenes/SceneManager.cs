@@ -15,30 +15,8 @@ namespace Cog.Scenes
 
         public SceneManager()
         {
-            // Register events for rerouting
-            Register<UpdateEvent>();
-            Register<DrawEvent>();
-            Register<DrawInterfaceEvent>();
-            Register<KeyDownEvent>();
-            Register<CloseButtonEvent>();
-            Register<ExitEvent>();
         }
-
-        private void Register<T>()
-            where T : EventParameters
-        {
-            Engine.EventHost.GetEvent<T>().Register(0, RerouteEvent);
-        }
-
-        private void RerouteEvent<T>(T args)
-            where T : EventParameters
-        {
-            if (CurrentScene != null)
-            {
-                CurrentScene.EventModule.GetEvent<T>().Trigger(args);
-            }
-        }
-
+        
         public void TriggerButton(ButtonDownEvent ev)
         {
             if (CurrentScene != null)

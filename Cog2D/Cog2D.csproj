@@ -162,6 +162,7 @@
     <Compile Include="Modules\Content\QuadTreeEntry.cs" />
     <Compile Include="Scenes\DrawCell.cs" />
     <Compile Include="Scenes\GameInterface.cs" />
+    <Compile Include="Scenes\SceneCache.cs" />
     <Compile Include="SplashScreen.cs">
       <SubType>Form</SubType>
     </Compile>

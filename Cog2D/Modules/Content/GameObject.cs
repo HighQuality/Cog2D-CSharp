@@ -304,6 +304,8 @@ namespace Cog.Modules.Content
 
         internal static void CreateCache(Type type)
         {
+            Debug.Info("Object ID {0} = {1}", nextObjectId, type.FullName);
+
             objectsArray.Add(type);
             objectsDictionary.Add(type, nextObjectId++);
         }

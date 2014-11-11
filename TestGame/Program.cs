@@ -28,26 +28,20 @@ namespace TestGame
             
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
-                /*var message = Engine.ConnectServer("127.0.0.1", 1234);
+                var message = Engine.ConnectServer("127.0.0.1", 1234);
                 if (message != null)
                     Debug.Error(message);
                 else
-                    Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);*/
+                    Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);
 
                 // Create and push the initial scene
                 scene = new GameScene();
                 Engine.SceneHost.Push(scene);
-
-                scene.CreateObject<TestObject>(new Vector2(0f, 0f));
             });
             
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>
             {
                 time += e.DeltaTime;
-                if (Engine.Window.IsKeyDown(Keyboard.Key.A))
-                    scene.Camera.LocalCoord += new Vector2(100f * e.DeltaTime, 0f);
-                if (Engine.Window.IsKeyDown(Keyboard.Key.D))
-                    scene.Camera.LocalCoord -= new Vector2(100f * e.DeltaTime, 0f);
             });
             
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>
