@@ -11,12 +11,14 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Cog.Modules.Resources;
+using System.IO;
 
 namespace Cog.Scenes
 {
     public abstract class Scene
     {
         public string Name { get; private set; }
+        public int SceneId { get; private set; }
         public LinkedList<GameObject> Objects = new LinkedList<GameObject>();
         public Dictionary<long, GameObject> ObjectDictionary = new Dictionary<long, GameObject>();
         public EventModule EventModule = new EventModule();
@@ -45,8 +47,13 @@ namespace Cog.Scenes
 
         internal Dictionary<DrawCell, HashSet<GameObject>> DrawCells = new Dictionary<DrawCell, HashSet<GameObject>>();
 
+        private List<CogClient> subscribedClients = new List<CogClient>();
+
         public Scene(string name)
         {
+            this.Name = name;
+            SceneId = SceneCache.IdFromType(GetType());
+
             // Randomize an offset for the event strength update timer
             eventStrengthUpdateTimer = Engine.RandomFloat();
 
@@ -132,6 +139,46 @@ namespace Cog.Scenes
             }
         }
 
+        internal SceneCreationMessage CreateSceneCreationMessage()
+        {
+            var msg = new SceneCreationMessage();
+            msg.SceneName = Name;
+            msg.SceneId = (ushort)SceneId;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    var objects = BaseObjects.Where(o => o.IsGlobal).ToArray();
+                    writer.Write((UInt16)objects.Length);
+                    for (int i=0; i<objects.Length; i++)
+                    {
+                        var obj = objects[i];
+                        obj.Serialize(writer);
+                    }
+                }
+
+                msg.Data = stream.ToArray();
+            }
+
+            return msg;
+        }
+
+        internal void ReadSceneCreationData(byte[] data)
+        {
+            using (MemoryStream stream = new MemoryStream(data))
+            {
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    var objCount = reader.ReadUInt16();
+                    for (int i = 0; i < (int)objCount; i++)
+                    {
+                        GameObject.Deserialize(this, null, reader);
+                    }
+                }
+            }
+        }
+
         public T CreateObject<T>(Vector2 localCord)
             where T : GameObject, new()
         {
@@ -185,11 +232,48 @@ namespace Cog.Scenes
             if (Engine.IsServer)
             {
                 CreateObjectMessage message = obj.CreateCreationMessage();
-
-                Engine.ServerModule.Send<CreateObjectMessage>(message);
+                foreach (var client in EnumerateSubscribedClients())
+                    client.Send(message);
             }
 
             return obj;
+        }
+
+        public GameObject CreateUninitializedObject(Type type, int id, GameObject parent)
+        {
+            // Create an object of this type without invoking the constructor
+            GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(type);
+            obj.Scene = this;
+            obj.Id = id;
+            obj.InitialSetParent(parent);
+
+            // Register the new object
+            ObjectDictionary.Add(obj.Id, obj);
+            Objects.AddLast(obj);
+            
+            return obj;
+        }
+
+        public void InitializeObject(GameObject obj)
+        {
+            // If we don't have a parent we need to register this object to ensure it and it's children are drawn
+            if (obj.Parent == null)
+            {
+                BaseObjects.AddLast(obj);
+                HashSet<GameObject> objectSet;
+                DrawCell cell;
+                cell.X = (int)obj.LocalCoord.X / DrawCell.DrawCellSize;
+                cell.Y = (int)obj.LocalCoord.Y / DrawCell.DrawCellSize;
+                if (!DrawCells.TryGetValue(cell, out objectSet))
+                {
+                    objectSet = new HashSet<GameObject>();
+                    DrawCells.Add(cell, objectSet);
+                }
+                objectSet.Add(obj);
+            }
+
+            // Invoke the constructor
+            obj.GetType().GetConstructor(new Type[0]).Invoke(obj, new object[0]);
         }
 
         public T CreateLocalObject<T>(Vector2 localCoord)
@@ -231,14 +315,6 @@ namespace Cog.Scenes
             // Invoke the constructor, new()-constraint ensures an empty one exists
             typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
 
-            // Serialize and send to clients that are subscribed to this scene
-            if (Engine.IsServer)
-            {
-                CreateObjectMessage message = obj.CreateCreationMessage();
-
-                Engine.ServerModule.Send<CreateObjectMessage>(message);
-            }
-
             return obj;
         }
 
@@ -279,6 +355,19 @@ namespace Cog.Scenes
             }
 
             listenerList.Add(listener);
+        }
+
+        /// <summary>
+        /// Adds a client to this scene's subscription list
+        /// </summary>
+        internal void AddSubscription(CogClient client)
+        {
+            subscribedClients.Add(client);
+        }
+
+        public IEnumerable<CogClient> EnumerateSubscribedClients()
+        {
+            return subscribedClients;
         }
     }
 }

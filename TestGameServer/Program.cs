@@ -1,5 +1,6 @@
 ﻿using Cog;
 using Cog.Modules.EventHost;
+using Cog.Modules.Networking;
 using Cog.Modules.Renderer;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,17 @@ namespace TestGameServer
             Engine.Initialize<DefaultRenderer>(null);
 
             var container = Engine.ResourceHost.LoadDictionary("main", "resources");
+            GameScene scene = null;
             
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
-                Engine.SceneHost.Push(new GameScene());
+                scene = new GameScene();
+                Engine.SceneHost.Push(scene);
+            });
+
+            Engine.EventHost.RegisterEvent<NewClientEvent>(0, e =>
+            {
+                e.Client.SubscribeTo(scene);
             });
 
             Engine.StartServer(1234);

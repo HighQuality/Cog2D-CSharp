@@ -1,5 +1,6 @@
 ﻿using Cog.Modules.Content;
 using Cog.Modules.Networking;
+using Cog.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,12 @@ namespace Cog.Modules
             : base(client, Permissions.DefaultClientPermissions)
         {
 
+        }
+
+        public void SubscribeTo(Scene scene)
+        {
+            scene.AddSubscription(this);
+            Send(scene.CreateSceneCreationMessage());
         }
 
         public bool IsKeyDown(Keyboard.Key key)

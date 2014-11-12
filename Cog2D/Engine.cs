@@ -201,13 +201,16 @@ namespace Cog
             {
                 foreach (var type in assembly.GetTypes().OrderBy(o => o.FullName))
                 {
-                    if (typeof(GameObject).IsAssignableFrom(type))
+                    if (!type.IsAbstract)
                     {
-                        GameObject.CreateCache(type);
-                    }
-                    else if (typeof(Scene).IsAssignableFrom(type))
-                    {
-                        SceneCache.CreateCache(type);
+                        if (typeof(GameObject).IsAssignableFrom(type))
+                        {
+                            GameObject.CreateCache(type);
+                        }
+                        else if (typeof(Scene).IsAssignableFrom(type))
+                        {
+                            SceneCache.CreateCache(type);
+                        }
                     }
                 }
             }
@@ -277,9 +280,9 @@ namespace Cog
 
         public static void StartServer(int port)
         {
-            ServerModule = new ServerModule(port);
-
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
+
+            ServerModule = new ServerModule(port);
 
             EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
 

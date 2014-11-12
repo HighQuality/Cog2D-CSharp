@@ -93,6 +93,7 @@ namespace Cog.Modules.Networking
                         lock (clients)
                         {
                             clients.Add(client);
+                            Engine.EventHost.GetEvent<NewClientEvent>().Trigger(new NewClientEvent(this, client));
                         }
                     }
                     catch (InvalidVersionException e)

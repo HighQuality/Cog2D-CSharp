@@ -141,6 +141,7 @@
     <Compile Include="ISerializable.cs" />
     <Compile Include="Modules\Networking\IStringCacher.cs" />
     <Compile Include="Modules\Networking\MessageExecutionProperty.cs" />
+    <Compile Include="Modules\Networking\NewClientEvent.cs" />
     <Compile Include="Modules\Networking\StringCacheMessage.cs" />
     <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
     <Compile Include="Modules\Renderer\BitmapFont.cs" />
@@ -163,6 +164,7 @@
     <Compile Include="Scenes\DrawCell.cs" />
     <Compile Include="Scenes\GameInterface.cs" />
     <Compile Include="Scenes\SceneCache.cs" />
+    <Compile Include="Scenes\SceneCreationMessage.cs" />
     <Compile Include="SplashScreen.cs">
       <SubType>Form</SubType>
     </Compile>

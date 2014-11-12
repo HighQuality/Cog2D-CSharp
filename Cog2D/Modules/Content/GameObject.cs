@@ -258,6 +258,65 @@ namespace Cog.Modules.Content
             return new CreateObjectMessage(id);
         }
 
+        internal void Serialize(BinaryWriter writer)
+        {
+            // Id
+            var id = objectsDictionary[GetType()];
+            writer.Write((UInt16)id);
+            writer.Write((Int32)Id);
+
+            // Transformation
+            writer.Write((float)LocalCoord.X);
+            writer.Write((float)LocalCoord.Y);
+            writer.Write((float)LocalRotation.Degree);
+            writer.Write((float)LocalScale.X);
+            writer.Write((float)LocalScale.Y);
+
+            // Children
+            if (children != null)
+            {
+                writer.Write((UInt16)children.Where(o => o.IsGlobal).Count());
+                for (int i = 0; i < children.Count; i++)
+                    if (children[i].IsGlobal)
+                        children[i].Serialize(writer);
+            }
+            else
+                writer.Write((UInt16)0);
+        }
+
+        internal static GameObject Deserialize(Scene scene, GameObject parent, BinaryReader reader)
+        {
+            // Id
+            ushort objectId = reader.ReadUInt16();
+            var id = reader.ReadInt32();
+            GameObject obj = scene.CreateUninitializedObject(objectsArray[(int)objectId], id, parent);
+
+            // Transformation
+            Vector2 coord,
+                scale;
+            float rotDegree;
+
+            coord.X = reader.ReadSingle();
+            coord.Y = reader.ReadSingle();
+            rotDegree = reader.ReadSingle();
+            scale.X = reader.ReadSingle();
+            scale.Y = reader.ReadSingle();
+
+            obj.LocalCoord = coord;
+            obj.LocalRotation = Angle.FromDegree(rotDegree);
+            obj.LocalScale = scale;
+
+            // TODO: Read user data
+
+            // Children
+            var childCount = reader.ReadUInt16();
+            var child = Deserialize(scene, obj, reader);
+
+            scene.InitializeObject(obj);
+
+            return obj;
+        }
+
         internal static GameObject CreateFromMessage(CreateObjectMessage message)
         {
             Type objectType = objectsArray[message.ObjectType];
