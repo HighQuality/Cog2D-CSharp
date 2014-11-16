@@ -47,8 +47,8 @@ namespace Cog
         public static ClientModule ClientModule { get; private set; }
         public static ServerModule ServerModule { get; private set; }
 
-        public static bool IsClient { get { return ClientModule != null; } }
-        public static bool IsServer { get { return ServerModule != null; } }
+        public static bool IsClient { get; private set; }
+        public static bool IsServer { get; private set; }
         public static bool IsNetworkGame { get { return ClientModule != null || ServerModule != null; } }
 
         public static float PhysicsTimeStep;
@@ -123,6 +123,7 @@ namespace Cog
             nextLocalId = -1;
             DesiredResolution = new Vector2(640f, 480f);
 
+            NetworkMessage.InitializeCache();
             GameObject.InitializeCache();
             SceneCache.InitializeCache();
             Mouse.Initialize();
@@ -195,7 +196,7 @@ namespace Cog
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             // Cache event registrators for Object Components
-            Debug.Event("Pre-Caching GameObjects/Scenes...");
+            Debug.Event("Pre-Caching...");
             watch.Restart();
             foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
             {
@@ -211,15 +212,27 @@ namespace Cog
                         {
                             SceneCache.CreateCache(type);
                         }
+                        else if (typeof(NetworkMessage).IsAssignableFrom(type))
+                        {
+                            NetworkMessage.CreateCache(type);
+                        }
                     }
                 }
             }
-            Debug.Success("Finished Pre-Caching GameObjects/Scenes! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+            Debug.Success("Finished Pre-Caching! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
-            Debug.Event("Caching Network Events...");
-            watch.Restart();
-            NetworkMessage.BuildCache(loadedAssemblies.Values);
-            Debug.Success("Finished Caching Network Events! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+            StringBuilder hash = new StringBuilder();
+            hash.Append(NetworkMessage.GetNetworkDescriber());
+            hash.Append(GameObject.GetNetworkDescriber());
+
+            Console.WriteLine(hash.ToString());
+
+            // Generates a SHA256-hash from the string describing the networking classes
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                NetworkMessage.NetworkingHash = sha256.ComputeHash(Encoding.UTF8.GetBytes(hash.ToString()));
+                Console.WriteLine(BitConverter.ToString(NetworkMessage.NetworkingHash).Replace("-", ""));
+            }
 
             Debug.Event("Initializing Core Modules...");
             watch.Restart();
@@ -237,6 +250,10 @@ namespace Cog
         /// </summary>
         public static void StartGame(string title, WindowStyle style)
         {
+            IsServer = false;
+            // You're only a client if you're connected to a server
+            IsClient = false;
+
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
             EventHost.RegisterEvent<ExitEvent>(-999, e => { Window.Close(); e.Intercept = true; });
             EventHost.RegisterEvent<CloseButtonEvent>(-999, e => { EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null)); e.Intercept = true; });
@@ -280,6 +297,9 @@ namespace Cog
 
         public static void StartServer(int port)
         {
+            IsServer = true;
+            IsClient = false;
+
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
 
             ServerModule = new ServerModule(port);
@@ -316,6 +336,8 @@ namespace Cog
         {
             try
             {
+                IsClient = true;
+
                 ClientModule = new Modules.Networking.ClientModule(hostname, port);
             }
             catch(SocketException e)

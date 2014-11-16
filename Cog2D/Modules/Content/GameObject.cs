@@ -310,7 +310,8 @@ namespace Cog.Modules.Content
 
             // Children
             var childCount = reader.ReadUInt16();
-            var child = Deserialize(scene, obj, reader);
+            for (int i = 0; i < childCount; i++)
+                Deserialize(scene, obj, reader);
 
             scene.InitializeObject(obj);
 
@@ -357,6 +358,9 @@ namespace Cog.Modules.Content
         internal static void InitializeCache()
         {
             objectsArray = new List<Type>();
+            // Id 0 is not used
+            objectsArray.Add(null);
+
             objectsDictionary = new Dictionary<Type, ushort>();
             nextObjectId = 1;
         }
@@ -367,6 +371,20 @@ namespace Cog.Modules.Content
 
             objectsArray.Add(type);
             objectsDictionary.Add(type, nextObjectId++);
+        }
+
+        internal static string GetNetworkDescriber()
+        {
+            StringBuilder builder = new StringBuilder("- OBJECTS\n");
+
+            for (int i = 1; i < objectsArray.Count; i++)
+            {
+                var type = objectsArray[i];
+                builder.Append(type.FullName);
+                builder.Append('\n');
+            }
+
+            return builder.ToString();
         }
     }
 }

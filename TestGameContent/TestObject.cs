@@ -1,5 +1,7 @@
 ﻿using Cog;
 using Cog.Modules.Content;
+using Cog.Modules.EventHost;
+using Cog.Modules.Renderer;
 using Cog.Modules.Resources;
 using System;
 using System.Collections.Generic;
@@ -23,6 +25,8 @@ namespace TestGame
             Movement.Right = new KeyCapture(this, Keyboard.Key.D, 0, CaptureRelayMode.NoRelay);
             Movement.Up = new KeyCapture(this, Keyboard.Key.W, 0, CaptureRelayMode.NoRelay);
             Movement.Down = new KeyCapture(this, Keyboard.Key.S, 0, CaptureRelayMode.NoRelay);
+
+            RegisterEvent<UpdateEvent>(0, e => LocalRotation += Angle.FromRadian(e.DeltaTime));
         }
     }
 }

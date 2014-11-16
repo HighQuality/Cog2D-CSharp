@@ -26,6 +26,8 @@ namespace Cog.Scenes
             var scene = SceneCache.CreateFromId(SceneId);
             scene.ReadSceneCreationData(Data);
 
+            Engine.SceneHost.Push(scene);
+
             Console.WriteLine("Received scene {0}", scene.Name);
         }
     }
