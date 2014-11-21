@@ -19,9 +19,6 @@ namespace TestGame
             if (Engine.IsServer)
             {
                 var obj = CreateObject<TestObject>(new Vector2(0f, 0f));
-                CreateObject<TestObject>(obj, new Vector2(32f, 0f));
-                var second = CreateObject<TestObject>(obj, new Vector2(0f, 32f));
-                CreateObject<TestObject>(second, new Vector2(8f, 0f));
             }
         }
     }

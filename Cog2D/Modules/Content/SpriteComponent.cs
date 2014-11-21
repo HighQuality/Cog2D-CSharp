@@ -25,7 +25,11 @@ namespace Cog.Modules.Content
                 c.Origin = texture.Size / 2f;
                 c.Origin = new Vector2((int)c.Origin.X, (int)c.Origin.Y);
             }
-            gameObject.OnDraw += c.Draw;
+
+            if (gameObject.OnDraw == null)
+                gameObject.OnDraw = new List<Action<DrawEvent, DrawTransformation>>();
+            gameObject.OnDraw.Add(c.Draw);
+
             return c;
         }
 

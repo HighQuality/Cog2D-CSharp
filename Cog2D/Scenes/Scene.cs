@@ -156,9 +156,9 @@ namespace Cog.Scenes
                         var obj = objects[i];
                         obj.Serialize(writer);
                     }
-                }
 
-                msg.Data = stream.ToArray();
+                    msg.Data = stream.ToArray();
+                }
             }
 
             return msg;
@@ -171,10 +171,13 @@ namespace Cog.Scenes
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
                     var objCount = reader.ReadUInt16();
+                    List<GameObject> objects = new List<GameObject>(objCount);
                     for (int i = 0; i < (int)objCount; i++)
-                    {
-                        GameObject.Deserialize(this, null, reader);
-                    }
+                        objects.AddRange(GameObject.DeserializeUninitialized(this, null, reader));
+                    for (int i = 0; i < objects.Count; i++)
+                        InitializeObject(objects[i]);
+                    for (int i = 0; i < objects.Count; i++)
+                        objects[i].Initialize();
                 }
             }
         }
@@ -196,56 +199,31 @@ namespace Cog.Scenes
         {
             if (Engine.IsNetworkGame && !Engine.IsServer)
                 throw new Exception("Only the server can create global objects!");
-            
-            // Create an object of this type without invoking the constructor
-            T obj = (T)FormatterServices.GetUninitializedObject(typeof(T));
-            obj.Scene = this;
-            obj.Owner = owner;
-            obj.Id = Engine.GetGlobalId();
-            obj.InitialSetParent(parent);
+
+            T obj = (T)CreateUninitializedObject(typeof(T), Engine.GetGlobalId(), parent);
             obj.LocalCoord = localCoord;
 
-            // Register the new object
-            ObjectDictionary.Add(obj.Id, obj);
-            Objects.AddLast(obj);
-
-            // If we don't have a parent we need to register this object to ensure it and it's children are drawn
-            if (parent == null)
-            {
-                BaseObjects.AddLast(obj);
-                HashSet<GameObject> objectSet;
-                DrawCell cell;
-                cell.X = (int)localCoord.X / DrawCell.DrawCellSize;
-                cell.Y = (int)localCoord.Y / DrawCell.DrawCellSize;
-                if (!DrawCells.TryGetValue(cell, out objectSet))
-                {
-                    objectSet = new HashSet<GameObject>();
-                    DrawCells.Add(cell, objectSet);
-                }
-                objectSet.Add(obj);
-            }
-
-            // Invoke the constructor, new()-constraint ensures an empty one exists
-            typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
-
-            // Serialize and send to clients that are subscribed to this scene
-            if (Engine.IsServer)
-            {
-                CreateObjectMessage message = obj.CreateCreationMessage();
-                foreach (var client in EnumerateSubscribedClients())
-                    client.Send(message);
-            }
+            // Engine/Object Constructor
+            InitializeObject(obj);
+            // Object Initialization
+            obj.Initialize();
 
             return obj;
         }
 
-        public GameObject CreateUninitializedObject(Type type, int id, GameObject parent)
+        public GameObject CreateUninitializedObject(Type type, long id, GameObject parent)
         {
             // Create an object of this type without invoking the constructor
             GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(type);
             obj.Scene = this;
             obj.Id = id;
             obj.InitialSetParent(parent);
+
+            InitializationData data = new InitializationData();
+            data.SynchronizedFields = GameObject.GetSynchronizedFields(type);
+            data.SynchronizedValues = null;
+
+            obj.InitializationData = data;
 
             // Register the new object
             ObjectDictionary.Add(obj.Id, obj);
@@ -274,6 +252,16 @@ namespace Cog.Scenes
 
             // Invoke the constructor
             obj.GetType().GetConstructor(new Type[0]).Invoke(obj, new object[0]);
+            
+            if (Engine.IsServer && obj.IsGlobal)
+            {
+                var msg = obj.CreateCreationMessage();
+                foreach (var client in EnumerateSubscribedClients())
+                {
+                    client.Send(msg);
+                    obj.SubscribedClients.Add(client);
+                }
+            }
         }
 
         public T CreateLocalObject<T>(Vector2 localCoord)
@@ -285,35 +273,13 @@ namespace Cog.Scenes
         public T CreateLocalObject<T>(GameObject parent, Vector2 localCoord)
             where T : GameObject, new()
         {
-            // Create an object of this type without invoking the constructor
-            T obj = (T)FormatterServices.GetUninitializedObject(typeof(T));
-            obj.Scene = this;
-            obj.Id = Engine.GetLocalId();
-            obj.InitialSetParent(parent);
+            T obj = (T)CreateUninitializedObject(typeof(T), Engine.GetLocalId(), parent);
             obj.LocalCoord = localCoord;
 
-            // Register the new object
-            ObjectDictionary.Add(obj.Id, obj);
-            Objects.AddLast(obj);
-
-            // If we don't have a parent we need to register this object to ensure it and it's children are drawn
-            if (parent == null)
-            {
-                BaseObjects.AddLast(obj);
-                HashSet<GameObject> objectSet;
-                DrawCell cell;
-                cell.X = (int)localCoord.X / DrawCell.DrawCellSize;
-                cell.Y = (int)localCoord.Y / DrawCell.DrawCellSize;
-                if (!DrawCells.TryGetValue(cell, out objectSet))
-                {
-                    objectSet = new HashSet<GameObject>();
-                    DrawCells.Add(cell, objectSet);
-                }
-                objectSet.Add(obj);
-            }
-
-            // Invoke the constructor, new()-constraint ensures an empty one exists
-            typeof(T).GetConstructor(new Type[0]).Invoke(obj, new object[0]);
+            // Engine/object constructor
+            InitializeObject(obj);
+            // Object initialization
+            obj.Initialize();
 
             return obj;
         }

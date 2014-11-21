@@ -16,6 +16,7 @@ using System.Net.Sockets;
 using Cog.Modules.Networking;
 using System.Threading;
 using Cog.Modules.Resources;
+using Cog.Modules.Animation;
 
 namespace Cog
 {
@@ -43,6 +44,10 @@ namespace Cog
         /// Gets the current resource manager
         /// </summary>
         public static ResourceManager ResourceHost { get; private set; }
+        /// <summary>
+        /// Gets the current host for timed events
+        /// </summary>
+        internal static TimedEventHost TimedEventHost { get; private set; }
 
         public static ClientModule ClientModule { get; private set; }
         public static ServerModule ServerModule { get; private set; }
@@ -69,6 +74,9 @@ namespace Cog
         /// </summary>
         public static Vector2 Resolution { get { if (Window != null) return Window.Resolution; return DesiredResolution; } }
 
+        public static double TimeStamp { get; private set; }
+        private static Stopwatch timeStampWatch;
+
         /// <summary>
         /// Initializes Cog2D making it available for use showing the default splash screen while initializing
         /// </summary>
@@ -94,6 +102,7 @@ namespace Cog
             where TRenderer : RenderModule, new()
         {
             EventHost = new EventModule();
+            TimedEventHost = new TimedEventHost();
 
             if (splashScreenImage != null)
             {
@@ -127,6 +136,7 @@ namespace Cog
             GameObject.InitializeCache();
             SceneCache.InitializeCache();
             Mouse.Initialize();
+            AnimationInterpolations.Initialize();
 
             Debug.Event("Loading Assemblies...");
             Stopwatch watch = Stopwatch.StartNew();
@@ -192,6 +202,8 @@ namespace Cog
             TypeSerializer.Register<Vector2>((v, w) => { w.Write((float)v.X); w.Write((float)v.Y); }, r => { Vector2 v; v.X = r.ReadSingle(); v.Y = r.ReadSingle(); return v; });
             TypeSerializer.Register<Rectangle>((v, w) => { w.Write((float)v.TopLeft.X); w.Write((float)v.TopLeft.Y); w.Write((float)v.Size.X); w.Write((float)v.Size.Y); }, r => { Vector2 topLeft, size; topLeft.X = r.ReadSingle(); topLeft.Y = r.ReadSingle(); size.X = r.ReadSingle(); size.Y = r.ReadSingle(); return new Rectangle(topLeft, size); });
             TypeSerializer.Register<Color>((v, w) => { w.Write((byte)v.R); w.Write((byte)v.G); w.Write((byte)v.B); w.Write((byte)v.A); }, r => { Color v; v.R = r.ReadByte(); v.G = r.ReadByte(); v.B = r.ReadByte(); v.A = r.ReadByte(); return v; });
+
+            TypeSerializer.Register<GameObject>((v, w) => { w.Write((long)v.Id); }, r => { var id = r.ReadInt64(); return Engine.FindObject(id); });
 
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
@@ -263,12 +275,17 @@ namespace Cog
             Window = Renderer.CreateWindow(title, (int)DesiredResolution.X, (int)DesiredResolution.Y, style, EventHost);
             Window.VerticalSynchronization = true;
 
+            timeStampWatch = Stopwatch.StartNew();
             Stopwatch watch = Stopwatch.StartNew();
             float accumulator = 0f;
             while (Window.IsOpen)
             {
+                TimeStamp = timeStampWatch.Elapsed.TotalSeconds;
                 float deltaTime = (float)watch.Elapsed.TotalSeconds;
                 watch.Restart();
+
+                TimedEventHost.Update();
+
                 Window.DispatchEvents();
 
                 accumulator += deltaTime;
@@ -306,12 +323,16 @@ namespace Cog
 
             EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
 
+            timeStampWatch = Stopwatch.StartNew();
             Stopwatch watch = Stopwatch.StartNew();
             float accumulator = 0f;
             while (SceneHost.CurrentScene != null)
             {
+                TimeStamp = timeStampWatch.Elapsed.TotalSeconds;
                 float deltaTime = (float)watch.Elapsed.TotalSeconds;
                 watch.Restart();
+
+                TimedEventHost.Update();
 
                 accumulator += deltaTime;
                 while(accumulator >= PhysicsTimeStep)
@@ -349,6 +370,17 @@ namespace Cog
         }
 
         /// <summary>
+        /// Invokes the given action synchronized, in the main thread, after the given time has elapsed.
+        /// Passes the time in seconds it missed by.
+        /// </summary>
+        public static TimedEvent InvokeTimed(float timeInSeconds, Action<float> action)
+        {
+            var ev = new TimedEvent(action, TimeStamp + (double)timeInSeconds);
+            TimedEventHost.Schedule(ev);
+            return ev;
+        }
+
+        /// <summary>
         /// Returns a random floating-point value ranging from 0 - 1
         /// </summary>
         /// <returns>A random value in the range of 0 - 1</returns>
@@ -365,6 +397,16 @@ namespace Cog
         internal static long GetLocalId()
         {
             return nextLocalId--;
+        }
+
+        public static GameObject FindObject(long id)
+        {
+            // TODO: Search non-active scenes
+            if (SceneHost.CurrentScene == null)
+                return null;
+            GameObject obj;
+            SceneHost.CurrentScene.ObjectDictionary.TryGetValue(id, out obj);
+            return obj;
         }
     }
 }

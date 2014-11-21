@@ -9,20 +9,20 @@ namespace Cog.Modules.Content
 {
     class CreateObjectMessage : NetworkMessage
     {
-        public UInt16 ObjectType;
+        public byte[] ObjectData;
 
-        public CreateObjectMessage(UInt16 objectType)
+        public CreateObjectMessage(byte[] objectData)
         {
             if (!Engine.Permissions.CreateGlobalObjects)
                 throw new Exception("You may not create global objects!");
-            this.ObjectType = objectType;
+            this.ObjectData = objectData;
         }
 
         public override void Received()
         {
             if (!Sender.Permissions.CreateGlobalObjects)
                 throw new Exception(string.Format("{0} may not create global objects!", Sender.Identifier));
-            GameObject.CreateFromMessage(this);
+            GameObject.CreateFromData(Engine.SceneHost.CurrentScene, ObjectData);
         }
     }
 }

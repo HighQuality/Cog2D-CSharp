@@ -216,9 +216,20 @@ namespace Cog.Modules.Networking
                     var messageWriter = messageWriterCache[id];
                     if (messageWriter != null)
                         messageWriter((Object)message, writer, socket);
-                }
 
-                socket.Writer.Write(stream.ToArray());
+                    if (!socket.IsDisconnected)
+                    {
+                        try
+                        {
+                            socket.Writer.Write(stream.ToArray());
+                        }
+                        catch (IOException e)
+                        {
+                            Debug.Error("Disconnecting client {0}: {1}", socket.IpAddress, e.Message);
+                            socket.Disconnect();
+                        }
+                    }
+                }
             }
         }
 

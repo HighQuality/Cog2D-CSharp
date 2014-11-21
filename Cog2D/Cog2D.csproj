@@ -102,6 +102,11 @@
     <Compile Include="Interface\Window.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="Mathf.cs" />
+    <Compile Include="Modules\Animation\Animation.cs" />
+    <Compile Include="Modules\Animation\AnimationComponent.cs" />
+    <Compile Include="Modules\Animation\AnimationInstance.cs" />
+    <Compile Include="Modules\Animation\AnimationInterpolations.cs" />
+    <Compile Include="Modules\Animation\Keyframe.cs" />
     <Compile Include="Modules\Audio\IAudioModule.cs" />
     <Compile Include="Modules\Audio\ISoundEffect.cs" />
     <Compile Include="Modules\Audio\ISoundInstance.cs" />
@@ -110,6 +115,7 @@
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
     <Compile Include="Modules\Content\IBoundingBox.cs" />
+    <Compile Include="Modules\Content\InitializationData.cs" />
     <Compile Include="Modules\Content\KeyCapture.cs" />
     <Compile Include="Modules\Content\GameObject.cs" />
     <Compile Include="Modules\Content\IContentModule.cs" />
@@ -117,6 +123,8 @@
     <Compile Include="Modules\Content\SpriteComponent.cs" />
     <Compile Include="Modules\Content\Synchronized.cs" />
     <Compile Include="Modules\Content\SynchronizedEditPermission.cs" />
+    <Compile Include="Modules\Content\TimedEvent.cs" />
+    <Compile Include="Modules\Content\TimedEventHost.cs" />
     <Compile Include="Modules\EventHost\BeginDrawEvent.cs" />
     <Compile Include="Modules\EventHost\ButtonDownEvent.cs" />
     <Compile Include="Modules\EventHost\CloseButtonEvent.cs" />
@@ -152,6 +160,7 @@
     <Compile Include="Modules\Resources\ResourceManager.cs" />
     <Compile Include="Modules\Resources\DictionaryContainer.cs" />
     <Compile Include="Modules\Resources\SQLiteContainer.cs" />
+    <Compile Include="Modules\Content\SetSynchronizedValueMessage.cs" />
     <Compile Include="NoSerializerException.cs" />
     <Compile Include="Modules\Networking\TcpSocket.cs" />
     <Compile Include="Modules\Networking\ClientModule.cs" />

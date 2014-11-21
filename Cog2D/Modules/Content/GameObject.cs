@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,8 +17,12 @@ namespace Cog.Modules.Content
     public abstract class GameObject : IBoundingBox
     {
         private static Dictionary<Type, UInt16> objectsDictionary;
+        private static Dictionary<Type, FieldInfo[]> objectsSynchronizedProperties;
+        private static Dictionary<FieldInfo, UInt16> synchronizedIds;
         private static List<Type> objectsArray;
         private static UInt16 nextObjectId;
+
+        internal InitializationData InitializationData;
 
         public string ObjectName;
         private GameObject _parent;
@@ -85,6 +90,8 @@ namespace Cog.Modules.Content
         }
 
         private List<GameObject> children;
+
+        public HashSet<CogClient> SubscribedClients = new HashSet<CogClient>();
 
         private Vector2 _localCoord;
         public Vector2 LocalCoord
@@ -189,12 +196,45 @@ namespace Cog.Modules.Content
         public bool IsLocal { get { return Id < 0; } }
         private List<IEventListener> registeredEvents;
 
-        internal Action<DrawEvent, DrawTransformation> OnDraw;
+        internal List<Action<DrawEvent, DrawTransformation>> OnDraw;
 
         public GameObject()
         {
-            Resources = Engine.ResourceHost.GetResourceCollection(GetType());
-            ObjectName = GetType().Name;
+            if (InitializationData == null)
+                throw new InvalidOperationException("GameObject.InitalizationData was never set! Did you create the object through one of the Scene creation methods?");
+
+            var type = GetType();
+            
+            Resources = Engine.ResourceHost.GetResourceCollection(type);
+            ObjectName = type.Name;
+
+            var fields = objectsSynchronizedProperties[type];
+
+            for (int i = 1; i < fields.Length; i++)
+            {
+                var field = fields[i];
+
+                ISynchronized member = (ISynchronized)field.GetValue(this);
+                member.BaseObject = this;
+                member.SynchronizationId = synchronizedIds[field];
+                member.TypeWriter = TypeSerializer.GetTypeWriter(member.GetType().GenericTypeArguments[0]);
+
+                if (InitializationData.SynchronizedValues != null)
+                    member.ForceSet(InitializationData.SynchronizedValues[i - 1]);
+
+                field.SetValue(this, member);
+                Console.WriteLine("Initialized {0}.{1} (Value: {2})", type.Name, field.Name, member.GenericGet());
+            }
+
+            // Initialization has finished, get rid of data that is no longer necessary
+            InitializationData = null;
+
+            Console.WriteLine(ObjectName + "()");
+        }
+
+        public virtual void Initialize()
+        {
+            Console.WriteLine(ObjectName + ".Initialize()");
         }
         
         public bool KeyIsDown(Keyboard.Key key)
@@ -234,6 +274,13 @@ namespace Cog.Modules.Content
             registeredEvents.Add(listener);
             return listener;
         }
+
+        public void Send<T>(T message)
+            where T : NetworkMessage
+        {
+            foreach (var client in Scene.EnumerateSubscribedClients())
+                client.Send(message);
+        }
         
         /// <summary>
         /// Sets the parent witout triggering Parent's setter.
@@ -253,17 +300,22 @@ namespace Cog.Modules.Content
 
         internal CreateObjectMessage CreateCreationMessage()
         {
-            var id = objectsDictionary[GetType()];
-
-            return new CreateObjectMessage(id);
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    Serialize(writer);
+                    return new CreateObjectMessage(stream.ToArray());
+                }
+            }
         }
 
         internal void Serialize(BinaryWriter writer)
         {
             // Id
-            var id = objectsDictionary[GetType()];
-            writer.Write((UInt16)id);
-            writer.Write((Int32)Id);
+            var objectId = objectsDictionary[GetType()];
+            writer.Write((UInt16)objectId);
+            writer.Write((Int64)Id);
 
             // Transformation
             writer.Write((float)LocalCoord.X);
@@ -271,6 +323,22 @@ namespace Cog.Modules.Content
             writer.Write((float)LocalRotation.Degree);
             writer.Write((float)LocalScale.X);
             writer.Write((float)LocalScale.Y);
+
+            // 
+            var fields = objectsSynchronizedProperties[GetType()];
+            for (int i = 1; i < fields.Length; i++)
+            {
+                var serializer = TypeSerializer.GetTypeWriter(fields[i].FieldType.GenericTypeArguments[0]);
+                ISynchronized value = (ISynchronized)fields[i].GetValue(this);
+                serializer.GenericWrite(value.GenericGet(), writer);
+            }
+
+            // TODO: User Data
+            /*
+             var userData = obj.WriteUserData();
+             writer.Write((UInt32)userData.Length);
+             writer.Write((byte[])userData);
+             */
 
             // Children
             if (children != null)
@@ -286,9 +354,23 @@ namespace Cog.Modules.Content
 
         internal static GameObject Deserialize(Scene scene, GameObject parent, BinaryReader reader)
         {
+            var objects = DeserializeUninitialized(scene, parent, reader).ToArray();
+
+            // Parent -> Children
+            for (int i = 0; i < objects.Length; i++)
+                scene.InitializeObject(objects[i]);
+            for (int i = 0; i < objects.Length; i++)
+                objects[i].Initialize();
+
+            // Return main object
+            return objects[0];
+        }
+
+        internal static IEnumerable<GameObject> DeserializeUninitialized(Scene scene, GameObject parent, BinaryReader reader)
+        {
             // Id
             ushort objectId = reader.ReadUInt16();
-            var id = reader.ReadInt32();
+            var id = reader.ReadInt64();
             GameObject obj = scene.CreateUninitializedObject(objectsArray[(int)objectId], id, parent);
 
             // Transformation
@@ -306,26 +388,43 @@ namespace Cog.Modules.Content
             obj.LocalRotation = Angle.FromDegree(rotDegree);
             obj.LocalScale = scale;
 
-            // TODO: Read user data
+            // Read properties
+            var fields = objectsSynchronizedProperties[obj.GetType()];
+            object[] synchronizedValues = new object[fields.Length - 1];
+            for (int i = 1; i < fields.Length; i++)
+            {
+                var serializer = TypeSerializer.GetTypeWriter(fields[i].FieldType.GenericTypeArguments[0]);
+                synchronizedValues[i - 1] = serializer.GenericRead(reader);
+            }
+
+            // Assign synchronized values to be set by GameObject's constructor
+            obj.InitializationData.SynchronizedValues = synchronizedValues;
+
+            // TODO: User data
+            /*var userSize = reader.ReadUInt32();
+            var userData = reader.ReadBytes((int)userSize);*/
+
+            // Yield this object back to the caller, who initializes them after the hierarcy has been created 
+            yield return obj;
 
             // Children
             var childCount = reader.ReadUInt16();
             for (int i = 0; i < childCount; i++)
-                Deserialize(scene, obj, reader);
-
-            scene.InitializeObject(obj);
-
-            return obj;
+                foreach (var child in DeserializeUninitialized(scene, obj, reader))
+                    yield return child;
         }
 
-        internal static GameObject CreateFromMessage(CreateObjectMessage message)
+        internal static GameObject CreateFromData(Scene scene, byte[] objectData)
         {
-            Type objectType = objectsArray[message.ObjectType];
-            GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(objectType);
-
-            return obj;
+            using (MemoryStream stream = new MemoryStream(objectData))
+            {
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    return Deserialize(scene, null, reader);
+                }
+            }
         }
-        
+
         internal void Draw(DrawEvent ev, DrawTransformation transform)
         {
             if (children != null)
@@ -335,12 +434,13 @@ namespace Cog.Modules.Content
                 transform.WorldScale *= LocalScale;
 
                 if (OnDraw != null)
-                    OnDraw(ev, transform);
+                    for (int i = 0; i < OnDraw.Count; i++)
+                        OnDraw[i](ev, transform);
 
                 transform.ParentWorldCoord = transform.WorldCoord;
                 transform.ParentWorldRotation = transform.WorldRotation;
                 transform.ParentWorldScale = transform.WorldScale;
-                
+
                 int c = children.Count;
                 for (int i = 0; i < c; i++)
                     children[i].Draw(ev, transform);
@@ -351,7 +451,8 @@ namespace Cog.Modules.Content
                 transform.WorldRotation += LocalRotation;
                 transform.WorldScale *= LocalScale;
 
-                OnDraw(ev, transform);
+                for (int i = 0; i < OnDraw.Count; i++)
+                    OnDraw[i](ev, transform);
             }
         }
 
@@ -361,16 +462,47 @@ namespace Cog.Modules.Content
             // Id 0 is not used
             objectsArray.Add(null);
 
+            objectsSynchronizedProperties = new Dictionary<Type, FieldInfo[]>();
+
             objectsDictionary = new Dictionary<Type, ushort>();
             nextObjectId = 1;
+
+            synchronizedIds = new Dictionary<FieldInfo, ushort>();
         }
 
         internal static void CreateCache(Type type)
         {
             Debug.Info("Object ID {0} = {1}", nextObjectId, type.FullName);
 
+            UInt16 nextId = 1;
+            List<FieldInfo> fields = new List<FieldInfo>();
+            fields.Add(null);
+            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(o => typeof(ISynchronized).IsAssignableFrom(o.FieldType)).OrderBy(o => o.Name))
+            {
+                fields.Add(field);
+                synchronizedIds.Add(field, nextId);
+
+                Debug.Error(field.Name);
+
+                nextId++;
+            }
+
+            objectsSynchronizedProperties.Add(type, fields.ToArray());
+
             objectsArray.Add(type);
-            objectsDictionary.Add(type, nextObjectId++);
+            objectsDictionary.Add(type, nextObjectId);
+
+            nextObjectId++;
+        }
+
+        internal static FieldInfo GetSynchronizedField(Type objectType, ushort synchronizationId)
+        {
+            return GetSynchronizedFields(objectType)[synchronizationId];
+        }
+
+        internal static FieldInfo[] GetSynchronizedFields(Type objectType)
+        {
+            return objectsSynchronizedProperties[objectType];
         }
 
         internal static string GetNetworkDescriber()
