@@ -53,6 +53,12 @@
     <Compile Include="SfmlSoundInstance.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Cog2D\Cog2D.csproj">
+      <Project>{5c56475f-f797-4c69-83f5-d5920c204e4a}</Project>
+      <Name>Cog2D</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="csfml-audio-2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -65,12 +71,6 @@
     <Content Include="openal32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Cog2D\Cog2D.csproj">
-      <Project>{5c56475f-f797-4c69-83f5-d5920c204e4a}</Project>
-      <Name>Cog2D</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
