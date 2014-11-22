@@ -17,6 +17,7 @@ using Cog.Modules.Networking;
 using System.Threading;
 using Cog.Modules.Resources;
 using Cog.Modules.Animation;
+using Cog.Modules.Audio;
 
 namespace Cog
 {
@@ -32,6 +33,10 @@ namespace Cog
         /// The current render engine
         /// </summary>
         public static RenderModule Renderer { get; private set; }
+        /// <summary>
+        /// The current audio engine
+        /// </summary>
+        public static IAudioModule Audio { get; private set; }
         /// <summary>
         /// Gets the current event host
         /// </summary>
@@ -81,10 +86,11 @@ namespace Cog
         /// Initializes Cog2D making it available for use showing the default splash screen while initializing
         /// </summary>
         /// <typeparam name="TRenderer">The renderer to use</typeparam>
-        public static void Initialize<TRenderer>()
+        public static void Initialize<TRenderer, TAudioModule>()
             where TRenderer : RenderModule, new()
+            where TAudioModule : IAudioModule, new()
         {
-            InnerInitialize<TRenderer>(new Image("splash.png"));
+            InnerInitialize<TRenderer, TAudioModule>(new Image("splash.png"));
         }
 
         /// <summary>
@@ -92,14 +98,16 @@ namespace Cog
         /// </summary>
         /// <typeparam name="TRenderer">The renderer to use</typeparam>
         /// <param name="splashScreenImage">The splash screen to show while initializing. Pass null for no splash screen.</param>
-        public static void Initialize<TRenderer>(Image splashScreenImage)
+        public static void Initialize<TRenderer, TAudioModule>(Image splashScreenImage)
             where TRenderer : RenderModule, new()
+            where TAudioModule : IAudioModule, new()
         {
-            InnerInitialize<TRenderer>(splashScreenImage);
+            InnerInitialize<TRenderer, TAudioModule>(splashScreenImage);
         }
 
-        private static void InnerInitialize<TRenderer>(Image splashScreenImage)
+        private static void InnerInitialize<TRenderer, TAudioModule>(Image splashScreenImage)
             where TRenderer : RenderModule, new()
+            where TAudioModule : IAudioModule, new()
         {
             EventHost = new EventModule();
             TimedEventHost = new TimedEventHost();
@@ -251,6 +259,7 @@ namespace Cog
             ResourceHost = new ResourceManager();
             SceneHost = new SceneManager();
             Renderer = new TRenderer();
+            Audio = new TAudioModule();
             Debug.Success("Finished Initializing Core Modules! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             Debug.Success("Cog2D has been initialized! ({0}ms)", entireLoadTime.Elapsed.TotalMilliseconds);

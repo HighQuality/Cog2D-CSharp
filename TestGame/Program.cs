@@ -12,6 +12,7 @@ using System.Threading;
 using Cog.Modules.Networking;
 using Cog.Interface;
 using System.IO;
+using Cog.SfmlAudio;
 
 namespace TestGame
 {
@@ -19,7 +20,7 @@ namespace TestGame
     {
         static void Main(string[] args)
         {
-            Engine.Initialize<SfmlRenderer>();
+            Engine.Initialize<SfmlRenderer, SfmlAudioModule>();
             float time = 0f;
 
             var container = Engine.ResourceHost.LoadDictionary("main", "resources");

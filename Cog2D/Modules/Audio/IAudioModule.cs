@@ -8,6 +8,7 @@ namespace Cog.Modules.Audio
 {
     public interface IAudioModule
     {
-        ISoundEffect Load(string file);
+        SoundEffect Load(byte[] data);
+        SoundEffect Load(string file);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Cog.Modules.Renderer;
+﻿using Cog.Modules.Audio;
+using Cog.Modules.Renderer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,11 @@ namespace Cog.Modules.Resources
         public Texture GetTexture(string key)
         {
             return resources[key] as Texture;
+        }
+
+        public SoundEffect GetSound(string key)
+        {
+            return resources[key] as SoundEffect;
         }
 
         internal void AddResource(string key, Resource resource)

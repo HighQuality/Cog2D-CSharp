@@ -118,26 +118,7 @@ namespace Cog.Modules.Resources
         {
 
         }
-
-        public override Resource Load(string file)
-        {
-            var data = ReadData(file);
-            var extension = System.IO.Path.GetExtension(file).ToLower();
-            Resource resource = null;
-
-            if (extension == ".png")
-            {
-                resource = Engine.Renderer.LoadTexture(data);
-            }
-            else
-                throw new NotImplementedException("Resource Type \"" + extension + "\" not implemented!");
-
-            resource.Container = this;
-            LoadedResources.Add(resource);
-
-            return resource;
-        }
-
+        
         public override void Preload(string file)
         {
             throw new NotImplementedException();

@@ -103,6 +103,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SfmlAudio\SfmlAudio.csproj">
+      <Project>{82be15e4-8dde-41e0-9ca1-a7d2375590eb}</Project>
+      <Name>SfmlAudio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SfmlRenderer\SfmlRenderer.csproj">
       <Project>{084372eb-5096-4ae6-bfed-4b10637cd216}</Project>
       <Name>SfmlRenderer</Name>

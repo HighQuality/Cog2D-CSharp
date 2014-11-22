@@ -22,8 +22,38 @@ namespace Cog.Modules.Resources
 
         public abstract void PreloadAll();
         public abstract void Preload(string file);
-        public abstract Resource Load(string file);
         public abstract byte[] ReadData(string file);
+
+        public Resource Load(string file)
+        {
+            var data = ReadData(file);
+            var extension = System.IO.Path.GetExtension(file).ToLower();
+            Resource resource = null;
+            string resourceType;
+
+            if (extension == ".png" || extension == ".bmp")
+            {
+                resource = Engine.Renderer.LoadTexture(data);
+                resourceType = "Texture";
+            }
+            else if (extension == ".wav" || extension == ".ogg" || extension == ".flac")
+            {
+                resource = Engine.Audio.Load(data);
+                resourceType = "Sound";
+            }
+            else
+                throw new NotImplementedException("Resource Type \"" + extension + "\" not implemented!");
+
+            Console.WriteLine("Resource {0} ({1}) in container {2} loaded!", file, resourceType, Name);
+
+            if (resource != null)
+            {
+                resource.Container = this;
+                LoadedResources.Add(resource);
+            }
+
+            return resource;
+        }
 
         public void Import(string file, string externalFile)
         {

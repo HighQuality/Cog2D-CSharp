@@ -107,6 +107,7 @@
     <Compile Include="Modules\Animation\AnimationInstance.cs" />
     <Compile Include="Modules\Animation\AnimationInterpolations.cs" />
     <Compile Include="Modules\Animation\Keyframe.cs" />
+    <Compile Include="Modules\Audio\DefaultAudioModule.cs" />
     <Compile Include="Modules\Audio\IAudioModule.cs" />
     <Compile Include="Modules\Audio\ISoundEffect.cs" />
     <Compile Include="Modules\Audio\ISoundInstance.cs" />

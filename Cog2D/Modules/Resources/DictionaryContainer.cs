@@ -26,33 +26,7 @@ namespace Cog.Modules.Resources
         {
             File.WriteAllBytes(System.IO.Path.Combine(Path, file), data);
         }
-
-        public override Resource Load(string file)
-        {
-            var data = ReadData(file);
-            var extension = System.IO.Path.GetExtension(file).ToLower();
-            Resource resource = null;
-            string resourceType;
-
-            if (extension == ".png")
-            {
-                resource = Engine.Renderer.LoadTexture(data);
-                resourceType = "Texture";
-            }
-            else
-                throw new NotImplementedException("Resource Type \"" + extension + "\" not implemented!");
-
-            Console.WriteLine("Resource {0} ({1}) in container {2} loaded!", file, resourceType, Name);
-
-            if (resource != null)
-            {
-                resource.Container = this;
-                LoadedResources.Add(resource);
-            }
-
-            return resource;
-        }
-
+        
         public override void Preload(string file)
         {
             throw new NotImplementedException();

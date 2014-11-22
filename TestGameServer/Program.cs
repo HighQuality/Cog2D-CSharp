@@ -1,4 +1,5 @@
 ﻿using Cog;
+using Cog.Modules.Audio;
 using Cog.Modules.EventHost;
 using Cog.Modules.Networking;
 using Cog.Modules.Renderer;
@@ -15,7 +16,7 @@ namespace TestGameServer
     {
         static void Main(string[] args)
         {
-            Engine.Initialize<DefaultRenderer>(null);
+            Engine.Initialize<DefaultRenderer, DefaultAudioModule>(null);
 
             var container = Engine.ResourceHost.LoadDictionary("main", "resources");
             GameScene scene = null;

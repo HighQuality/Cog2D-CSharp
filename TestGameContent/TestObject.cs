@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 namespace TestGame
 {
     [Resource(ContainerName = "main", Filename = "valid.png", Key = "texture")]
+    [Resource(ContainerName = "main", Filename = "test_sound.wav", Key = "Test Sound")]
     public class TestObject : GameObject, IAnimated
     {
         public SpriteComponent Sprite;
@@ -32,7 +33,7 @@ namespace TestGame
             AnimationComponent<TestObject>.RegisterOn(this);
             AnimationComponent.Animation = new AnimationInstance(new TestAnimation());
             Sprite = SpriteComponent.RegisterOn(this, Resources.GetTexture("texture"));
-            
+
             RegisterEvent<UpdateEvent>(0, e => LocalRotation += Angle.FromRadian(e.DeltaTime));
 
             if (Engine.IsServer)
@@ -42,7 +43,7 @@ namespace TestGame
                 SynchronizedTarget.Value = this;
             }
             else
-                RegisterEvent<KeyDownEvent>(Keyboard.Key.Space, 1000, ev => Console.WriteLine(SynchronizedValue.Value));
+                RegisterEvent<KeyDownEvent>(Keyboard.Key.Space, 1000, ev => { var sound = Resources.GetSound("Test Sound").Play(); Console.WriteLine(SynchronizedValue.Value); });
 
             Console.WriteLine("SynchronizedValue is " + SynchronizedValue.Value);
             if (SynchronizedTarget.Value != null)
