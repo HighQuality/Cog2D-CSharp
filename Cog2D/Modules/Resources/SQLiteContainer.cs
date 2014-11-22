@@ -43,7 +43,8 @@ namespace Cog.Modules.Resources
                 var version = BitConverter.ToInt32(ReadMetaData("Version"), 0);
                 if (version < 1 || version > 1)
                     throw new Exception(string.Format("SQLiteContainer version {0} not supported!", version));
-                Console.WriteLine("Loaded resource container \"{0}\" (Container Version {1})", Name, version);
+
+                Debug.Event("Loaded resource container \"{0}\" (Container Version {1})", Name, version);
             }
         }
 

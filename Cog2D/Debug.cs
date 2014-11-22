@@ -12,13 +12,23 @@ namespace Cog
             successColor = ConsoleColor.DarkGreen,
             errorColor = ConsoleColor.DarkRed,
             eventColor = ConsoleColor.DarkYellow,
-            infoColor = ConsoleColor.Gray;
+            infoColor = ConsoleColor.Gray,
+            warningColor = ConsoleColor.Yellow;
 
         public static void Info(string message, params object[] parameters)
         {
             var oldColor = Console.ForegroundColor;
             OutputInfo("Info");
             Console.ForegroundColor = infoColor;
+            Console.WriteLine(message, parameters);
+            Console.ForegroundColor = oldColor;
+        }
+
+        public static void Warning(string message, params object[] parameters)
+        {
+            var oldColor = Console.ForegroundColor;
+            OutputInfo("Warning");
+            Console.ForegroundColor = warningColor;
             Console.WriteLine(message, parameters);
             Console.ForegroundColor = oldColor;
         }
@@ -48,6 +58,11 @@ namespace Cog
             Console.ForegroundColor = successColor;
             Console.WriteLine(message, parameters);
             Console.ForegroundColor = oldColor;
+        }
+
+        public static void NewLine()
+        {
+            Console.WriteLine();
         }
 
         /// <summary>

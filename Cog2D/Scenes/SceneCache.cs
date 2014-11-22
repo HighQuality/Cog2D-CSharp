@@ -23,8 +23,6 @@ namespace Cog.Scenes
 
         internal static void CreateCache(Type type)
         {
-            Debug.Info("Scene ID {0} = {1}", nextSceneId, type.FullName);
-
             typeToId.Add(type, nextSceneId);
             idToType.Add(type);
             nextSceneId++;

@@ -187,7 +187,7 @@ namespace Cog.SfmlRenderer
                 var newKey = SfmlKeyToCog(e.Code);
                 if (newKey == Keyboard.Key.Unknown)
                 {
-                    Console.WriteLine(e.Code.ToString() + " is not mapped to a Cog.Keyboard.Key");
+                    Debug.Error(e.Code.ToString() + " is not mapped to a Cog.Keyboard.Key");
                     return;
                 }
 

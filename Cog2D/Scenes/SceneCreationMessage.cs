@@ -23,12 +23,13 @@ namespace Cog.Scenes
             // TODO: Move to restriction attribute
             if (Engine.IsServer)
                 throw new Exception("Client sent server a SceneCreationMessage");
+
             var scene = SceneCache.CreateFromId(SceneId);
             scene.ReadSceneCreationData(Data);
 
             Engine.SceneHost.Push(scene);
 
-            Console.WriteLine("Received scene {0}", scene.Name);
+            Debug.Event("Received scene \"{0}\" from server", scene.Name);
         }
     }
 }

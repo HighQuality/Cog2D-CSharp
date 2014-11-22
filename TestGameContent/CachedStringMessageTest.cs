@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Cog.Modules.Networking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cog.Modules.Networking
+namespace TestGame
 {
     public class CachedStringMessageTest : NetworkMessage
     {

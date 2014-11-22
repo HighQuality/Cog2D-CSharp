@@ -2,7 +2,6 @@
 using Cog.Modules.Networking;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +10,7 @@ namespace TestGame
 {
     public class PingMessage : NetworkMessage
     {
-        private static Dictionary<int, Stopwatch> watches = new Dictionary<int,Stopwatch>();
+        private static Dictionary<int, System.Diagnostics.Stopwatch> watches = new Dictionary<int, System.Diagnostics.Stopwatch>();
         private static int nextId = 1;
 
         public int Id;
@@ -20,21 +19,21 @@ namespace TestGame
         public PingMessage()
         {
             this.Id = nextId++;
-            watches.Add(Id, Stopwatch.StartNew());
+            watches.Add(Id, System.Diagnostics.Stopwatch.StartNew());
         }
 
         public override void Received()
         {
             if (IsResponse)
             {
-                Stopwatch watch;
+                System.Diagnostics.Stopwatch watch;
                 if (watches.TryGetValue(Id, out watch))
                 {
-                    Console.WriteLine("Ping: {0}ms", watch.Elapsed.TotalMilliseconds);
+                    Debug.Info("Ping: {0}ms", watch.Elapsed.TotalMilliseconds);
                     watches.Remove(Id);
                 }
                 else
-                    Console.WriteLine("No Ping Message with ID " + Id.ToString() + " expected!");
+                    Debug.Error("No Ping Message with ID " + Id.ToString() + " expected!");
             }
             else
             {

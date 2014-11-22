@@ -20,7 +20,6 @@ namespace Cog.Scenes
         public string Name { get; private set; }
         public int SceneId { get; private set; }
         public LinkedList<GameObject> Objects = new LinkedList<GameObject>();
-        public Dictionary<long, GameObject> ObjectDictionary = new Dictionary<long, GameObject>();
         public EventModule EventModule = new EventModule();
         private Dictionary<EventIdentifier, List<IEventListener>> eventStrength = new Dictionary<EventIdentifier, List<IEventListener>>();
         private Dictionary<EventIdentifier, IEventListener> globalListeners = new Dictionary<EventIdentifier, IEventListener>();
@@ -95,7 +94,7 @@ namespace Cog.Scenes
 
                 for (int i = toBeRemoved.Count - 1; i >= 0; i--)
                 {
-                    Console.WriteLine("Stopped listening for " + globalListeners[toBeRemoved[i]].IEvent.GetType().GenericTypeArguments[0].Name + " events");
+                    Debug.Event("Stopped listening for " + globalListeners[toBeRemoved[i]].IEvent.GetType().GenericTypeArguments[0].Name + " events");
 
                     // Cancel and remove the global listener (Engine.EventModule -> this scene's event module)
                     globalListeners[toBeRemoved[i]].Cancel();
@@ -171,9 +170,11 @@ namespace Cog.Scenes
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
                     var objCount = reader.ReadUInt16();
+
                     List<GameObject> objects = new List<GameObject>(objCount);
                     for (int i = 0; i < (int)objCount; i++)
                         objects.AddRange(GameObject.DeserializeUninitialized(this, null, reader));
+
                     for (int i = 0; i < objects.Count; i++)
                         InitializeObject(objects[i]);
                     for (int i = 0; i < objects.Count; i++)
@@ -200,7 +201,8 @@ namespace Cog.Scenes
             if (Engine.IsNetworkGame && !Engine.IsServer)
                 throw new Exception("Only the server can create global objects!");
 
-            T obj = (T)CreateUninitializedObject(typeof(T), Engine.GetGlobalId(), parent);
+            T obj = (T)CreateUninitializedObject(typeof(T), parent);
+            Engine.GenerateGlobalId(obj);
             obj.LocalCoord = localCoord;
 
             // Engine/Object Constructor
@@ -211,12 +213,11 @@ namespace Cog.Scenes
             return obj;
         }
 
-        public GameObject CreateUninitializedObject(Type type, long id, GameObject parent)
+        public GameObject CreateUninitializedObject(Type type, GameObject parent)
         {
             // Create an object of this type without invoking the constructor
             GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(type);
             obj.Scene = this;
-            obj.Id = id;
             obj.InitialSetParent(parent);
 
             InitializationData data = new InitializationData();
@@ -226,7 +227,6 @@ namespace Cog.Scenes
             obj.InitializationData = data;
 
             // Register the new object
-            ObjectDictionary.Add(obj.Id, obj);
             Objects.AddLast(obj);
             
             return obj;
@@ -273,7 +273,8 @@ namespace Cog.Scenes
         public T CreateLocalObject<T>(GameObject parent, Vector2 localCoord)
             where T : GameObject, new()
         {
-            T obj = (T)CreateUninitializedObject(typeof(T), Engine.GetLocalId(), parent);
+            T obj = (T)CreateUninitializedObject(typeof(T), parent);
+            Engine.GenerateLocalId(obj);
             obj.LocalCoord = localCoord;
 
             // Engine/object constructor

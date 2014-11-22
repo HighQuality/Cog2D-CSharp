@@ -46,6 +46,7 @@ namespace TestGame
                 RegisterEvent<KeyDownEvent>(Keyboard.Key.Space, 1000, ev => { var sound = Resources.GetSound("Test Sound").Play(); Console.WriteLine(SynchronizedValue.Value); });
 
             Console.WriteLine("SynchronizedValue is " + SynchronizedValue.Value);
+
             if (SynchronizedTarget.Value != null)
                 Console.WriteLine("SynchronizedTarget is " + SynchronizedTarget.Value.ObjectName);
             else

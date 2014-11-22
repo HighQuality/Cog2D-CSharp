@@ -146,7 +146,6 @@
     <Compile Include="Modules\EventHost\Mouse.cs" />
     <Compile Include="Modules\EventHost\PhysicsUpdateEvent.cs" />
     <Compile Include="Modules\EventHost\UpdateEvent.cs" />
-    <Compile Include="Modules\Networking\CachedStringMessageTest.cs" />
     <Compile Include="ISerializable.cs" />
     <Compile Include="Modules\Networking\IStringCacher.cs" />
     <Compile Include="Modules\Networking\MessageExecutionProperty.cs" />

@@ -30,7 +30,7 @@ namespace Cog.Modules.Resources
 
         ~Resource()
         {
-            Console.WriteLine("Disposing " + Identifier);
+            Debug.Info("Disposing Resource {0}!", Identifier);
         }
     }
 }

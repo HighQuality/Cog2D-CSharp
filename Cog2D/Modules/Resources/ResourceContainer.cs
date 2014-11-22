@@ -44,7 +44,7 @@ namespace Cog.Modules.Resources
             else
                 throw new NotImplementedException("Resource Type \"" + extension + "\" not implemented!");
 
-            Console.WriteLine("Resource {0} ({1}) in container {2} loaded!", file, resourceType, Name);
+            Debug.Info("Resource {0} ({1}) in container {2} loaded!", file, resourceType, Name);
 
             if (resource != null)
             {

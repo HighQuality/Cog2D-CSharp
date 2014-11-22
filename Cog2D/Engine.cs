@@ -63,6 +63,7 @@ namespace Cog
 
         public static float PhysicsTimeStep;
 
+        private static Dictionary<long, GameObject> objectDictionary;
         private static long nextGlobalId,
             nextLocalId;
 
@@ -136,8 +137,11 @@ namespace Cog
             random = new Random();
             PhysicsTimeStep = 1f / 120f;
             Permissions = Permissions.FullPermissions;
+
             nextGlobalId = 1;
             nextLocalId = -1;
+            objectDictionary = new Dictionary<long, GameObject>();
+
             DesiredResolution = new Vector2(640f, 480f);
 
             NetworkMessage.InitializeCache();
@@ -177,12 +181,12 @@ namespace Cog
                 }
                 if (referencesThis)
                 {
-                    Debug.Info(currentName.Name);
                     loadedAssemblies[currentName.FullName] = assembly;
                 }
             }
             while (toLoad.Count > 0);
-            Debug.Success("Finished Loading Assemblies! ({0}ms)", watch.Elapsed.TotalMilliseconds);
+
+            Debug.Success("Discovered {0} Content Assemblies! ({1}ms)", loadedAssemblies.Count, watch.Elapsed.TotalMilliseconds);
 
             Debug.Event("Registrating Type Serializers...");
             watch.Restart();
@@ -211,12 +215,16 @@ namespace Cog
             TypeSerializer.Register<Rectangle>((v, w) => { w.Write((float)v.TopLeft.X); w.Write((float)v.TopLeft.Y); w.Write((float)v.Size.X); w.Write((float)v.Size.Y); }, r => { Vector2 topLeft, size; topLeft.X = r.ReadSingle(); topLeft.Y = r.ReadSingle(); size.X = r.ReadSingle(); size.Y = r.ReadSingle(); return new Rectangle(topLeft, size); });
             TypeSerializer.Register<Color>((v, w) => { w.Write((byte)v.R); w.Write((byte)v.G); w.Write((byte)v.B); w.Write((byte)v.A); }, r => { Color v; v.R = r.ReadByte(); v.G = r.ReadByte(); v.B = r.ReadByte(); v.A = r.ReadByte(); return v; });
 
-            TypeSerializer.Register<GameObject>((v, w) => { w.Write((long)v.Id); }, r => { var id = r.ReadInt64(); return Engine.FindObject(id); });
+            TypeSerializer.Register<GameObject>((v, w) => { w.Write((long)v.Id); }, r =>
+            {
+                var id = r.ReadInt64();
+                return Engine.FindObject(id);
+            });
 
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             // Cache event registrators for Object Components
-            Debug.Event("Pre-Caching...");
+            Debug.Event("Generating Game Meta Data...");
             watch.Restart();
             foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
             {
@@ -239,20 +247,19 @@ namespace Cog
                     }
                 }
             }
-            Debug.Success("Finished Pre-Caching! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             StringBuilder hash = new StringBuilder();
             hash.Append(NetworkMessage.GetNetworkDescriber());
             hash.Append(GameObject.GetNetworkDescriber());
 
-            Console.WriteLine(hash.ToString());
-
             // Generates a SHA256-hash from the string describing the networking classes
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
             {
                 NetworkMessage.NetworkingHash = sha256.ComputeHash(Encoding.UTF8.GetBytes(hash.ToString()));
-                Console.WriteLine(BitConverter.ToString(NetworkMessage.NetworkingHash).Replace("-", ""));
+                // Debug.Info("Generated Networking Hash:\n{0}", BitConverter.ToString(NetworkMessage.NetworkingHash).Replace("-", ""));
             }
+
+            Debug.Success("Finished Generating Meta Data! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             Debug.Event("Initializing Core Modules...");
             watch.Restart();
@@ -263,6 +270,7 @@ namespace Cog
             Debug.Success("Finished Initializing Core Modules! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
             Debug.Success("Cog2D has been initialized! ({0}ms)", entireLoadTime.Elapsed.TotalMilliseconds);
+            Debug.NewLine();
         }
 
         /// <summary>
@@ -398,23 +406,44 @@ namespace Cog
             return (float)random.NextDouble();
         }
 
-        internal static long GetGlobalId()
+        internal static void GenerateGlobalId(GameObject gameObject)
         {
-            return nextGlobalId++;
+            if (IsClient && !IsServer)
+                throw new InvalidOperationException("Only the server may generate global IDs!");
+            if (gameObject == null)
+                throw new ArgumentNullException("gameObject");
+            if (gameObject.Id != 0)
+                throw new InvalidOperationException("GameObject has already been assigned an ID!");
+            gameObject.Id = nextGlobalId++;
+            objectDictionary.Add(gameObject.Id, gameObject);
         }
 
-        internal static long GetLocalId()
+        internal static void GenerateLocalId(GameObject gameObject)
         {
-            return nextLocalId--;
+            if (gameObject == null)
+                throw new ArgumentNullException("gameObject");
+            if (gameObject.Id != 0)
+                throw new InvalidOperationException("GameObject has already been assigned an ID!");
+            gameObject.Id = nextLocalId--;
+            objectDictionary.Add(gameObject.Id, gameObject);
+        }
+
+        internal static void AssignId(GameObject gameObject, long id)
+        {
+            if (!IsNetworkGame)
+                throw new InvalidOperationException("Only games using networking may use Engine.AssignId()");
+            if (IsServer)
+                throw new InvalidOperationException("Only the client may use Engine.AssignID()");
+            if (objectDictionary.ContainsKey(id))
+                throw new InvalidOperationException("ID {0} is already in use!");
+            gameObject.Id = id;
+            objectDictionary.Add(id, gameObject);
         }
 
         public static GameObject FindObject(long id)
         {
-            // TODO: Search non-active scenes
-            if (SceneHost.CurrentScene == null)
-                return null;
             GameObject obj;
-            SceneHost.CurrentScene.ObjectDictionary.TryGetValue(id, out obj);
+            objectDictionary.TryGetValue(id, out obj);
             return obj;
         }
     }

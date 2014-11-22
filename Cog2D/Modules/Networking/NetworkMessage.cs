@@ -185,7 +185,6 @@ namespace Cog.Modules.Networking
                         var field = currentField;
                         var fieldType = field.FieldType;
 
-                        Debug.Info("\t{0} {1}", fieldType.Name, field.Name);
                         networkingDescriber.Append(fieldType.Name);
                         networkingDescriber.Append(' ');
                         networkingDescriber.Append(field.Name);

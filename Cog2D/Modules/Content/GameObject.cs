@@ -223,18 +223,14 @@ namespace Cog.Modules.Content
                     member.ForceSet(InitializationData.SynchronizedValues[i - 1]);
 
                 field.SetValue(this, member);
-                Console.WriteLine("Initialized {0}.{1} (Value: {2})", type.Name, field.Name, member.GenericGet());
             }
 
             // Initialization has finished, get rid of data that is no longer necessary
             InitializationData = null;
-
-            Console.WriteLine(ObjectName + "()");
         }
 
         public virtual void Initialize()
         {
-            Console.WriteLine(ObjectName + ".Initialize()");
         }
         
         public bool KeyIsDown(Keyboard.Key key)
@@ -371,7 +367,8 @@ namespace Cog.Modules.Content
             // Id
             ushort objectId = reader.ReadUInt16();
             var id = reader.ReadInt64();
-            GameObject obj = scene.CreateUninitializedObject(objectsArray[(int)objectId], id, parent);
+            GameObject obj = scene.CreateUninitializedObject(objectsArray[(int)objectId], parent);
+            Engine.AssignId(obj, id);
 
             // Transformation
             Vector2 coord,
@@ -393,7 +390,8 @@ namespace Cog.Modules.Content
             object[] synchronizedValues = new object[fields.Length - 1];
             for (int i = 1; i < fields.Length; i++)
             {
-                var serializer = TypeSerializer.GetTypeWriter(fields[i].FieldType.GenericTypeArguments[0]);
+                var readType = fields[i].FieldType.GenericTypeArguments[0];
+                var serializer = TypeSerializer.GetTypeWriter(readType);
                 synchronizedValues[i - 1] = serializer.GenericRead(reader);
             }
 
@@ -472,8 +470,6 @@ namespace Cog.Modules.Content
 
         internal static void CreateCache(Type type)
         {
-            Debug.Info("Object ID {0} = {1}", nextObjectId, type.FullName);
-
             UInt16 nextId = 1;
             List<FieldInfo> fields = new List<FieldInfo>();
             fields.Add(null);
@@ -481,9 +477,7 @@ namespace Cog.Modules.Content
             {
                 fields.Add(field);
                 synchronizedIds.Add(field, nextId);
-
-                Debug.Error(field.Name);
-
+                
                 nextId++;
             }
 

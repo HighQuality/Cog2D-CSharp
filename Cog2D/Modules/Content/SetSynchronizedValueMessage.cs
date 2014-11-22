@@ -38,8 +38,7 @@ namespace Cog.Modules.Content
             }
             else
             {
-                Console.WriteLine("Object does not exist");
-                //throw new Exception("Tried to set synchronized value on an object that does not exist!");
+                Debug.Error("Tried to set synchronized value of object that couldn't be found!");
             }
         }
     }

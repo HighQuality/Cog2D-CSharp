@@ -53,7 +53,7 @@ namespace Cog.Modules.Networking
 
                     if (clients[i].IsDisconnected)
                     {
-                        Console.WriteLine(clients[i].IpAddress + " disconnected!");
+                        Debug.Event(clients[i].IpAddress + " disconnected!");
                         clients.RemoveAt(i);
                         continue;
                     }
