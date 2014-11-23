@@ -25,8 +25,8 @@ namespace TestGame
 
             var container = Engine.ResourceHost.LoadDictionary("main", "resources");
 
-            GameScene scene = null;
-            
+            LoadingScene scene = null;
+
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
                 var message = Engine.ConnectServer("127.0.0.1", 1234);
@@ -35,9 +35,7 @@ namespace TestGame
                 else
                     Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);
 
-                // Create and push the initial scene
-                scene = new GameScene();
-                Engine.SceneHost.Push(scene);
+                scene = Engine.SceneHost.CreateLocal<LoadingScene>();
             });
             
             Engine.EventHost.RegisterEvent<UpdateEvent>(1, e =>

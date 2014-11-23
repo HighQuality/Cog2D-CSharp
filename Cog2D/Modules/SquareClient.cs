@@ -20,8 +20,8 @@ namespace Cog.Modules
 
         public void SubscribeTo(Scene scene)
         {
-            scene.AddSubscription(this);
             Send(scene.CreateSceneCreationMessage());
+            scene.AddSubscription(this);
         }
 
         public bool IsKeyDown(Keyboard.Key key)

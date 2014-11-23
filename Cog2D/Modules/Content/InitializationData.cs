@@ -9,7 +9,6 @@ namespace Cog.Modules.Content
 {
     internal class InitializationData
     {
-        public FieldInfo[] SynchronizedFields;
-        public object[] SynchronizedValues;
+        public ISynchronized[] SynchronizedFields;
     }
 }

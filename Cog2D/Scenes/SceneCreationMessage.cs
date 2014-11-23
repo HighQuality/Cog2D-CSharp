@@ -9,7 +9,8 @@ namespace Cog.Scenes
 {
     class SceneCreationMessage : NetworkMessage
     {
-        public ushort SceneId;
+        public ushort TypeId;
+        public long Id;
         public string SceneName;
         public byte[] Data;
 
@@ -24,7 +25,7 @@ namespace Cog.Scenes
             if (Engine.IsServer)
                 throw new Exception("Client sent server a SceneCreationMessage");
 
-            var scene = SceneCache.CreateFromId(SceneId);
+            var scene = SceneCache.CreateFromId(TypeId, Id);
             scene.ReadSceneCreationData(Data);
             
             // TODO: Add to Engine resolve dictionary and fire SceneReceivedEvent instead of pushing

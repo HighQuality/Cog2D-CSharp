@@ -181,6 +181,7 @@ namespace Cog
                 }
                 if (referencesThis)
                 {
+                    Debug.Info(assembly.FullName);
                     loadedAssemblies[currentName.FullName] = assembly;
                 }
             }
@@ -219,6 +220,12 @@ namespace Cog
             {
                 var id = r.ReadInt64();
                 return Engine.Resolve<GameObject>(id);
+            });
+
+            TypeSerializer.Register<Scene>((v, w) => { w.Write((long)v.Id); }, r =>
+            {
+                var id = r.ReadInt64();
+                return Engine.Resolve<Scene>(id);
             });
 
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);

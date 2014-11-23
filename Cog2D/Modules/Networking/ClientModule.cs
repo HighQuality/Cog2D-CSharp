@@ -23,7 +23,7 @@ namespace Cog.Modules.Networking
             var tcpClient = new TcpClient();
             tcpClient.Connect(hostname, port);
 
-            client = new TcpSocket(tcpClient, Permissions.DefaultClientPermissions);
+            client = new TcpSocket(tcpClient, Permissions.FullPermissions);
             updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue, Update);
         }
 

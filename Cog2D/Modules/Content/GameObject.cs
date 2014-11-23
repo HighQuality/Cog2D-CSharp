@@ -204,6 +204,8 @@ namespace Cog.Modules.Content
 
         public GameObject()
         {
+            if (Id == 0)
+                throw new InvalidOperationException("GameObjet.Id was never set! Did you create the object through one of the Scene creation methods?");
             if (InitializationData == null)
                 throw new InvalidOperationException("GameObject.InitalizationData was never set! Did you create the object through one of the Scene creation methods?");
 
@@ -218,18 +220,7 @@ namespace Cog.Modules.Content
             var fields = objectsSynchronizedProperties[type];
 
             for (int i = 1; i < fields.Length; i++)
-            {
-                var field = fields[i];
-
-                object value = null;
-                if (InitializationData.SynchronizedValues != null)
-                    value = InitializationData.SynchronizedValues[i - 1];
-
-                ISynchronized member = (ISynchronized)field.GetValue(this);
-                member.Initialize(this, synchronizedIds[field], value);
-
-                field.SetValue(this, member);
-            }
+                fields[i].SetValue(this, InitializationData.SynchronizedFields[i - 1]);
 
             // Initialization has finished, get rid of data that is no longer necessary
             InitializationData = null;
@@ -250,6 +241,20 @@ namespace Cog.Modules.Content
                 
         public void Remove()
         {
+            if (Engine.IsClient && IsGlobal)
+                throw new InvalidOperationException("Can not Remove a global object when connected to a server!");
+
+            ForceRemove();
+
+            if (Engine.IsServer)
+            {
+                Send(new RemoveObjectMessage(this));
+                SubscribedClients.Clear();
+            }
+        }
+
+        internal void ForceRemove()
+        {
             if (registeredEvents != null)
             {
                 for (int i = registeredEvents.Count - 1; i >= 0; i--)
@@ -257,6 +262,21 @@ namespace Cog.Modules.Content
                 registeredEvents = null;
             }
 
+            if (Parent != null)
+                Parent.children.Remove(this);
+            else
+            {
+                Scene.BaseObjects.Remove(this);
+
+                HashSet<GameObject> objectSet;
+                DrawCell cell;
+                cell.X = (int)LocalCoord.X / DrawCell.DrawCellSize;
+                cell.Y = (int)LocalCoord.Y / DrawCell.DrawCellSize;
+                if (Scene.DrawCells.TryGetValue(cell, out objectSet))
+                {
+                    objectSet.Remove(this);
+                }
+            }
             DoRemove = true;
         }
         
@@ -302,6 +322,9 @@ namespace Cog.Modules.Content
 
         internal CreateObjectMessage CreateCreationMessage()
         {
+            if (!IsGlobal || !Scene.IsGlobal)
+                throw new InvalidOperationException("Tried to create an object creation message from a local object or from an object in a local scene!");
+
             using (MemoryStream stream = new MemoryStream())
             {
                 using (BinaryWriter writer = new BinaryWriter(stream))
@@ -309,6 +332,7 @@ namespace Cog.Modules.Content
                     Serialize(writer);
 
                     var msg = new CreateObjectMessage(stream.ToArray());
+                    msg.Scene = Scene;
                     msg.TypeId = IdFromType(GetType());
                     msg.ObjectId = Id;
 
@@ -383,16 +407,10 @@ namespace Cog.Modules.Content
 
             // Read properties
             var fields = objectsSynchronizedProperties[GetType()];
-            object[] synchronizedValues = new object[fields.Length - 1];
             for (int i = 1; i < fields.Length; i++)
             {
-                var sync = (ISynchronized)fields[i].GetValue(this);
-                sync.Deserialize(reader);
-                synchronizedValues[i - 1] = sync.GenericGet();
+                InitializationData.SynchronizedFields[i - 1].Deserialize(reader);
             }
-
-            // Assign synchronized values to later be set by GameObject's constructor
-            InitializationData.SynchronizedValues = synchronizedValues;
 
             // TODO: User data
             /*var userSize = reader.ReadUInt32();

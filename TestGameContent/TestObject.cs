@@ -18,7 +18,7 @@ namespace TestGame
     {
         public SpriteComponent Sprite;
         public MovementComponent Movement;
-        public Synchronized<int> SynchronizedValue = new Synchronized<int>(1234);
+        public Synchronized<int> SynchronizedValue;
         public SynchronizedDR<GameObject> SynchronizedTarget;
         public IAnimationComponent AnimationComponent { get; set; }
 

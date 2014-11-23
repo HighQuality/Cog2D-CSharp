@@ -115,6 +115,7 @@
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
+    <Compile Include="Modules\Content\RemoveObjectMessage.cs" />
     <Compile Include="Modules\Content\SynchronizedDR.cs" />
     <Compile Include="Modules\Content\IBoundingBox.cs" />
     <Compile Include="Modules\Content\IIdentifier.cs" />

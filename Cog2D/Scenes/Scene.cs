@@ -15,7 +15,7 @@ using System.IO;
 
 namespace Cog.Scenes
 {
-    public abstract class Scene
+    public abstract class Scene : IIdentifier
     {
         public string Name { get; private set; }
         public int SceneId { get; private set; }
@@ -48,8 +48,15 @@ namespace Cog.Scenes
 
         private List<CogClient> subscribedClients = new List<CogClient>();
 
+        public long Id { get; set; }
+        public bool IsGlobal { get { return Id > 0; } }
+        public bool IsLocal { get { return Id < 0; } }
+
         public Scene(string name)
         {
+            if (Id == 0)
+                throw new InvalidOperationException("No ID was assigned to the scene!\nDid you create the scene through SceneManager.Create<T>()?");
+
             this.Name = name;
             SceneId = SceneCache.IdFromType(GetType());
 
@@ -68,17 +75,18 @@ namespace Cog.Scenes
 
         private void Update(UpdateEvent args)
         {
-            var current = Objects.First;
-            
-            while (current != null)
             {
-                if (current.Value.DoRemove)
-                    Objects.Remove(current);
-                current = current.Next;
+                var current = Objects.First;
+                while (current != null)
+                {
+                    if (current.Value.DoRemove)
+                        Objects.Remove(current);
+                    current = current.Next;
+                }
             }
 
             eventStrengthUpdateTimer += args.DeltaTime;
-            while(eventStrengthUpdateTimer >= 1f)
+            while (eventStrengthUpdateTimer >= 1f)
             {
                 foreach (var pair in eventStrength)
                 {
@@ -140,9 +148,13 @@ namespace Cog.Scenes
 
         internal SceneCreationMessage CreateSceneCreationMessage()
         {
+            if (IsLocal)
+                throw new InvalidOperationException("Tried to create a scene creation message from a local scene!");
+
             var msg = new SceneCreationMessage();
             msg.SceneName = Name;
-            msg.SceneId = (ushort)SceneId;
+            msg.TypeId = (ushort)SceneId;
+            msg.Id = Id;
 
             using (MemoryStream stream = new MemoryStream())
             {
@@ -212,8 +224,8 @@ namespace Cog.Scenes
         public T CreateObject<T>(CogClient owner, GameObject parent, Vector2 localCoord)
             where T : GameObject, new()
         {
-            if (Engine.IsNetworkGame && !Engine.IsServer)
-                throw new Exception("Only the server can create global objects!");
+            if (Engine.IsClient)
+                throw new Exception("Can not create global objects when connected to a server!");
 
             T obj = (T)CreateUninitializedObject(typeof(T), parent);
             Engine.GenerateGlobalId(obj);
@@ -235,8 +247,14 @@ namespace Cog.Scenes
             obj.InitialSetParent(parent);
 
             InitializationData data = new InitializationData();
-            data.SynchronizedFields = GameObject.GetSynchronizedFields(type);
-            data.SynchronizedValues = null;
+            var synchronizedFields = GameObject.GetSynchronizedFields(type);
+            data.SynchronizedFields = new ISynchronized[synchronizedFields.Length - 1];
+
+            for (int i = 1; i < synchronizedFields.Length; i++)
+            {
+                data.SynchronizedFields[i - 1] = (ISynchronized)Activator.CreateInstance(synchronizedFields[i].FieldType, true);
+                data.SynchronizedFields[i - 1].Initialize(obj, (ushort)i);
+            }
 
             obj.InitializationData = data;
 

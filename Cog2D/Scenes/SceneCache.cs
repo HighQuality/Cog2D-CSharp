@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,11 +29,16 @@ namespace Cog.Scenes
             nextSceneId++;
         }
 
-        internal static Scene CreateFromId(int id)
+        internal static Scene CreateFromId(ushort typeId, long id)
         {
             if (id < 1 || id >= idToType.Count)
                 throw new ArgumentOutOfRangeException("Scene ID " + id.ToString() + " is not cached!");
-            return (Scene)Activator.CreateInstance(idToType[(int)id]);
+
+            var type = idToType[(int)typeId];
+            var scene = (Scene)FormatterServices.GetUninitializedObject(type);
+            Engine.AssignId(scene, id);
+            type.GetConstructor(new Type[0]).Invoke(scene, new object[0]);
+            return scene;
         }
 
         internal static int IdFromType(Type type)

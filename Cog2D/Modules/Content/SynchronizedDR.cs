@@ -11,7 +11,7 @@ namespace Cog.Modules.Content
     /// A Synchronized value that is resolved on read-time through an identifier.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public struct SynchronizedDR<T> : ISynchronized
+    public class SynchronizedDR<T> : ISynchronized
         where T : IIdentifier
     {
         public GameObject BaseObject { get; set; }
@@ -40,16 +40,12 @@ namespace Cog.Modules.Content
             }
         }
 
-        public SynchronizedDR(T value)
-            : this()
+        private SynchronizedDR()
         {
-            this.Value = value;
         }
 
-        public void Initialize(GameObject obj, ushort synchronizationId, object value)
+        public void Initialize(GameObject obj, ushort synchronizationId)
         {
-            if (value != null)
-                Identifier = (long)value;
             BaseObject = obj;
             SynchronizationId = synchronizationId;
         }

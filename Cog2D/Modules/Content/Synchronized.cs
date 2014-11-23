@@ -9,7 +9,7 @@ namespace Cog.Modules.Content
 {
     public interface ISynchronized
     {
-        void Initialize(GameObject obj, ushort synchronizationId, object value);
+        void Initialize(GameObject obj, ushort synchronizationId);
         GameObject BaseObject { get; set; }
         ushort SynchronizationId { get; set; }
         void ForceSet(object value);
@@ -19,23 +19,19 @@ namespace Cog.Modules.Content
         void Deserialize(BinaryReader reader);
     }
 
-    public struct Synchronized<T> : ISynchronized
+    public class Synchronized<T> : ISynchronized
     {
         public GameObject BaseObject { get; set; }
         public ushort SynchronizationId { get; set; }
 
         private T _value;
 
-        public Synchronized(T value)
-            : this()
+        private Synchronized()
         {
-            this._value = value;
         }
 
-        public void Initialize(GameObject obj, ushort synchronizationId, object value)
+        public void Initialize(GameObject obj, ushort synchronizationId)
         {
-            if (value != null)
-                _value = (T)value;
             BaseObject = obj;
             SynchronizationId = synchronizationId;
         }
