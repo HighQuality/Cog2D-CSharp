@@ -148,9 +148,16 @@ namespace Cog.Scenes
             {
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    var objects = BaseObjects.Where(o => o.IsGlobal).ToArray();
-                    writer.Write((UInt16)objects.Length);
-                    for (int i=0; i<objects.Length; i++)
+                    var objects = Objects.Where(o => o.IsGlobal).ToArray();
+                    writer.Write((UInt32)objects.Length);
+
+                    for (int i = 0; i < objects.Length; i++)
+                    {
+                        writer.Write((ushort)GameObject.IdFromType(objects[i].GetType()));
+                        writer.Write((long)objects[i].Id);
+                    }
+
+                    for (int i = 0; i < objects.Length; i++)
                     {
                         var obj = objects[i];
                         obj.Serialize(writer);
@@ -169,15 +176,22 @@ namespace Cog.Scenes
             {
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
-                    var objCount = reader.ReadUInt16();
+                    var objCount = reader.ReadUInt32();
+                    var objects = new GameObject[objCount];
 
-                    List<GameObject> objects = new List<GameObject>(objCount);
-                    for (int i = 0; i < (int)objCount; i++)
-                        objects.AddRange(GameObject.DeserializeUninitialized(this, null, reader));
+                    for (int i = 0; i < objects.Length; i++)
+                    {
+                        ushort typeId = reader.ReadUInt16();
+                        long id = reader.ReadInt64();
+                        objects[i] = CreateUninitializedObject(GameObject.TypeFromId(typeId), null);
+                        Engine.AssignId(objects[i], id);
+                    }
 
-                    for (int i = 0; i < objects.Count; i++)
+                    for (int i = 0; i < objects.Length; i++)
+                        objects[i].Deserialize(reader);
+                    for (int i = 0; i < objects.Length; i++)
                         InitializeObject(objects[i]);
-                    for (int i = 0; i < objects.Count; i++)
+                    for (int i = 0; i < objects.Length; i++)
                         objects[i].Initialize();
                 }
             }
@@ -290,7 +304,7 @@ namespace Cog.Scenes
             var current = Objects.First;
             do
             {
-                if (current.Value.DoRemove)
+                if (!current.Value.DoRemove)
                     current.Value.Remove();
             }
             while (current != null);

@@ -19,7 +19,7 @@ namespace TestGame
         public SpriteComponent Sprite;
         public MovementComponent Movement;
         public Synchronized<int> SynchronizedValue = new Synchronized<int>(1234);
-        public Synchronized<GameObject> SynchronizedTarget;
+        public SynchronizedDR<GameObject> SynchronizedTarget;
         public IAnimationComponent AnimationComponent { get; set; }
 
         public TestObject()
@@ -45,12 +45,16 @@ namespace TestGame
             else
                 RegisterEvent<KeyDownEvent>(Keyboard.Key.Space, 1000, ev => { var sound = Resources.GetSound("Test Sound").Play(); Console.WriteLine(SynchronizedValue.Value); });
 
+            Console.WriteLine(ObjectName + ":");
+
             Console.WriteLine("SynchronizedValue is " + SynchronizedValue.Value);
 
             if (SynchronizedTarget.Value != null)
                 Console.WriteLine("SynchronizedTarget is " + SynchronizedTarget.Value.ObjectName);
             else
                 Console.WriteLine("SynchronizedTarget is null");
+
+            Console.WriteLine("---");
         }
     }
 }

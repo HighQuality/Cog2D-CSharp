@@ -18,7 +18,15 @@ namespace TestGame
         {
             if (Engine.IsServer)
             {
-                var obj = CreateObject<TestObject>(new Vector2(0f, 0f));
+                var firstObject = CreateObject<TestObject>(new Vector2(0f, 0f));
+                firstObject.ObjectName = "First Object";
+                firstObject.LocalRotation = Angle.FromDegree(90f);
+
+                var secondObject = CreateObject<TestObject>(firstObject, new Vector2(32f, 0f));
+                secondObject.ObjectName = "Second Object";
+
+                secondObject.SynchronizedTarget.Value = firstObject;
+                firstObject.SynchronizedTarget.Value = secondObject;
             }
         }
     }

@@ -7,13 +7,22 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Content
 {
-    public interface ISynchronized { GameObject BaseObject { get; set; } ushort SynchronizationId { get; set; } ITypeWriter TypeWriter { get; set; } void ForceSet(object value); object GenericGet(); }
+    public interface ISynchronized
+    {
+        void Initialize(GameObject obj, ushort synchronizationId, object value);
+        GameObject BaseObject { get; set; }
+        ushort SynchronizationId { get; set; }
+        void ForceSet(object value);
+        object GenericGet();
+
+        void Serialize(BinaryWriter writer);
+        void Deserialize(BinaryReader reader);
+    }
 
     public struct Synchronized<T> : ISynchronized
     {
         public GameObject BaseObject { get; set; }
         public ushort SynchronizationId { get; set; }
-        public ITypeWriter TypeWriter { get; set; }
 
         private T _value;
 
@@ -21,6 +30,14 @@ namespace Cog.Modules.Content
             : this()
         {
             this._value = value;
+        }
+
+        public void Initialize(GameObject obj, ushort synchronizationId, object value)
+        {
+            if (value != null)
+                _value = (T)value;
+            BaseObject = obj;
+            SynchronizationId = synchronizationId;
         }
 
         public T Value
@@ -38,13 +55,23 @@ namespace Cog.Modules.Content
                 {
                     using (BinaryWriter writer = new BinaryWriter(stream))
                     {
-                        TypeWriter.GenericWrite(_value, writer);
+                        TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]).GenericWrite(_value, writer);
                         message.Data = stream.ToArray();
                     }
                 }
                 
                 BaseObject.Send(message);
             }
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]).GenericWrite(_value, writer);
+        }
+
+        public void Deserialize(BinaryReader reader)
+        {
+            _value = (T)TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]).GenericRead(reader);
         }
 
         public void ForceSet(object value)

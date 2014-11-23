@@ -25,16 +25,11 @@ namespace Cog.Modules.Content
                 var field = GameObject.GetSynchronizedField(Object.GetType(), SynchronizationId);
                 var converter = TypeSerializer.GetTypeWriter(field.FieldType.GenericTypeArguments[0]);
 
+                ISynchronized prop = (ISynchronized)field.GetValue(Object);
                 using (MemoryStream stream = new MemoryStream(Data))
-                {
                     using (BinaryReader reader = new BinaryReader(stream))
-                    {
-                        ISynchronized prop = (ISynchronized)field.GetValue(Object);
-                        object receivedValue = converter.GenericRead(reader);
-                        prop.ForceSet(receivedValue);
-                        field.SetValue(Object, prop);
-                    }
-                }
+                        prop.Deserialize(reader);
+                field.SetValue(Object, prop);
             }
             else
             {

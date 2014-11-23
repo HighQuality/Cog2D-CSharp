@@ -63,7 +63,7 @@ namespace Cog
 
         public static float PhysicsTimeStep;
 
-        private static Dictionary<long, GameObject> objectDictionary;
+        private static Dictionary<long, IIdentifier> resolveDictionary;
         private static long nextGlobalId,
             nextLocalId;
 
@@ -140,7 +140,7 @@ namespace Cog
 
             nextGlobalId = 1;
             nextLocalId = -1;
-            objectDictionary = new Dictionary<long, GameObject>();
+            resolveDictionary = new Dictionary<long, IIdentifier>();
 
             DesiredResolution = new Vector2(640f, 480f);
 
@@ -218,7 +218,7 @@ namespace Cog
             TypeSerializer.Register<GameObject>((v, w) => { w.Write((long)v.Id); }, r =>
             {
                 var id = r.ReadInt64();
-                return Engine.FindObject(id);
+                return Engine.Resolve<GameObject>(id);
             });
 
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
@@ -406,45 +406,48 @@ namespace Cog
             return (float)random.NextDouble();
         }
 
-        internal static void GenerateGlobalId(GameObject gameObject)
+        internal static void GenerateGlobalId(IIdentifier obj)
         {
             if (IsClient && !IsServer)
                 throw new InvalidOperationException("Only the server may generate global IDs!");
-            if (gameObject == null)
+            if (obj == null)
                 throw new ArgumentNullException("gameObject");
-            if (gameObject.Id != 0)
+            if (obj.Id != 0)
                 throw new InvalidOperationException("GameObject has already been assigned an ID!");
-            gameObject.Id = nextGlobalId++;
-            objectDictionary.Add(gameObject.Id, gameObject);
+            obj.Id = nextGlobalId++;
+            resolveDictionary.Add(obj.Id, obj);
         }
 
-        internal static void GenerateLocalId(GameObject gameObject)
+        internal static void GenerateLocalId(IIdentifier obj)
         {
-            if (gameObject == null)
+            if (obj == null)
                 throw new ArgumentNullException("gameObject");
-            if (gameObject.Id != 0)
+            if (obj.Id != 0)
                 throw new InvalidOperationException("GameObject has already been assigned an ID!");
-            gameObject.Id = nextLocalId--;
-            objectDictionary.Add(gameObject.Id, gameObject);
+            obj.Id = nextLocalId--;
+            resolveDictionary.Add(obj.Id, obj);
         }
 
-        internal static void AssignId(GameObject gameObject, long id)
+        internal static void AssignId(IIdentifier obj, long id)
         {
             if (!IsNetworkGame)
                 throw new InvalidOperationException("Only games using networking may use Engine.AssignId()");
             if (IsServer)
                 throw new InvalidOperationException("Only the client may use Engine.AssignID()");
-            if (objectDictionary.ContainsKey(id))
+            if (resolveDictionary.ContainsKey(id))
                 throw new InvalidOperationException("ID {0} is already in use!");
-            gameObject.Id = id;
-            objectDictionary.Add(id, gameObject);
+            obj.Id = id;
+            resolveDictionary.Add(id, obj);
         }
 
-        public static GameObject FindObject(long id)
+        public static T Resolve<T>(long id)
+            where T : IIdentifier
         {
-            GameObject obj;
-            objectDictionary.TryGetValue(id, out obj);
-            return obj;
+            IIdentifier obj;
+            resolveDictionary.TryGetValue(id, out obj);
+            if (obj is T || obj == null)
+                return (T)obj;
+            throw new Exception(string.Format("{0} with ID {1} is not a {2}", obj.GetType().Name, id, typeof(T).Name));
         }
     }
 }

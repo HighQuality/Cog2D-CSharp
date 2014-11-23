@@ -9,6 +9,8 @@ namespace Cog.Modules.Content
 {
     class CreateObjectMessage : NetworkMessage
     {
+        public ushort TypeId;
+        public long ObjectId;
         public byte[] ObjectData;
 
         public CreateObjectMessage(byte[] objectData)
@@ -22,7 +24,7 @@ namespace Cog.Modules.Content
         {
             if (!Sender.Permissions.CreateGlobalObjects)
                 throw new Exception(string.Format("{0} may not create global objects!", Sender.Identifier));
-            GameObject.CreateFromData(Engine.SceneHost.CurrentScene, ObjectData);
+            throw new NotImplementedException();
         }
     }
 }

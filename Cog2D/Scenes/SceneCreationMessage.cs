@@ -26,7 +26,8 @@ namespace Cog.Scenes
 
             var scene = SceneCache.CreateFromId(SceneId);
             scene.ReadSceneCreationData(Data);
-
+            
+            // TODO: Add to Engine resolve dictionary and fire SceneReceivedEvent instead of pushing
             Engine.SceneHost.Push(scene);
 
             Debug.Event("Received scene \"{0}\" from server", scene.Name);
