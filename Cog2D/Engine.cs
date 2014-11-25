@@ -238,15 +238,19 @@ namespace Cog
             TypeSerializer.Register<Rectangle>((r, w) => w.Write(r.ReadBytes(sizeof(float) * 4)), (v, w) => { w.Write((float)v.TopLeft.X); w.Write((float)v.TopLeft.Y); w.Write((float)v.Size.X); w.Write((float)v.Size.Y); }, r => { Vector2 topLeft, size; topLeft.X = r.ReadSingle(); topLeft.Y = r.ReadSingle(); size.X = r.ReadSingle(); size.Y = r.ReadSingle(); return new Rectangle(topLeft, size); });
             TypeSerializer.Register<Color>((r, w) => w.Write(r.ReadBytes(sizeof(byte) * 4)), (v, w) => { w.Write((byte)v.R); w.Write((byte)v.G); w.Write((byte)v.B); w.Write((byte)v.A); }, r => { Color v; v.R = r.ReadByte(); v.G = r.ReadByte(); v.B = r.ReadByte(); v.A = r.ReadByte(); return v; });
 
-            TypeSerializer.Register<GameObject>((r, w) => w.Write(r.ReadBytes(sizeof(Int64))), (v, w) => { w.Write((long)v.Id); }, r =>
+            TypeSerializer.Register<GameObject>((r, w) => w.Write(r.ReadBytes(sizeof(Int64))), (v, w) => { if (v == null) w.Write((long)0); else w.Write((long)v.Id); }, r =>
             {
                 var id = r.ReadInt64();
+                if (id == 0)
+                    return null;
                 return Engine.Resolve<GameObject>(id);
             });
 
-            TypeSerializer.Register<Scene>((r, w) => w.Write(r.ReadBytes(sizeof(Int64))), (v, w) => { w.Write((long)v.Id); }, r =>
+            TypeSerializer.Register<Scene>((r, w) => w.Write(r.ReadBytes(sizeof(Int64))), (v, w) => { if (v == null) w.Write((long)0); else w.Write((long)v.Id); }, r =>
             {
                 var id = r.ReadInt64();
+                if (id == 0)
+                    return null;
                 return Engine.Resolve<Scene>(id);
             });
 
@@ -264,10 +268,12 @@ namespace Cog
                         if (typeof(GameObject).IsAssignableFrom(type))
                         {
                             GameObject.CreateCache(type);
+                            TypeSerializer.RegisterDescendant<GameObject>(type);
                         }
                         else if (typeof(Scene).IsAssignableFrom(type))
                         {
                             SceneCache.CreateCache(type);
+                            TypeSerializer.RegisterDescendant<Scene>(type);
                         }
                         else if (typeof(NetworkMessage).IsAssignableFrom(type))
                         {

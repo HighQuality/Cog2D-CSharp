@@ -83,6 +83,18 @@ namespace Cog
             });
         }
 
+        public static void RegisterDescendant<T>(Type type)
+        {
+            if (!typeof(T).IsAssignableFrom(type))
+                throw new Exception(typeof(T).FullName + " is not assignable from " + type.FullName + "!");
+            if (!typeWriters.ContainsKey(typeof(T)))
+                throw new Exception(typeof(T).FullName + " has no registered type serializer!");
+
+            typeWriters[type] = typeWriters[typeof(T)];
+            typeWriters[type.MakeArrayType(1)] = typeWriters[typeof(T[])];
+            typeWriters[type.MakeArrayType(2)] = typeWriters[typeof(T[][])];
+        }
+
         public static bool SerializerExists<T>()
         {
             return typeWriters.ContainsKey(typeof(T));
