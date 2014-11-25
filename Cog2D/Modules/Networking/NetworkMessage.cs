@@ -16,6 +16,7 @@ namespace Cog.Modules.Networking
     {
         private static ushort nextId;
         private static Dictionary<ushort, Action<Object, BinaryWriter, IStringCacher>> messageWriterCache;
+        private static Dictionary<ushort, Action<BinaryReader, BinaryWriter>> messageReceiverCache;
         private static Dictionary<ushort, Action<Object, BinaryReader, IStringCacher>> messageReaderCache;
         private static Dictionary<ushort, Func<NetworkMessage>> eventCreators;
         private static Dictionary<Type, ushort> typeIds;
@@ -27,7 +28,7 @@ namespace Cog.Modules.Networking
         /// <summary>
         /// The TcpSocket which sent us this message
         /// </summary>
-        public TcpSocket Sender { get { return _sender; } }
+        public TcpSocket Sender { get { return _sender; } internal set { _sender = value; } }
         public CogClient Client { get { return _sender as CogClient; } }
 
         public NetworkMessage()
@@ -51,6 +52,11 @@ namespace Cog.Modules.Networking
             return typeIds[typeof(T)];
         }
 
+        internal static Type GetType(ushort id)
+        {
+            return types[(int)id - 1];
+        }
+
         internal static void InitializeCache()
         {
             nextId = 1;
@@ -58,6 +64,7 @@ namespace Cog.Modules.Networking
             typeIds = new Dictionary<Type, ushort>();
             eventCreators = new Dictionary<ushort, Func<NetworkMessage>>();
             messageWriterCache = new Dictionary<ushort, Action<object, BinaryWriter, IStringCacher>>();
+            messageReceiverCache = new Dictionary<ushort, Action<BinaryReader, BinaryWriter>>();
             messageReaderCache = new Dictionary<ushort, Action<object, BinaryReader, IStringCacher>>();
             types = new List<Type>();
         }
@@ -69,6 +76,7 @@ namespace Cog.Modules.Networking
 
             Action<Object, BinaryWriter, IStringCacher> messageWriter = null;
             Action<Object, BinaryReader, IStringCacher> messageReader = null;
+            Action<BinaryReader, BinaryWriter> messageReceiver = null;
             // Iterate through all fields contained within the type alphabetically
             foreach (var currentField in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).OrderBy(o => o.Name))
             {
@@ -100,6 +108,14 @@ namespace Cog.Modules.Networking
                                     }
                                 };
 
+                                messageReceiver += (r, w) =>
+                                {
+                                    var size = r.ReadUInt16();
+                                    w.Write((UInt16)size);
+                                    if (size > 0)
+                                        w.Write(r.ReadBytes(size));
+                                };
+
                                 messageReader += (o, r, sc) =>
                                 {
                                     string value = "";
@@ -115,6 +131,11 @@ namespace Cog.Modules.Networking
                                 {
                                     var value = (string)field.GetValue(o);
                                     w.Write((ushort)sc.GetIdFromString(value));
+                                };
+
+                                messageReceiver += (r, w) =>
+                                {
+                                    w.Write(r.ReadUInt16());
                                 };
 
                                 messageReader += (o, r, sc) =>
@@ -135,17 +156,14 @@ namespace Cog.Modules.Networking
                         {
                             // Add write/read operations to the type handler
                             messageWriter += (o, w, sc) => writer.GenericWrite(field.GetValue(o), w);
+                            messageReceiver += writer.GenericCopy;
                             messageReader += (o, r, sc) => field.SetValue(o, writer.GenericRead(r));
                         }
                         else if (fieldType.IsEnum)
                         {
                             messageWriter += (o, w, sc) => w.Write((UInt16)field.GetValue(o));
+                            messageReceiver += (r, w) => w.Write((UInt16)r.ReadUInt16());
                             messageReader += (o, r, sc) => field.SetValue(o, r.ReadUInt16());
-                        }
-                        else if (typeof(ISerializable).IsAssignableFrom(fieldType))
-                        {
-                            messageWriter += (o, w, sc) => { ((ISerializable)field.GetValue(o)).Serialize(w); };
-                            messageReader += (o, r, sc) => { var v = (ISerializable)FormatterServices.GetUninitializedObject(fieldType); v.Deserialize(r); field.SetValue(o, v); };
                         }
                         else
                             throw new Exception(string.Format("Network Event type {0} contains a type without a registered type handler: {1}\r\nEither register a custom type handler through NetworkEvent.RegisterCustomType<T>(writer, reader) or add a NetworkIgnore-attribute to the field.", type.FullName, field.Name));
@@ -155,6 +173,7 @@ namespace Cog.Modules.Networking
 
             // Register the collection of write/read functions for this type
             messageReaderCache[nextId] = messageReader;
+            messageReceiverCache[nextId] = messageReceiver;
             messageWriterCache[nextId] = messageWriter;
             // Create an anonymous function that creates an instance of the specified type without invoking it's constructor
             eventCreators[nextId] = () => (NetworkMessage)FormatterServices.GetUninitializedObject(type);
@@ -235,16 +254,32 @@ namespace Cog.Modules.Networking
         /// <summary>
         /// Reads an event of the given type from the given BinaryReader
         /// </summary>
-        internal static NetworkMessage ReadMessage(TcpSocket sender, TcpSocket socket)
+        internal static byte[] ReadMessageData(UInt16 type, TcpSocket socket, BinaryReader reader)
         {
-            UInt16 type = socket.Reader.ReadUInt16();
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    var messageReceiver = messageReceiverCache[type];
+                    if (messageReceiver != null)
+                        messageReceiver(reader, writer);
 
-            NetworkMessage ev = eventCreators[type]();
-            var messageReader = messageReaderCache[type];
-            if (messageReader != null)
-                messageReader((Object)ev, socket.Reader, socket);
-            ev._sender = sender;
-            return ev;
+                    return stream.ToArray();
+                }
+            }
+        }
+
+        internal static NetworkMessage ReadMessage(UInt16 typeId, byte[] data, TcpSocket socket)
+        {
+            using (MemoryStream stream = new MemoryStream(data))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                var type = GetType(typeId);
+                NetworkMessage ev = eventCreators[typeId]();
+                messageReaderCache[typeId](ev, reader, socket);
+                ev.Sender = socket;
+                return ev;
+            }
         }
     }
 }

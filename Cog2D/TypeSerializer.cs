@@ -14,16 +14,23 @@ namespace Cog
         /// <summary>
         /// Registers methods to serialize a type and an array-subtype 
         /// </summary>
-        public static void Register<T>(Action<T, BinaryWriter> writer, Func<BinaryReader, T> reader)
+        public static void Register<T>(Action<BinaryReader, BinaryWriter> copy, Action<T, BinaryWriter> writer, Func<BinaryReader, T> reader)
         {
             if (typeof(T).IsArray)
                 throw new Exception("Array-variants are automatically implemented and may not be implemented manually!");
             if (typeWriters == null)
                 typeWriters = new Dictionary<Type, ITypeWriter>();
 
-            typeWriters[typeof(T)] = new TypeWriter<T>(writer, reader);
+            typeWriters[typeof(T)] = new TypeWriter<T>(copy, writer, reader);
 
-            typeWriters[typeof(T[])] = new TypeWriter<T[]>((v, w) =>
+            typeWriters[typeof(T[])] = new TypeWriter<T[]>((r, w) =>
+            {
+                var length = r.ReadUInt16();
+
+                w.Write((UInt16)length);
+                for (int i = 0; i < length; i++)
+                    copy(r, w);
+            }, (v, w) =>
             {
                 w.Write((UInt16)v.Length);
                 for (int i = 0; i < v.Length; i++)
@@ -37,7 +44,20 @@ namespace Cog
                 return arr;
             });
 
-            typeWriters[typeof(T[][])] = new TypeWriter<T[][]>((v, w) =>
+            typeWriters[typeof(T[][])] = new TypeWriter<T[][]>((r, w) =>
+            {
+                var length = r.ReadUInt16();
+                w.Write((UInt16)length);
+
+                for (int i = 0; i < length; i++)
+                {
+                    var innerLength = r.ReadUInt16();
+                    w.Write((UInt16)innerLength);
+
+                    for (int j = 0; j < innerLength; j++)
+                        copy(r, w);
+                }
+            }, (v, w) =>
             {
                 w.Write((UInt16)v.Length);
                 for (int i = 0; i < v.Length; i++)

@@ -40,7 +40,7 @@ namespace TestGameServer
             {
                 time += e.DeltaTime;
 
-                while (time >= 1f)
+                while (time >= .1f)
                 {
                     objects.Add(scene.CreateObject<StationaryObject>(new Vector2(x, 16f)));
 

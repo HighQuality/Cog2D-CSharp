@@ -12,8 +12,8 @@ namespace TestGame
     {
         public TestAnimation()
         {
-            AddKeyframe(1f, new Vector2(-32, 0f), AnimationInterpolations.Sine, null, null, null, null);
-            AddKeyframe(1f, new Vector2(32, 0f), AnimationInterpolations.Sine, null, null, null, null);
+            AddKeyframe(1f, new Vector2(-32, 0f), AnimationInterpolations.Linear, null, null, null, null);
+            AddKeyframe(1f, new Vector2(32, 0f), AnimationInterpolations.Linear, null, null, null, null);
         }
     }
 }

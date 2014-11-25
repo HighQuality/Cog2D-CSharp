@@ -18,7 +18,7 @@ namespace Cog.Modules.Networking
         internal BinaryWriter Writer;
         internal BinaryReader Reader;
         private Thread thread;
-        private Queue<NetworkMessage> messages = new Queue<NetworkMessage>();
+        private Queue<MessageData> messages = new Queue<MessageData>();
         public bool IsDisconnected { get; private set; }
         public string IpAddress { get; private set; }
         public string Identifier { get { return IpAddress; } }
@@ -57,7 +57,9 @@ namespace Cog.Modules.Networking
         {
             while (messages.Count > 0)
             {
-                messages.Dequeue().Received();
+                var msgData = messages.Dequeue();
+                var msg = NetworkMessage.ReadMessage(msgData.TypeId, msgData.Data, this);
+                msg.Received();
             }
         }
         
@@ -73,14 +75,24 @@ namespace Cog.Modules.Networking
             {
                 for (; ; )
                 {
-                    NetworkMessage receivedMessage = NetworkMessage.ReadMessage(this, this);
+                    UInt16 typeId = Reader.ReadUInt16();
+                    var type = NetworkMessage.GetType(typeId);
+                    var data = NetworkMessage.ReadMessageData(typeId, this, Reader);
 
-                    var properties = receivedMessage.GetType().GetCustomAttribute<MessageExecutionAttribute>();
+                    var properties = type.GetCustomAttribute<MessageExecutionAttribute>();
                     if (properties != null && properties.Immediate)
-                        receivedMessage.Received();
+                    {
+                        var msg = NetworkMessage.ReadMessage(typeId, data, this);
+                        msg.Received();
+                    }
                     else
-                        lock(messages)
-                            messages.Enqueue(receivedMessage);
+                    {
+                        MessageData msgData;
+                        msgData.TypeId = typeId;
+                        msgData.Data = data;
+                        lock (messages)
+                            messages.Enqueue(msgData);
+                    }
                 }
             }
             catch(IOException e)

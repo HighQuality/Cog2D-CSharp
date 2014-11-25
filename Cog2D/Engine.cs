@@ -193,36 +193,58 @@ namespace Cog
             watch.Restart();
 
             // UPDATE DOCUMENTATION UNDER "NETWORKING" WHEN MAKING CHANGES
-            TypeSerializer.Register<Int16>((v, w) => w.Write((Int16)v), r => r.ReadInt16());
-            TypeSerializer.Register<UInt16>((v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
+            TypeSerializer.Register<Int16>((r, w) => w.Write(r.ReadBytes(sizeof(Int16))), (v, w) => w.Write((Int16)v), r => r.ReadInt16());
+            TypeSerializer.Register<UInt16>((r, w) => w.Write(r.ReadBytes(sizeof(UInt16))), (v, w) => w.Write((UInt16)v), r => r.ReadUInt16());
 
-            TypeSerializer.Register<Int32>((v, w) => w.Write((Int32)v), r => r.ReadInt32());
-            TypeSerializer.Register<UInt32>((v, w) => w.Write((UInt32)v), r => r.ReadUInt32());
+            TypeSerializer.Register<Int32>((r, w) => w.Write(r.ReadBytes(sizeof(Int32))), (v, w) => w.Write((Int32)v), r => r.ReadInt32());
+            TypeSerializer.Register<UInt32>((r, w) => w.Write(r.ReadBytes(sizeof(UInt32))), (v, w) => w.Write((UInt32)v), r => r.ReadUInt32());
 
-            TypeSerializer.Register<Int64>((v, w) => w.Write((Int64)v), r => r.ReadInt64());
-            TypeSerializer.Register<UInt64>((v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
+            TypeSerializer.Register<Int64>((r, w) => w.Write(r.ReadBytes(sizeof(Int64))), (v, w) => w.Write((Int64)v), r => r.ReadInt64());
+            TypeSerializer.Register<UInt64>((r, w) => w.Write(r.ReadBytes(sizeof(UInt64))), (v, w) => w.Write((UInt64)v), r => r.ReadUInt64());
 
-            TypeSerializer.Register<Byte>((v, w) => w.Write((Byte)v), r => r.ReadByte());
-            TypeSerializer.Register<SByte>((v, w) => w.Write((SByte)v), r => r.ReadSByte());
+            TypeSerializer.Register<Byte>((r, w) => w.Write(r.ReadBytes(sizeof(Byte))), (v, w) => w.Write((Byte)v), r => r.ReadByte());
+            TypeSerializer.Register<SByte>((r, w) => w.Write(r.ReadBytes(sizeof(SByte))), (v, w) => w.Write((SByte)v), r => r.ReadSByte());
 
-            TypeSerializer.Register<Boolean>((v, w) => w.Write((Boolean)v), r => r.ReadBoolean());
-            TypeSerializer.Register<Single>((v, w) => w.Write((Single)v), r => r.ReadSingle());
-            TypeSerializer.Register<Double>((v, w) => w.Write((Double)v), r => r.ReadDouble());
-            TypeSerializer.Register<Decimal>((v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
-            TypeSerializer.Register<Char>((v, w) => w.Write((Char)v), r => r.ReadChar());
-            TypeSerializer.Register<String>((v, w) => { if (v == null || v.Length == 0) { w.Write((UInt32)0); } else { var bytes = Encoding.UTF8.GetBytes(v); w.Write((UInt32)bytes.Length); w.Write(bytes); } }, r => { UInt32 size = r.ReadUInt32(); if (size == 0) return ""; return Encoding.UTF8.GetString(r.ReadBytes((int)size)); });
+            TypeSerializer.Register<Boolean>((r, w) => w.Write(r.ReadBytes(sizeof(Boolean))), (v, w) => w.Write((Boolean)v), r => r.ReadBoolean());
+            TypeSerializer.Register<Single>((r, w) => w.Write(r.ReadBytes(sizeof(Single))), (v, w) => w.Write((Single)v), r => r.ReadSingle());
+            TypeSerializer.Register<Double>((r, w) => w.Write(r.ReadBytes(sizeof(Double))), (v, w) => w.Write((Double)v), r => r.ReadDouble());
+            TypeSerializer.Register<Decimal>((r, w) => w.Write(r.ReadBytes(sizeof(Decimal))), (v, w) => w.Write((Decimal)v), r => r.ReadDecimal());
+            TypeSerializer.Register<Char>((r, w) => w.Write(r.ReadBytes(sizeof(Char))), (v, w) => w.Write((Char)v), r => r.ReadChar());
+            TypeSerializer.Register<String>((r, w) =>
+            {
+                UInt32 size = r.ReadUInt32();
+                w.Write((UInt32)size);
+                if (size != 0)
+                    w.Write(r.ReadBytes((int)size));
+            }, (v, w) =>
+            {
+                if (v == null || v.Length == 0)
+                    w.Write((UInt32)0);
+                else
+                {
+                    var bytes = Encoding.UTF8.GetBytes(v);
+                    w.Write((UInt32)bytes.Length);
+                    w.Write(bytes);
+                }
+            }, r =>
+            {
+                UInt32 size = r.ReadUInt32();
+                if (size == 0)
+                    return "";
+                return Encoding.UTF8.GetString(r.ReadBytes((int)size));
+            });
 
-            TypeSerializer.Register<Vector2>((v, w) => { w.Write((float)v.X); w.Write((float)v.Y); }, r => { Vector2 v; v.X = r.ReadSingle(); v.Y = r.ReadSingle(); return v; });
-            TypeSerializer.Register<Rectangle>((v, w) => { w.Write((float)v.TopLeft.X); w.Write((float)v.TopLeft.Y); w.Write((float)v.Size.X); w.Write((float)v.Size.Y); }, r => { Vector2 topLeft, size; topLeft.X = r.ReadSingle(); topLeft.Y = r.ReadSingle(); size.X = r.ReadSingle(); size.Y = r.ReadSingle(); return new Rectangle(topLeft, size); });
-            TypeSerializer.Register<Color>((v, w) => { w.Write((byte)v.R); w.Write((byte)v.G); w.Write((byte)v.B); w.Write((byte)v.A); }, r => { Color v; v.R = r.ReadByte(); v.G = r.ReadByte(); v.B = r.ReadByte(); v.A = r.ReadByte(); return v; });
+            TypeSerializer.Register<Vector2>((r, w) => w.Write(r.ReadBytes(sizeof(float) * 2)), (v, w) => { w.Write((float)v.X); w.Write((float)v.Y); }, r => { Vector2 v; v.X = r.ReadSingle(); v.Y = r.ReadSingle(); return v; });
+            TypeSerializer.Register<Rectangle>((r, w) => w.Write(r.ReadBytes(sizeof(float) * 4)), (v, w) => { w.Write((float)v.TopLeft.X); w.Write((float)v.TopLeft.Y); w.Write((float)v.Size.X); w.Write((float)v.Size.Y); }, r => { Vector2 topLeft, size; topLeft.X = r.ReadSingle(); topLeft.Y = r.ReadSingle(); size.X = r.ReadSingle(); size.Y = r.ReadSingle(); return new Rectangle(topLeft, size); });
+            TypeSerializer.Register<Color>((r, w) => w.Write(r.ReadBytes(sizeof(byte) * 4)), (v, w) => { w.Write((byte)v.R); w.Write((byte)v.G); w.Write((byte)v.B); w.Write((byte)v.A); }, r => { Color v; v.R = r.ReadByte(); v.G = r.ReadByte(); v.B = r.ReadByte(); v.A = r.ReadByte(); return v; });
 
-            TypeSerializer.Register<GameObject>((v, w) => { w.Write((long)v.Id); }, r =>
+            TypeSerializer.Register<GameObject>((r, w) => w.Write(r.ReadBytes(sizeof(Int64))), (v, w) => { w.Write((long)v.Id); }, r =>
             {
                 var id = r.ReadInt64();
                 return Engine.Resolve<GameObject>(id);
             });
 
-            TypeSerializer.Register<Scene>((v, w) => { w.Write((long)v.Id); }, r =>
+            TypeSerializer.Register<Scene>((r, w) => w.Write(r.ReadBytes(sizeof(Int64))), (v, w) => { w.Write((long)v.Id); }, r =>
             {
                 var id = r.ReadInt64();
                 return Engine.Resolve<Scene>(id);
