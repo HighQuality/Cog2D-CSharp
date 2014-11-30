@@ -16,5 +16,27 @@ namespace Cog.Modules.Animation
         public Func<float, float> PositionInterpolationFrom,
             ScaleInterpolationFrom,
             RotationInterpolationFrom;
+
+        public override bool Equals(object obj)
+        {
+            var other = (Keyframe)obj;
+            return Position == other.Position &&
+                Scale == other.Scale &&
+                Duration == other.Duration;
+        }
+
+        public static bool operator ==(Keyframe first, Keyframe second)
+        {
+            return first.Equals(second);
+        }
+        public static bool operator !=(Keyframe first, Keyframe second)
+        {
+            return !first.Equals(second);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

@@ -40,7 +40,8 @@ namespace Cog.Interface
             MinimumSize = new Vector2(17f, 29f);
             Padding = new Padding(8f, 8f, 18f, 8f);
 
-            font = new BitmapFont("merriweather_16.fnt");
+            throw new NotImplementedException("Implement manual resource loading!");
+            //font = new BitmapFont("merriweather_16.fnt");
         }
 
         public override void OnUpdate(float deltaTime)

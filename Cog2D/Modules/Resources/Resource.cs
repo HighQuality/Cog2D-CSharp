@@ -20,17 +20,10 @@ namespace Cog.Modules.Resources
         /// Gets the Resource Container this resource belongs to, if any
         /// </summary>
         public ResourceContainer Container { get; internal set; }
-        public string File { get; private set; }
-        public string Identifier { get { return File + "@" + Container.Name; } }
 
         /// <summary>
         /// Called when a resource is manually disposed by other means than the finalizer
         /// </summary>
         public abstract void Dispose();
-
-        ~Resource()
-        {
-            Debug.Info("Disposing Resource {0}!", Identifier);
-        }
     }
 }

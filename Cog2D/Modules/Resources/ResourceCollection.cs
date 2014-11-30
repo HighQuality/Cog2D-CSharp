@@ -21,9 +21,20 @@ namespace Cog.Modules.Resources
             return resources[key] as Texture;
         }
 
+        public BitmapFont GetBitmapFont(string key)
+        {
+            return resources[key] as BitmapFont;
+        }
+
         public SoundEffect GetSound(string key)
         {
             return resources[key] as SoundEffect;
+        }
+
+        public T Get<T>(string key)
+            where T : class
+        {
+            return resources[key] as T;
         }
 
         internal void AddResource(string key, Resource resource)

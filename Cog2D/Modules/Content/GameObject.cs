@@ -93,6 +93,9 @@ namespace Cog.Modules.Content
 
         public HashSet<CogClient> SubscribedClients = new HashSet<CogClient>();
 
+        internal bool IsScheduledForDrawCellMove;
+        internal DrawCell CurrentDrawCell;
+
         private Vector2 _localCoord;
         public Vector2 LocalCoord
         {
@@ -101,30 +104,19 @@ namespace Cog.Modules.Content
             {
                 if (Parent == null)
                 {
-                    DrawCell currentCell,
-                        newCell;
-                    currentCell.X = ((int)_localCoord.X / DrawCell.DrawCellSize);
-                    currentCell.Y = ((int)_localCoord.Y / DrawCell.DrawCellSize);
-                    newCell.X = ((int)value.X / DrawCell.DrawCellSize);
-                    newCell.Y = ((int)value.Y / DrawCell.DrawCellSize);
-
-                    if (newCell.X != currentCell.X || newCell.Y != currentCell.Y)
+                    if (!IsScheduledForDrawCellMove)
                     {
-                        HashSet<GameObject> objectSet;
-                        // Remove our current entry
-                        if (Scene.DrawCells.TryGetValue(currentCell, out objectSet))
+                        // If we moved to another draw cell schedule us to be moved
+                        if ((int)Math.Floor(value.X / (float)DrawCell.DrawCellSize) != CurrentDrawCell.X ||
+                            (int)Math.Floor(value.Y / (float)DrawCell.DrawCellSize) != CurrentDrawCell.Y)
                         {
-                            objectSet.Remove(this);
-                            if (objectSet.Count == 0)
-                                Scene.DrawCells.Remove(currentCell);
+                            IsScheduledForDrawCellMove = true;
+                            Scene.DrawCellMoveQueue.Enqueue(new DrawCellMoveInfo
+                            {
+                                Object = this,
+                                IsInitialPlacement = false
+                            });
                         }
-                        // Add our new entry
-                        if (!Scene.DrawCells.TryGetValue(newCell, out objectSet))
-                        {
-                            objectSet = new HashSet<GameObject>();
-                            Scene.DrawCells.Add(newCell, objectSet);
-                        }
-                        objectSet.Add(this);
                     }
                 }
                 _localCoord = value;
@@ -186,7 +178,7 @@ namespace Cog.Modules.Content
 
         public ResourceCollection Resources { get; private set; }
 
-        public Rectangle BoundingBox { get { return new Rectangle(WorldCoord, Size); } }
+        public Rectangle BoundingBox { get { return new Rectangle(WorldCoord - Size / 2f, Size); } }
         public Vector2 Size { get; set; }
         public Scene Scene { get; internal set; }
         public bool DoRemove { get; private set; }

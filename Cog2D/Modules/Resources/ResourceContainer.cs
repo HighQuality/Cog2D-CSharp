@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.SQLite;
+using Cog.Modules.Renderer;
 
 namespace Cog.Modules.Resources
 {
@@ -40,6 +41,11 @@ namespace Cog.Modules.Resources
             {
                 resource = Engine.Audio.Load(data);
                 resourceType = "Sound";
+            }
+            else if (extension == ".fnt")
+            {
+                resource = new BitmapFont(data);
+                resourceType = "Bitmap Font";
             }
             else
                 throw new NotImplementedException("Resource Type \"" + extension + "\" not implemented!");

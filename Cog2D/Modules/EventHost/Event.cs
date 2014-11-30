@@ -75,6 +75,8 @@ namespace Cog.Modules.EventHost
 
         public EventListener<T> Register(int priority, Action<T> action)
         {
+            if (priority == int.MinValue || priority == int.MaxValue)
+                throw new ArgumentOutOfRangeException("priority must be greater than int.MinValue and less than int.MaxValue!");
             var listener = new EventListener<T>(this, action);
             List<EventListener<T>> listenerList;
             if (!Listeners.TryGetValue(-priority, out listenerList))

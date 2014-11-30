@@ -22,7 +22,7 @@ namespace Cog.Scenes
         {
             if (CurrentScene != null)
             {
-                CurrentScene.Interface.TriggerPress(ev.Position, ev);
+                CurrentScene.Interface.Press(ev.Position, ev);
             }
 
             if (!ev.Intercept)

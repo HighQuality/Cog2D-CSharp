@@ -13,8 +13,9 @@ namespace Cog.Modules.Content
         public GameObject GameObject;
         public Texture Texture;
         public Vector2 Origin,
-            Scale;
+            Scale = Vector2.One;
         public Color Color = Color.White;
+        public Rectangle TextureRect;
 
         public static SpriteComponent RegisterOn(GameObject gameObject, Texture texture)
         {
@@ -22,6 +23,7 @@ namespace Cog.Modules.Content
             if (texture != null)
             {
                 c.Texture = texture;
+                c.TextureRect = new Rectangle(Vector2.Zero, texture.Size);
                 c.Origin = texture.Size / 2f;
                 c.Origin = new Vector2((int)c.Origin.X, (int)c.Origin.Y);
             }
@@ -33,14 +35,14 @@ namespace Cog.Modules.Content
             return c;
         }
 
-        public SpriteComponent(GameObject gameObject)
+        private SpriteComponent(GameObject gameObject)
         {
             this.GameObject = gameObject;
         }
 
         public void Draw(DrawEvent ev, DrawTransformation transformation)
         {
-            ev.RenderTarget.RenderTexture(Texture, transformation.WorldCoord, Color, transformation.WorldScale, Origin, transformation.WorldRotation.Degree, new Rectangle(Vector2.Zero, Texture.Size));
+            ev.RenderTarget.RenderTexture(Texture, transformation.WorldCoord, Color, transformation.WorldScale * Scale, Origin, transformation.WorldRotation.Degree, TextureRect);
         }
     }
 }

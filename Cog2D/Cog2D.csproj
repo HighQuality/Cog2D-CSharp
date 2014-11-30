@@ -116,6 +116,7 @@
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
     <Compile Include="Modules\Content\RemoveObjectMessage.cs" />
+    <Compile Include="Modules\Content\LabelComponent.cs" />
     <Compile Include="Modules\Content\SynchronizedDR.cs" />
     <Compile Include="Modules\Content\IBoundingBox.cs" />
     <Compile Include="Modules\Content\IIdentifier.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="Modules\Networking\ServerModule.cs" />
     <Compile Include="Modules\Content\QuadTreeEntry.cs" />
     <Compile Include="Scenes\DrawCell.cs" />
+    <Compile Include="Scenes\DrawCellMoveInfo.cs" />
     <Compile Include="Scenes\GameInterface.cs" />
     <Compile Include="Scenes\SceneCache.cs" />
     <Compile Include="Scenes\SceneCreationMessage.cs" />

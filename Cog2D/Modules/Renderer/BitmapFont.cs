@@ -3,6 +3,7 @@
 // ---- There's no license restrictions, use as you will. ----
 // ---- Credits to http://www.angelcode.com/ -----------------
 
+using Cog.Modules.Resources;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,7 +12,7 @@ using System.Xml.Serialization;
 
 namespace Cog.Modules.Renderer
 {
-    public class BitmapFont
+    public class BitmapFont : Resource, IDisposable
     {
         internal class FontRenderer
         {
@@ -143,9 +144,9 @@ namespace Cog.Modules.Renderer
         internal FontRenderer Renderer;
         private Texture texture;
 
-        public BitmapFont(string file)
+        public BitmapFont(byte[] data)
         {
-            FontFile fontFile = FontLoader.Load(file);
+            FontFile fontFile = FontLoader.Load(data);
             texture = Engine.Renderer.LoadTexture(fontFile.Pages[0].File);
             Renderer = new FontRenderer(fontFile, texture);
         }
@@ -163,6 +164,25 @@ namespace Cog.Modules.Renderer
         public Vector2 MeassureString(string str)
         {
             return Renderer.MeassureString(str);
+        }
+
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                texture.Dispose();
+            }
+        }
+
+        ~BitmapFont()
+        {
+            Dispose(false);
         }
     }
 
@@ -506,10 +526,10 @@ namespace Cog.Modules.Renderer
 
     public class FontLoader
     {
-        public static FontFile Load(String filename)
+        public static FontFile Load(byte[] data)
         {
             XmlSerializer deserializer = new XmlSerializer(typeof(FontFile));
-            TextReader textReader = new StreamReader(filename);
+            TextReader textReader = new StreamReader(new MemoryStream(data));
             FontFile file = (FontFile)deserializer.Deserialize(textReader);
             textReader.Close();
             return file;
