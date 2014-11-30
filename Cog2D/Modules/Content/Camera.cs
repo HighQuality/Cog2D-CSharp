@@ -18,7 +18,7 @@ namespace Cog.Modules.Content
 
         internal void Bind()
         {
-            beginDrawEvent = RegisterEvent<BeginDrawEvent>(int.MaxValue, BeginDraw);
+            beginDrawEvent = RegisterEvent<BeginDrawEvent>(int.MaxValue - 1, BeginDraw);
         }
         
         internal void Unbind()

@@ -19,6 +19,10 @@ namespace Cog.Scenes
     {
         public string Name { get; private set; }
         public int SceneId { get; private set; }
+        /// <summary>
+        /// Whether or not events in this scene should be triggered when this scene is not current
+        /// </summary>
+        public bool SimulateInBackground { get; set; }
         public LinkedList<GameObject> Objects = new LinkedList<GameObject>();
         public EventModule EventModule = new EventModule();
         private Dictionary<EventIdentifier, List<IEventListener>> eventStrength = new Dictionary<EventIdentifier, List<IEventListener>>();
@@ -45,6 +49,7 @@ namespace Cog.Scenes
         }
 
         internal Dictionary<DrawCell, HashSet<GameObject>> DrawCells = new Dictionary<DrawCell, HashSet<GameObject>>();
+        internal Queue<DrawCellMoveInfo> DrawCellMoveQueue = new Queue<DrawCellMoveInfo>();
 
         private List<CogClient> subscribedClients = new List<CogClient>();
 
@@ -66,9 +71,10 @@ namespace Cog.Scenes
             Interface = new GameInterface();
             Interface.Size = Engine.Resolution;
 
-            AddEventStrength<UpdateEvent>(EventModule.RegisterEvent<UpdateEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) { Update(e); Interface.TriggerUpdate(e); } }));
-            AddEventStrength<DrawEvent>(EventModule.RegisterEvent<DrawEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Draw(e); }));
-            AddEventStrength<DrawInterfaceEvent>(EventModule.RegisterEvent<DrawInterfaceEvent>(0, e => { if (Engine.SceneHost.CurrentScene == this) Interface.TriggerDraw(e, new Vector2()); }));
+            RegisterEvent<UpdateEvent>(0, e => { Update(e); Interface.TriggerUpdate(e); });
+            RegisterEvent<BeginDrawEvent>(1000, BeginDraw);
+            RegisterEvent<DrawEvent>(0, e => { Draw(e); });
+            RegisterEvent<DrawInterfaceEvent>(0, e => { Interface.TriggerDraw(e, new Vector2()); });
             
             Camera = CreateLocalObject<Camera>(new Vector2());
         }
@@ -117,6 +123,35 @@ namespace Cog.Scenes
             }
         }
         
+        public void BeginDraw(BeginDrawEvent ev)
+        {
+            while (DrawCellMoveQueue.Count > 0)
+            {
+                var info = DrawCellMoveQueue.Dequeue();
+                var obj = info.Object;
+
+                if (!info.IsInitialPlacement)
+                {
+                    var currentSet = DrawCells[obj.CurrentDrawCell];
+                    currentSet.Remove(obj);
+                    if (currentSet.Count == 0)
+                        DrawCells.Remove(obj.CurrentDrawCell);
+                }
+
+                obj.CurrentDrawCell = new DrawCell((int)Math.Floor(obj.LocalCoord.X / (float)DrawCell.DrawCellSize), (int)Math.Floor(obj.LocalCoord.Y / (float)DrawCell.DrawCellSize));
+
+                HashSet<GameObject> newSet;
+                if (!DrawCells.TryGetValue(obj.CurrentDrawCell, out newSet))
+                {
+                    newSet = new HashSet<GameObject>();
+                    DrawCells.Add(obj.CurrentDrawCell, newSet);
+                }
+                newSet.Add(obj);
+
+                obj.IsScheduledForDrawCellMove = false;
+            }
+        }
+
         public void Draw(DrawEvent ev)
         {
             DrawTransformation transform = new DrawTransformation();
@@ -125,10 +160,10 @@ namespace Cog.Scenes
 
             Vector2 cameraSize = Engine.Resolution * Camera.WorldScale;
             Vector2 cameraPosition = Camera.WorldCoord - cameraSize / 2f;
-            int x1 = (int)cameraPosition.X / DrawCell.DrawCellSize,
-                y1 = (int)cameraPosition.Y / DrawCell.DrawCellSize,
+            int x1 = (int)Math.Floor(cameraPosition.X / (int)DrawCell.DrawCellSize),
+                y1 = (int)Math.Floor(cameraPosition.Y / (int)DrawCell.DrawCellSize),
                 x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize),
-                y2 = x2 + (int)Math.Ceiling(cameraSize.Y / (float)DrawCell.DrawCellSize);
+                y2 = y1 + (int)Math.Ceiling(cameraSize.Y / (float)DrawCell.DrawCellSize);
 
             for (int x = x1; x < x2; x++)
             {
@@ -258,6 +293,13 @@ namespace Cog.Scenes
 
             obj.InitializationData = data;
 
+            obj.IsScheduledForDrawCellMove = true;
+            DrawCellMoveQueue.Enqueue(new DrawCellMoveInfo
+            {
+                Object = obj,
+                IsInitialPlacement = true
+            });
+
             // Register the new object
             Objects.AddLast(obj);
             
@@ -266,22 +308,6 @@ namespace Cog.Scenes
 
         public void InitializeObject(GameObject obj)
         {
-            // If we don't have a parent we need to register this object to ensure it and it's children are drawn
-            if (obj.Parent == null)
-            {
-                BaseObjects.AddLast(obj);
-                HashSet<GameObject> objectSet;
-                DrawCell cell;
-                cell.X = (int)obj.LocalCoord.X / DrawCell.DrawCellSize;
-                cell.Y = (int)obj.LocalCoord.Y / DrawCell.DrawCellSize;
-                if (!DrawCells.TryGetValue(cell, out objectSet))
-                {
-                    objectSet = new HashSet<GameObject>();
-                    DrawCells.Add(cell, objectSet);
-                }
-                objectSet.Add(obj);
-            }
-
             // Invoke the constructor
             obj.GetType().GetConstructor(new Type[0]).Invoke(obj, new object[0]);
             
@@ -339,6 +365,24 @@ namespace Cog.Scenes
             }
         }
 
+        public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)
+            where T : EventParameters
+        {
+            return RegisterEvent<T>(null, priority, action);
+        }
+
+        public EventListener<T> RegisterEvent<T>(object uniqueIdentifier, int priority, Action<T> action)
+            where T : EventParameters
+        {
+            var listener = EventModule.RegisterEvent<T>(uniqueIdentifier, priority, (ev) =>
+            {
+                if (Engine.SceneHost.CurrentScene == this || SimulateInBackground)
+                    action(ev);
+            });
+            AddEventStrength<T>(listener);
+            return listener;
+        }
+
         public void AddEventStrength<T>(EventListener<T> listener)
             where T : EventParameters
         {
@@ -354,6 +398,18 @@ namespace Cog.Scenes
             }
 
             listenerList.Add(listener);
+        }
+
+        public IEnumerable<T> EnumerateObjects<T>()
+            where T : GameObject
+        {
+            var current = Objects.First;
+            while (current != null)
+            {
+                if (current.Value is T)
+                    yield return (T)current.Value;
+                current = current.Next;
+            }
         }
 
         /// <summary>

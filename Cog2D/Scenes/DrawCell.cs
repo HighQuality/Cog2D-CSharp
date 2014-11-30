@@ -12,5 +12,11 @@ namespace Cog.Scenes
 
         public int X,
             Y;
+
+        public DrawCell(int x, int y)
+        {
+            this.X = x;
+            this.Y = y;
+        }
     }
 }

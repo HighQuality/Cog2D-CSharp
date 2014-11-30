@@ -181,7 +181,6 @@ namespace Cog
                 }
                 if (referencesThis)
                 {
-                    Debug.Info(assembly.FullName);
                     loadedAssemblies[currentName.FullName] = assembly;
                 }
             }
@@ -356,7 +355,6 @@ namespace Cog
                 EventHost.GetEvent<DrawInterfaceEvent>().Trigger(new DrawInterfaceEvent(null, Window.RenderTarget));
 
                 float frameTime = (float)watch.Elapsed.TotalMilliseconds;
-                Window.Title = frameTime.ToString();
                 Window.Display();
 
                 if (SceneHost.CurrentScene == null)

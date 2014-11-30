@@ -21,7 +21,6 @@ namespace Cog.Modules.Resources
             return File.ReadAllBytes(System.IO.Path.Combine(Path, file));
         }
 
-
         private void UpdateData(string file, byte[] data)
         {
             File.WriteAllBytes(System.IO.Path.Combine(Path, file), data);
