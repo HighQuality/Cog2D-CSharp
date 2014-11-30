@@ -115,6 +115,7 @@
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
+    <Compile Include="Modules\Content\ISynchronizedList.cs" />
     <Compile Include="Modules\Content\RemoveObjectMessage.cs" />
     <Compile Include="Modules\Content\SynchronizedDR.cs" />
     <Compile Include="Modules\Content\IBoundingBox.cs" />
@@ -127,6 +128,10 @@
     <Compile Include="Modules\Content\SpriteComponent.cs" />
     <Compile Include="Modules\Content\Synchronized.cs" />
     <Compile Include="Modules\Content\SynchronizedEditPermission.cs" />
+    <Compile Include="Modules\Content\SynchronizedList.cs" />
+    <Compile Include="Modules\Content\SynchronizedListSet.cs" />
+    <Compile Include="Modules\Content\SynchronizedListInsert.cs" />
+    <Compile Include="Modules\Content\SynchronizedListMessage.cs" />
     <Compile Include="Modules\Content\TimedEvent.cs" />
     <Compile Include="Modules\Content\TimedEventHost.cs" />
     <Compile Include="Modules\EventHost\BeginDrawEvent.cs" />

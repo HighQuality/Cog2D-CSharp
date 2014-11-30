@@ -14,6 +14,27 @@ namespace Cog
         void GenericWrite(Object value, BinaryWriter writer);
     }
 
+    public static class ITypeWriterExtension
+    {
+        public static byte[] GetBytes(this ITypeWriter self, object value)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                self.GenericWrite(value, writer);
+                return stream.ToArray();
+            }
+        }
+        public static object FromBytes(this ITypeWriter self, object value)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                return self.GenericRead(reader);
+            }
+        }
+    }
+
     public class TypeWriter<T> : ITypeWriter
     {
         public Action<BinaryReader, BinaryWriter> Copy { get; private set; }

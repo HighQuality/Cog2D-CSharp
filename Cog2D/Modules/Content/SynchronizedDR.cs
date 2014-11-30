@@ -50,16 +50,6 @@ namespace Cog.Modules.Content
             SynchronizationId = synchronizationId;
         }
 
-        public object GenericGet()
-        {
-            return (object)Identifier;
-        }
-
-        public void ForceSet(object value)
-        {
-            Identifier = (long)value;
-        }
-
         public void Serialize(BinaryWriter writer)
         {
             writer.Write(Identifier);

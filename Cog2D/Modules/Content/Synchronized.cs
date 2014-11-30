@@ -10,10 +10,8 @@ namespace Cog.Modules.Content
     public interface ISynchronized
     {
         void Initialize(GameObject obj, ushort synchronizationId);
-        GameObject BaseObject { get; set; }
-        ushort SynchronizationId { get; set; }
-        void ForceSet(object value);
-        object GenericGet();
+        GameObject BaseObject { get; }
+        ushort SynchronizationId { get; }
 
         void Serialize(BinaryWriter writer);
         void Deserialize(BinaryReader reader);
@@ -25,9 +23,11 @@ namespace Cog.Modules.Content
         public ushort SynchronizationId { get; set; }
 
         private T _value;
+        private ITypeWriter serializer;
 
         private Synchronized()
         {
+            serializer = TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]);
         }
 
         public void Initialize(GameObject obj, ushort synchronizationId)
@@ -51,7 +51,7 @@ namespace Cog.Modules.Content
                 {
                     using (BinaryWriter writer = new BinaryWriter(stream))
                     {
-                        TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]).GenericWrite(_value, writer);
+                        serializer.GenericWrite(_value, writer);
                         message.Data = stream.ToArray();
                     }
                 }
@@ -62,22 +62,12 @@ namespace Cog.Modules.Content
 
         public void Serialize(BinaryWriter writer)
         {
-            TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]).GenericWrite(_value, writer);
+            serializer.GenericWrite(_value, writer);
         }
 
         public void Deserialize(BinaryReader reader)
         {
-            _value = (T)TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]).GenericRead(reader);
-        }
-
-        public void ForceSet(object value)
-        {
-            this._value = (T)value;
-        }
-
-        public object GenericGet()
-        {
-            return _value;
+            _value = (T)serializer.GenericRead(reader);
         }
 
         public override string ToString()
