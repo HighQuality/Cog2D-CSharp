@@ -23,8 +23,10 @@ namespace Cog
             LAlt,
             RAlt,
             Space,
+            Backspace,
             Escape,
             Tab,
+            Return,
 
             Num0,
             Num1,

@@ -64,10 +64,17 @@ namespace Cog.SfmlRenderer
 
             this.EventHost = eventHost;
 
+            InnerWindow.TextEntered += InnerWindow_TextEntered;
             InnerWindow.KeyPressed += InnerWindow_KeyPressed;
             InnerWindow.MouseButtonPressed += InnerWindow_MouseButtonPressed;
             InnerWindow.MouseMoved += InnerWindow_MouseMoved;
             InnerWindow.Closed += InnerWindow_Closed;
+        }
+
+        void InnerWindow_TextEntered(object sender, SFML.Window.TextEventArgs e)
+        {
+            if (!char.IsControl(e.Unicode[0]))
+                Engine.EventHost.GetEvent<TextEnteredEvent>().Trigger(new TextEnteredEvent(e.Unicode[0]));
         }
 
         private void InnerWindow_MouseMoved(object sender, SFML.Window.MouseMoveEventArgs e)
@@ -94,6 +101,7 @@ namespace Cog.SfmlRenderer
         private static Dictionary<SFML.Window.Keyboard.Key, Keyboard.Key> keymap = new Dictionary<SFML.Window.Keyboard.Key, Keyboard.Key>
         {
             { SFML.Window.Keyboard.Key.Space, Keyboard.Key.Space },
+            { SFML.Window.Keyboard.Key.BackSpace, Keyboard.Key.Backspace },
             { SFML.Window.Keyboard.Key.Left, Keyboard.Key.Left },
             { SFML.Window.Keyboard.Key.Right, Keyboard.Key.Right },
             { SFML.Window.Keyboard.Key.Up, Keyboard.Key.Up },
@@ -106,6 +114,7 @@ namespace Cog.SfmlRenderer
             { SFML.Window.Keyboard.Key.RAlt, Keyboard.Key.RAlt },
             { SFML.Window.Keyboard.Key.Escape, Keyboard.Key.Escape },
             { SFML.Window.Keyboard.Key.Tab, Keyboard.Key.Tab },
+            { SFML.Window.Keyboard.Key.Return, Keyboard.Key.Return },
 
             { SFML.Window.Keyboard.Key.A, Keyboard.Key.A },
             { SFML.Window.Keyboard.Key.B, Keyboard.Key.B },
