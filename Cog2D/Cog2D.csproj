@@ -161,6 +161,7 @@
     <Compile Include="Modules\Networking\NewClientEvent.cs" />
     <Compile Include="Modules\Networking\StringCacheMessage.cs" />
     <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
+    <Compile Include="Modules\Renderer\Alignments.cs" />
     <Compile Include="Modules\Renderer\BitmapFont.cs" />
     <Compile Include="Modules\Resources\Resource.cs" />
     <Compile Include="Modules\Resources\ResourceAttribute.cs" />

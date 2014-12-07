@@ -15,6 +15,8 @@ namespace Cog.Modules.Content
         public string Text;
         public Color Color = Color.Black;
         public Vector2 RelativePosition;
+        public HAlign HorizontalAlignment = HAlign.Left;
+        public VAlign VerticalAlignment = VAlign.Top;
 
         public static LabelComponent RegisterOn(GameObject gameObject, BitmapFont font)
         {
@@ -34,7 +36,7 @@ namespace Cog.Modules.Content
 
         public void Draw(DrawEvent ev, DrawTransformation transformation)
         {
-            Font.DrawString(ev.RenderTarget, Text, Color, transformation.WorldCoord + RelativePosition);
+            Font.DrawString(ev.RenderTarget, Text, Color, transformation.WorldCoord + RelativePosition, HorizontalAlignment, VerticalAlignment);
         }
     }
 }

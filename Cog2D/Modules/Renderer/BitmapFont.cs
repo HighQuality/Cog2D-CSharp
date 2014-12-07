@@ -33,24 +33,47 @@ namespace Cog.Modules.Renderer
             internal FontFile FontFile;
             internal Texture Texture;
 
-            public void DrawString(IRenderTarget renderTarget, string text, Color color, Vector2 position)
+            public void DrawString(IRenderTarget renderTarget, string text, Color color, Vector2 position, HAlign horizontalAlignment, VAlign verticalAlignment)
             {
-                int dx = (int)position.X;
-                int dy = (int)position.Y;
-
-                foreach (char c in text)
+                if (horizontalAlignment != HAlign.Left)
                 {
-                    FontChar fc;
-                    if (c == '\n')
+                    var lines = text.Split('\n');
+                    for (int i = 0; i < lines.Length; i++)
                     {
-                        dx = (int)position.X;
-                        dy += FontFile.Common.LineHeight;
+                        var size = MeassureString(lines[i]);
+                        if (horizontalAlignment == HAlign.Right)
+                            DrawString(renderTarget, text, color, position - new Vector2(size.X, 0f), HAlign.Left, verticalAlignment);
+                        else
+                            DrawString(renderTarget, text, color, position - new Vector2(size.X / 2f, 0f), HAlign.Left, verticalAlignment);
+                        position.Y += size.Y;
                     }
-                    else if (CharacterMap.TryGetValue(c, out fc))
+                }
+                else
+                {
+                    if (verticalAlignment != VAlign.Top)
                     {
-                        renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset, dy + fc.YOffset), color, Vector2.One, Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
-                        
-                        dx += fc.XAdvance;
+                        var verticalOffset = MeassureString(text).Y;
+                        if (verticalAlignment == VAlign.Center)
+                            verticalOffset /= 2f;
+                        position.Y -= verticalOffset;
+                    }
+                    int dx = (int)position.X;
+                    int dy = (int)position.Y;
+
+                    foreach (char c in text)
+                    {
+                        FontChar fc;
+                        if (c == '\n')
+                        {
+                            dx = (int)position.X;
+                            dy += FontFile.Common.LineHeight;
+                        }
+                        else if (CharacterMap.TryGetValue(c, out fc))
+                        {
+                            renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset, dy + fc.YOffset), color, Vector2.One, Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
+
+                            dx += fc.XAdvance;
+                        }
                     }
                 }
             }
@@ -151,9 +174,9 @@ namespace Cog.Modules.Renderer
             Renderer = new FontRenderer(fontFile, texture);
         }
 
-        public void DrawString(IRenderTarget target, string text, Color color, Vector2 position)
+        public void DrawString(IRenderTarget target, string text, Color color, Vector2 position, HAlign horizontalAlignment, VAlign verticalAlignment)
         {
-            Renderer.DrawString(target, text, color, position);
+            Renderer.DrawString(target, text, color, position, horizontalAlignment, verticalAlignment);
         }
 
         public void DrawString(IRenderTarget target, string text, Color color, Rectangle rect)
