@@ -13,7 +13,6 @@ namespace Cog.Modules.Resources
     {
         public string Name { get; private set; }
         public string Path { get; private set; }
-        internal List<Resource> LoadedResources = new List<Resource>();
 
         internal ResourceContainer(string name, string path)
         {
@@ -55,7 +54,7 @@ namespace Cog.Modules.Resources
             if (resource != null)
             {
                 resource.Container = this;
-                LoadedResources.Add(resource);
+                resource.Filename = file;
             }
 
             return resource;

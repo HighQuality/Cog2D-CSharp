@@ -24,7 +24,7 @@ namespace Cog.Modules.Networking
             tcpClient.Connect(hostname, port);
 
             client = new TcpSocket(tcpClient, Permissions.FullPermissions);
-            updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue, Update);
+            updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue - 1, Update);
         }
 
         private void Update(UpdateEvent args)

@@ -20,6 +20,7 @@ namespace Cog.Modules.Resources
         /// Gets the Resource Container this resource belongs to, if any
         /// </summary>
         public ResourceContainer Container { get; internal set; }
+        public string Filename { get; internal set; }
 
         /// <summary>
         /// Called when a resource is manually disposed by other means than the finalizer
