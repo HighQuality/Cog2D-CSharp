@@ -192,6 +192,16 @@ namespace Cog.Modules.Content
         public bool IsLocal { get { return Id < 0; } }
         private List<IEventListener> registeredEvents;
 
+        private float _depth = 1f;
+        public float Depth
+        {
+            get { return _depth; }
+            set
+            {
+                _depth = value;
+            }
+        }
+
         internal List<Action<DrawEvent, DrawTransformation>> OnDraw;
 
         public GameObject()
@@ -419,7 +429,7 @@ namespace Cog.Modules.Content
             return objectsDictionary[type];
         }
 
-        internal void Draw(DrawEvent ev, DrawTransformation transform)
+        internal void Draw(DrawEvent ev, DrawTransformation transform, List<Tuple<float, Action>> drawList)
         {
             if (children != null)
             {
@@ -428,8 +438,15 @@ namespace Cog.Modules.Content
                 transform.WorldScale *= LocalScale;
 
                 if (OnDraw != null)
-                    for (int i = 0; i < OnDraw.Count; i++)
-                        OnDraw[i](ev, transform);
+                {
+                    // Copy the transformation variable, otherwise it'll be modified before OnDraw is called
+                    var myTransform = transform;
+                    drawList.Add(Tuple.Create<float, Action>(Depth, () =>
+                    {
+                        for (int i = 0; i < OnDraw.Count; i++)
+                            OnDraw[i](ev, myTransform);
+                    }));
+                }
 
                 transform.ParentWorldCoord = transform.WorldCoord;
                 transform.ParentWorldRotation = transform.WorldRotation;
@@ -437,7 +454,7 @@ namespace Cog.Modules.Content
 
                 int c = children.Count;
                 for (int i = 0; i < c; i++)
-                    children[i].Draw(ev, transform);
+                    children[i].Draw(ev, transform, drawList);
             }
             else if (OnDraw != null)
             {
@@ -445,8 +462,12 @@ namespace Cog.Modules.Content
                 transform.WorldRotation += LocalRotation;
                 transform.WorldScale *= LocalScale;
 
-                for (int i = 0; i < OnDraw.Count; i++)
-                    OnDraw[i](ev, transform);
+                var myTransform = transform;
+                drawList.Add(Tuple.Create<float, Action>(Depth, () =>
+                {
+                    for (int i = 0; i < OnDraw.Count; i++)
+                        OnDraw[i](ev, myTransform);
+                }));
             }
         }
 

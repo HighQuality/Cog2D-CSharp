@@ -116,6 +116,7 @@
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
     <Compile Include="Modules\Content\ISynchronizedList.cs" />
+    <Compile Include="Modules\Content\ObjectCreated.cs" />
     <Compile Include="Modules\Content\RemoveObjectMessage.cs" />
     <Compile Include="Modules\Content\LabelComponent.cs" />
     <Compile Include="Modules\Content\SynchronizedDR.cs" />

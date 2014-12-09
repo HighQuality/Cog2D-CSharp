@@ -165,6 +165,8 @@ namespace Cog.Scenes
                 x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize),
                 y2 = y1 + (int)Math.Ceiling(cameraSize.Y / (float)DrawCell.DrawCellSize);
 
+            List<Tuple<float, Action>> drawList = new List<Tuple<float, Action>>();
+
             for (int x = x1; x < x2; x++)
             {
                 for (int y = y1; y < y2; y++)
@@ -176,9 +178,12 @@ namespace Cog.Scenes
 
                     if (DrawCells.TryGetValue(cell, out objectSet))
                         foreach (var obj in objectSet)
-                            obj.Draw(ev, transform);
+                            obj.Draw(ev, transform, drawList);
                 }
             }
+
+            foreach (var obj in drawList.OrderBy(o => -o.Item1))
+                obj.Item2();
         }
 
         internal SceneCreationMessage CreateSceneCreationMessage()
@@ -293,12 +298,15 @@ namespace Cog.Scenes
 
             obj.InitializationData = data;
 
-            obj.IsScheduledForDrawCellMove = true;
-            DrawCellMoveQueue.Enqueue(new DrawCellMoveInfo
+            if (parent == null)
             {
-                Object = obj,
-                IsInitialPlacement = true
-            });
+                obj.IsScheduledForDrawCellMove = true;
+                DrawCellMoveQueue.Enqueue(new DrawCellMoveInfo
+                {
+                    Object = obj,
+                    IsInitialPlacement = true
+                });
+            }
 
             // Register the new object
             Objects.AddLast(obj);
@@ -310,7 +318,9 @@ namespace Cog.Scenes
         {
             // Invoke the constructor
             obj.GetType().GetConstructor(new Type[0]).Invoke(obj, new object[0]);
-            
+
+            Engine.EventHost.GetEvent<ObjectCreated>().Trigger(new ObjectCreated(this, obj));
+
             if (Engine.IsServer && obj.IsGlobal)
             {
                 var msg = obj.CreateCreationMessage();
