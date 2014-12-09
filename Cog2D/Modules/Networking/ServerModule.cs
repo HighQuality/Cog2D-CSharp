@@ -35,7 +35,7 @@ namespace Cog.Modules.Networking
                 thread.Start();
                 Debug.Success("Listening for connections on {0}...", port);
 
-                updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue, Update);
+                updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue - 1, Update);
             }
             catch (SocketException e)
             {
