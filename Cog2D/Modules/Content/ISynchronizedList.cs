@@ -11,5 +11,6 @@ namespace Cog.Modules.Content
         void InsertCommand(object value, int index);
         void AddCommand(object value);
         void SetCommand(int index, object value);
+        void RemoveCommand(int index);
     }
 }

@@ -145,8 +145,8 @@ namespace Cog.Modules.Content
             get
             {
                 if (Parent == null)
-                    return LocalRotation;
-                return Parent.WorldRotation + LocalRotation;
+                    return WorldScale.X < 0f ? -LocalRotation : LocalRotation;
+                return WorldScale.X < 0f ? -(Parent.WorldRotation + LocalRotation) : (Parent.WorldRotation + LocalRotation);
             }
             set
             {
@@ -277,6 +277,8 @@ namespace Cog.Modules.Content
                 if (Scene.DrawCells.TryGetValue(cell, out objectSet))
                 {
                     objectSet.Remove(this);
+                    if (objectSet.Count == 0)
+                        Scene.DrawCells.Remove(cell);
                 }
             }
             DoRemove = true;
@@ -304,6 +306,14 @@ namespace Cog.Modules.Content
         {
             foreach (var client in Scene.EnumerateSubscribedClients())
                 client.Send(message);
+        }
+
+        public void Send<T>(T message, CogClient except)
+            where T : NetworkMessage
+        {
+            foreach (var client in Scene.EnumerateSubscribedClients())
+                if (client != except)
+                    client.Send(message);
         }
         
         /// <summary>
@@ -434,8 +444,8 @@ namespace Cog.Modules.Content
             if (children != null)
             {
                 transform.WorldCoord += (LocalCoord * transform.ParentWorldScale).Rotate(transform.ParentWorldRotation);
-                transform.WorldRotation += LocalRotation;
                 transform.WorldScale *= LocalScale;
+                transform.WorldRotation += transform.WorldScale.X < 0f ? -LocalRotation : LocalRotation;
 
                 if (OnDraw != null)
                 {
@@ -459,8 +469,8 @@ namespace Cog.Modules.Content
             else if (OnDraw != null)
             {
                 transform.WorldCoord += (LocalCoord * transform.ParentWorldScale).Rotate(transform.ParentWorldRotation);
-                transform.WorldRotation += LocalRotation;
                 transform.WorldScale *= LocalScale;
+                transform.WorldRotation += transform.WorldScale.X < 0f ? -LocalRotation : LocalRotation;
 
                 var myTransform = transform;
                 drawList.Add(Tuple.Create<float, Action>(Depth, () =>

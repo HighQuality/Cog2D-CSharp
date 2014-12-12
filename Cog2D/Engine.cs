@@ -258,28 +258,35 @@ namespace Cog
             // Cache event registrators for Object Components
             Debug.Event("Generating Game Meta Data...");
             watch.Restart();
-            foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
             {
-                foreach (var type in assembly.GetTypes().OrderBy(o => o.FullName))
+                List<Action> jobQueue = new List<Action>();
+
+                foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
                 {
-                    if (!type.IsAbstract)
+                    foreach (var type in assembly.GetTypes().OrderBy(o => o.FullName))
                     {
                         if (typeof(GameObject).IsAssignableFrom(type))
                         {
-                            GameObject.CreateCache(type);
+                            if (!type.IsAbstract)
+                                jobQueue.Add(() => GameObject.CreateCache(type));
                             TypeSerializer.RegisterDescendant<GameObject>(type);
                         }
                         else if (typeof(Scene).IsAssignableFrom(type))
                         {
-                            SceneCache.CreateCache(type);
+                            if (!type.IsAbstract)
+                                jobQueue.Add(() => SceneCache.CreateCache(type));
                             TypeSerializer.RegisterDescendant<Scene>(type);
                         }
                         else if (typeof(NetworkMessage).IsAssignableFrom(type))
                         {
-                            NetworkMessage.CreateCache(type);
+                            if (!type.IsAbstract)
+                                jobQueue.Add(() => NetworkMessage.CreateCache(type));
                         }
                     }
                 }
+
+                for (int i = 0; i < jobQueue.Count; i++)
+                    jobQueue[i]();
             }
 
             StringBuilder hash = new StringBuilder();
@@ -352,6 +359,8 @@ namespace Cog
                 Window.Clear(Color.CornflowerBlue);
 
                 EventHost.GetEvent<DrawEvent>().Trigger(new DrawEvent(null, Window.RenderTarget));
+
+                Engine.Window.RenderTarget.SetTransformation(Engine.Resolution / 2f, Vector2.One, Angle.FromDegree(0f));
                 EventHost.GetEvent<DrawInterfaceEvent>().Trigger(new DrawInterfaceEvent(null, Window.RenderTarget));
 
                 float frameTime = (float)watch.Elapsed.TotalMilliseconds;

@@ -8,7 +8,7 @@ namespace Cog.Modules.Animation
 {
     public class AnimationInstance
     {
-        public Animation Animation;
+        public Animation Animation { get; private set; }
         private double startTime;
         public double Time { get { return Engine.TimeStamp - startTime; } }
 
@@ -17,7 +17,8 @@ namespace Cog.Modules.Animation
         public Keyframe CurrentKeyframe { get { return Animation.Keyframes[currentKeyframe % Animation.Keyframes.Count]; } }
         public Keyframe NextKeyframe { get { return Animation.Keyframes[(currentKeyframe + 1) % Animation.Keyframes.Count]; } }
         public bool DoLoop { get; set; }
-        public Action OnAnimationFinished;
+        public event Action<AnimationInstance> OnAnimationFinished;
+        public event Action<AnimationInstance> OnAnimationStopped;
         public bool IsFinished { get; private set; }
 
         public AnimationInstance(Animation animation)
@@ -28,6 +29,14 @@ namespace Cog.Modules.Animation
             this.Animation = animation;
             startTime = Engine.TimeStamp;
             DoLoop = true;
+        }
+
+        public void Stop()
+        {
+            IsFinished = true;
+
+            if (OnAnimationStopped != null)
+                OnAnimationStopped(this);
         }
 
         public void ApplyTransformation(IAnimationComponent component)
@@ -42,7 +51,7 @@ namespace Cog.Modules.Animation
 
             while (time >= previousTime + CurrentKeyframe.Duration)
             {
-                if (NextKeyframe == Animation.Keyframes[Animation.Keyframes.Count - 1])
+                if (NextKeyframe == Animation.Keyframes[0])
                 {
                     if (!DoLoop)
                     {
@@ -50,7 +59,7 @@ namespace Cog.Modules.Animation
                         ApplyFinalTransformation(component);
 
                         if (OnAnimationFinished != null)
-                            OnAnimationFinished();
+                            OnAnimationFinished(this);
 
                         return;
                     }
@@ -66,17 +75,17 @@ namespace Cog.Modules.Animation
             var deltaScale = (NextKeyframe.Scale - CurrentKeyframe.Scale);
             var deltaAngle = ((((NextKeyframe.Rotation.Degree - CurrentKeyframe.Rotation.Degree) % 360f) + 540f) % 360f) - 180f;
 
-            component.Object.LocalCoord = CurrentKeyframe.Position + deltaPosition * (float)CurrentKeyframe.PositionInterpolationFrom((float)currentProgress);
-            component.Object.LocalScale = CurrentKeyframe.Scale + deltaScale * (float)CurrentKeyframe.ScaleInterpolationFrom((float)currentProgress);
-            component.Object.LocalRotation = Angle.FromDegree(CurrentKeyframe.Rotation.Degree + deltaAngle * (float)CurrentKeyframe.RotationInterpolationFrom((float)currentProgress));
+            component.Object.LocalCoord = component.BasePosition + CurrentKeyframe.Position + deltaPosition * (float)CurrentKeyframe.PositionInterpolationFrom((float)currentProgress);
+            component.Object.LocalScale = component.BaseScale * CurrentKeyframe.Scale + deltaScale * (float)CurrentKeyframe.ScaleInterpolationFrom((float)currentProgress);
+            component.Object.LocalRotation = component.BaseRotation + Angle.FromDegree(CurrentKeyframe.Rotation.Degree + deltaAngle * (float)CurrentKeyframe.RotationInterpolationFrom((float)currentProgress));
         }
 
         private void ApplyFinalTransformation(IAnimationComponent component)
         {
             var lastKeyFrame = Animation.Keyframes[Animation.Keyframes.Count - 1];
-            component.Object.LocalCoord = lastKeyFrame.Position;
-            component.Object.LocalScale = lastKeyFrame.Scale;
-            component.Object.LocalRotation = lastKeyFrame.Rotation;
+            component.Object.LocalCoord = component.BasePosition + lastKeyFrame.Position;
+            component.Object.LocalScale = component.BaseScale * lastKeyFrame.Scale;
+            component.Object.LocalRotation = component.BaseRotation + lastKeyFrame.Rotation;
         }
     }
 }

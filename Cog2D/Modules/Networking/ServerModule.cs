@@ -15,6 +15,7 @@ namespace Cog.Modules.Networking
         private Thread thread;
         private TcpListener listener;
         private List<CogClient> clients;
+        private Queue<CogClient> queuedClients = new Queue<CogClient>();
         private IEventListener updateListener;
         public int Port { get; private set; }
 
@@ -45,18 +46,25 @@ namespace Cog.Modules.Networking
 
         private void Update(UpdateEvent args)
         {
-            lock (clients)
+            lock (queuedClients)
             {
-                for (int i = clients.Count - 1; i >= 0; i--)
+                while (queuedClients.Count > 0)
                 {
-                    clients[i].DispatchMessages();
+                    var client = queuedClients.Dequeue();
+                    clients.Add(client);
+                    Engine.EventHost.GetEvent<NewClientEvent>().Trigger(new NewClientEvent(this, client));
+                }
+            }
 
-                    if (clients[i].IsDisconnected)
-                    {
-                        Debug.Event(clients[i].IpAddress + " disconnected!");
-                        clients.RemoveAt(i);
-                        continue;
-                    }
+            for (int i = clients.Count - 1; i >= 0; i--)
+            {
+                clients[i].DispatchMessages();
+
+                if (clients[i].IsDisconnected)
+                {
+                    Debug.Event(clients[i].IpAddress + " disconnected!");
+                    clients.RemoveAt(i);
+                    continue;
                 }
             }
         }
@@ -90,11 +98,8 @@ namespace Cog.Modules.Networking
                         var client = new CogClient(tcpClient);
                         Debug.Info("{0} Connected!", client.IpAddress);
 
-                        lock (clients)
-                        {
-                            clients.Add(client);
-                            Engine.EventHost.GetEvent<NewClientEvent>().Trigger(new NewClientEvent(this, client));
-                        }
+                        lock (queuedClients)
+                            queuedClients.Enqueue(client);
                     }
                     catch (InvalidVersionException e)
                     {

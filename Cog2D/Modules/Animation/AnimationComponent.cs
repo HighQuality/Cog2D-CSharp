@@ -8,7 +8,15 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Animation
 {
-    public interface IAnimationComponent { AnimationInstance Animation { get; set; } GameObject Object { get; } }
+    public interface IAnimationComponent
+    {
+        AnimationInstance Animation { get; set; }
+        GameObject Object { get; }
+
+        Vector2 BasePosition { get; set; }
+        Vector2 BaseScale { get; set; }
+        Angle BaseRotation { get; set; }
+    }
     public interface IAnimated { IAnimationComponent AnimationComponent { get; set; } }
 
     public class AnimationComponent<T> : IAnimationComponent
@@ -17,9 +25,14 @@ namespace Cog.Modules.Animation
         public GameObject Object { get; private set; }
         public AnimationInstance Animation { get; set; }
 
+        public Vector2 BasePosition { get; set; }
+        public Vector2 BaseScale { get; set; }
+        public Angle BaseRotation { get; set; }
+
         private AnimationComponent(T obj)
         {
             this.Object = obj;
+            this.BaseScale = Vector2.One;
 
             if (obj.OnDraw == null)
                 obj.OnDraw = new List<Action<DrawEvent, DrawTransformation>>();

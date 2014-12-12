@@ -432,6 +432,8 @@ namespace Cog.Scenes
 
         public IEnumerable<CogClient> EnumerateSubscribedClients()
         {
+            if (!Engine.IsServer)
+                throw new Exception("Only the server may enumerate subscribed clients!");
             return subscribedClients;
         }
     }

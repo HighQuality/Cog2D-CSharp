@@ -132,6 +132,8 @@
     <Compile Include="Modules\Content\Synchronized.cs" />
     <Compile Include="Modules\Content\SynchronizedEditPermission.cs" />
     <Compile Include="Modules\Content\SynchronizedList.cs" />
+    <Compile Include="Modules\Content\SynchronizedListAdd.cs" />
+    <Compile Include="Modules\Content\SynchronizedListRemoveAt.cs" />
     <Compile Include="Modules\Content\SynchronizedListSet.cs" />
     <Compile Include="Modules\Content\SynchronizedListInsert.cs" />
     <Compile Include="Modules\Content\SynchronizedListMessage.cs" />

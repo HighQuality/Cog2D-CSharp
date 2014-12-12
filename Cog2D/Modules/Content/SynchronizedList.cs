@@ -61,6 +61,7 @@ namespace Cog.Modules.Content
                 Array.Resize(ref items, Capacity);
             }
 
+            BaseObject.Send(new SynchronizedListAdd(BaseObject, SynchronizationId, serializer.GetBytes(value)));
             items[Count] = value;
             Count++;
         }
@@ -73,6 +74,7 @@ namespace Cog.Modules.Content
                 Array.Resize(ref items, Capacity);
             }
 
+            BaseObject.Send(new SynchronizedListInsert(BaseObject, SynchronizationId, index, serializer.GetBytes(value)));
             // Copy all items after the current index to the right
             Array.Copy(items, index, items, index + 1, Count - index);
             items[index] = value;
@@ -113,6 +115,10 @@ namespace Cog.Modules.Content
 
         public void RemoveAt(int index)
         {
+            if (index < 0 || index >= Count)
+                throw new ArgumentOutOfRangeException("index must be greater than or equal to zero and less than SynchronizedList.Count!");
+            BaseObject.Send(new SynchronizedListRemoveAt(BaseObject, SynchronizationId, index));
+
             Array.Copy(items, index + 1, items, index, Count - index);
             Count--;
         }
@@ -136,6 +142,10 @@ namespace Cog.Modules.Content
             if (index < 0 || index >= Count)
                 throw new ArgumentOutOfRangeException("index");
             items[index] = (T)value;
+        }
+        public void RemoveCommand(int index)
+        {
+            RemoveAt(index);
         }
 
         public void Clear()
