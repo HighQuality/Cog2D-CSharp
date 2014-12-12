@@ -113,6 +113,7 @@
     <Compile Include="Modules\Audio\ISoundInstance.cs" />
     <Compile Include="Modules\Content\Camera.cs" />
     <Compile Include="Modules\Content\CaptureRelayMode.cs" />
+    <Compile Include="Modules\Content\Node.cs" />
     <Compile Include="Modules\Content\ClientEditAttribute.cs" />
     <Compile Include="Modules\Content\CreateObjectMessage.cs" />
     <Compile Include="Modules\Content\ISynchronizedList.cs" />

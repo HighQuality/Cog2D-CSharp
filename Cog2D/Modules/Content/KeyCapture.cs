@@ -30,6 +30,9 @@ namespace Cog.Modules.Content
             }
         }
 
+        public Action OnPressed,
+            OnReleased;
+
         public KeyCapture(GameObject obj, Keyboard.Key key, int priority, CaptureRelayMode relayMode)
         {
             this.baseObject = obj;
@@ -46,18 +49,30 @@ namespace Cog.Modules.Content
 
         private void KeyDown(KeyDownEvent args)
         {
-            IsDown = true;
-            args.KeyUpEvent = KeyUp;
-            args.Intercept = true;
-
-            if (RelayMode == CaptureRelayMode.ServerRelay || RelayMode == CaptureRelayMode.ServerClientRelay)
+            if (!IsDown)
             {
+                args.KeyUpEvent = KeyUp;
+                IsDown = true;
+
+                if (OnPressed != null)
+                    OnPressed();
+
+                if (RelayMode == CaptureRelayMode.ServerRelay || RelayMode == CaptureRelayMode.ServerClientRelay)
+                {
+                }
             }
+            args.Intercept = true;
         }
 
         private void KeyUp()
         {
-            IsDown = false;
+            if (IsDown)
+            {
+                IsDown = false;
+
+                if (OnReleased != null)
+                    OnReleased();
+            }
 
             if (RelayMode == CaptureRelayMode.ServerRelay || RelayMode == CaptureRelayMode.ServerClientRelay)
             {

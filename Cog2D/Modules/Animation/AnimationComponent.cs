@@ -20,7 +20,6 @@ namespace Cog.Modules.Animation
         private AnimationComponent(T obj)
         {
             this.Object = obj;
-            obj.AnimationComponent = this;
 
             if (obj.OnDraw == null)
                 obj.OnDraw = new List<Action<DrawEvent, DrawTransformation>>();
@@ -35,9 +34,10 @@ namespace Cog.Modules.Animation
                 Animation.ApplyTransformation(this);
         }
 
-        public static AnimationComponent<T> RegisterOn(T obj)
+        public static void RegisterOn(T obj)
         {
-            return new AnimationComponent<T>(obj);
+            var c = new AnimationComponent<T>(obj);
+            obj.AnimationComponent = c;
         }
     }
 }

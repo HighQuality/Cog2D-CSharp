@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Cog.Modules.Content
 {
     public class QuadTreeEntry<T>
+        where T : class
     {
         public QuadTreeEntry<T> Previous,
             Next;

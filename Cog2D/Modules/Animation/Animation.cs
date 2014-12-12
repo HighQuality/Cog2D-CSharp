@@ -47,5 +47,10 @@ namespace Cog.Modules.Animation
 
             Keyframes.Add(keyframe);
         }
+
+        public void AddKeyframe(Keyframe keyframe)
+        {
+            Keyframes.Add(keyframe);
+        }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Cog.Modules.Content
 {
     public class QuadTree<T>
+        where T : class
     {
         public int Size { get; private set; }
 
@@ -37,17 +38,17 @@ namespace Cog.Modules.Content
             this.Size = size;
         }
 
-        public QuadTree<T> Expand(Vector2 towards)
+        public QuadTree<T> Expand(Rectangle to)
         {
             if (Parent != null)
                 throw new InvalidOperationException("This QuadTree has a parent!");
-            if (BoundingBox.Contains(towards))
+            if (BoundingBox.Contains(to))
                 return this;
 
-            Vector2 delta = towards - BoundingBox.Center;
-            if (delta.X > 0f)
+            Vector2 delta = to.Center - BoundingBox.Center;
+            if (delta.X < 0f)
             {
-                if (delta.Y > 0f)
+                if (delta.Y < 0f)
                 {
                     Parent = new QuadTree<T>(Position - new Vector2(Size, Size), Size * 2);
                     Parent.BottomRight = this;
@@ -60,7 +61,7 @@ namespace Cog.Modules.Content
             }
             else
             {
-                if (delta.Y > 0f)
+                if (delta.Y < 0f)
                 {
                     Parent = new QuadTree<T>(Position - new Vector2(0f, Size), Size * 2);
                     Parent.BottomLeft = this;
@@ -71,7 +72,7 @@ namespace Cog.Modules.Content
                     Parent.TopLeft = this;
                 }
             }
-            return Parent.Expand(towards);
+            return Parent.Expand(to);
         }
 
         public QuadTreeEntry<T> Insert(T obj, Rectangle boundingBox)
@@ -221,6 +222,29 @@ namespace Cog.Modules.Content
             }
         }
 
+        public void Query(Vector2 position, Action<T> action)
+        {
+            if (!BoundingBox.Contains(position))
+                return;
+
+            var e = First;
+            while (e != null)
+            {
+                if (e.BoundingBox.Contains(position))
+                    action(e.Object);
+                e = e.Next;
+            }
+
+            if (TopLeft != null)
+                TopLeft.Query(position, action);
+            if (TopRight != null)
+                TopRight.Query(position, action);
+            if (BottomLeft != null)
+                BottomLeft.Query(position, action);
+            if (BottomRight != null)
+                BottomRight.Query(position, action);
+        }
+
         public void Query(Rectangle rectangle, Action<T> action)
         {
             if (!rectangle.Intersects(BoundingBox))
@@ -249,6 +273,83 @@ namespace Cog.Modules.Content
             List<T> l = new List<T>();
             Query(rectangle, o => l.Add(o));
             return l;
+        }
+
+        public List<T> Query(Vector2 position)
+        {
+            List<T> l = new List<T>();
+            Query(position, o => l.Add(o));
+            return l;
+        }
+
+        public T QuerySingle(Rectangle rectangle)
+        {
+            if (!rectangle.Intersects(BoundingBox))
+                return null;
+
+            var e = First;
+            while (e != null)
+            {
+                if (e.BoundingBox.Intersects(rectangle))
+                    return e.Object;
+                e = e.Next;
+            }
+
+            T res = null;
+
+            if (TopLeft != null)
+                res = TopLeft.QuerySingle(rectangle);
+            if (res != null)
+                return res;
+
+            if (TopRight != null)
+                res = TopRight.QuerySingle(rectangle);
+            if (res != null)
+                return res;
+
+            if (BottomLeft != null)
+                res = BottomLeft.QuerySingle(rectangle);
+            if (res != null)
+                return res;
+
+            if (BottomRight != null)
+                res = BottomRight.QuerySingle(rectangle);
+            return res;
+        }
+
+        public T QuerySingle(Vector2 position)
+        {
+            if (!BoundingBox.Contains(position))
+                return null;
+
+            var e = First;
+            while (e != null)
+            {
+                if (e.BoundingBox.Contains(position))
+                    return e.Object;
+                e = e.Next;
+            }
+
+            T res = null;
+
+            if (TopLeft != null)
+                res = TopLeft.QuerySingle(position);
+            if (res != null)
+                return res;
+
+            if (TopRight != null)
+                res = TopRight.QuerySingle(position);
+            if (res != null)
+                return res;
+
+            if (BottomLeft != null)
+                res = BottomLeft.QuerySingle(position);
+            if (res != null)
+                return res;
+
+            if (BottomRight != null)
+                res = BottomRight.QuerySingle(position);
+            return res;
         }
 
         public void Remove(QuadTreeEntry<T> entry)
