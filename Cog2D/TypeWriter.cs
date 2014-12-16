@@ -25,9 +25,9 @@ namespace Cog
                 return stream.ToArray();
             }
         }
-        public static object FromBytes(this ITypeWriter self, object value)
+        public static object FromBytes(this ITypeWriter self, byte[] data)
         {
-            using (MemoryStream stream = new MemoryStream())
+            using (MemoryStream stream = new MemoryStream(data))
             using (BinaryReader reader = new BinaryReader(stream))
             {
                 return self.GenericRead(reader);

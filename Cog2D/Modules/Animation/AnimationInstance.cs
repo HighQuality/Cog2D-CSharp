@@ -16,19 +16,19 @@ namespace Cog.Modules.Animation
         private double previousTime;
         public Keyframe CurrentKeyframe { get { return Animation.Keyframes[currentKeyframe % Animation.Keyframes.Count]; } }
         public Keyframe NextKeyframe { get { return Animation.Keyframes[(currentKeyframe + 1) % Animation.Keyframes.Count]; } }
-        public bool DoLoop { get; set; }
+        public bool DoLoop { get; private set; }
         public event Action<AnimationInstance> OnAnimationFinished;
         public event Action<AnimationInstance> OnAnimationStopped;
         public bool IsFinished { get; private set; }
 
-        public AnimationInstance(Animation animation)
+        public AnimationInstance(Animation animation, bool doLoop)
         {
             if (animation.Keyframes.Count == 0)
                 throw new Exception("Animations must have at least one keyframe!");
 
             this.Animation = animation;
+            this.DoLoop = doLoop;
             startTime = Engine.TimeStamp;
-            DoLoop = true;
         }
 
         public void Stop()

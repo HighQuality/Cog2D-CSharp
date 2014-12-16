@@ -40,7 +40,12 @@ namespace Cog.Modules.Content
             this.GameObject = gameObject;
         }
 
-        public void Draw(DrawEvent ev, DrawTransformation transformation)
+        public void Remove()
+        {
+            GameObject.OnDraw.Remove(Draw);
+        }
+
+        private void Draw(DrawEvent ev, DrawTransformation transformation)
         {
             ev.RenderTarget.RenderTexture(Texture, transformation.WorldCoord, Color, transformation.WorldScale * Scale, Origin, transformation.WorldRotation.Degree, TextureRect);
         }

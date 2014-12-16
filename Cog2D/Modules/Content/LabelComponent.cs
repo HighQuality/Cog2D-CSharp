@@ -17,6 +17,7 @@ namespace Cog.Modules.Content
         public Vector2 RelativePosition;
         public HAlign HorizontalAlignment = HAlign.Left;
         public VAlign VerticalAlignment = VAlign.Top;
+        public bool HasShadow;
 
         public static LabelComponent RegisterOn(GameObject gameObject, BitmapFont font)
         {
@@ -36,6 +37,8 @@ namespace Cog.Modules.Content
 
         public void Draw(DrawEvent ev, DrawTransformation transformation)
         {
+            if (HasShadow)
+                Font.DrawString(ev.RenderTarget, Text, Color.Black, transformation.WorldCoord + RelativePosition + new Vector2(1f, 1f), HorizontalAlignment, VerticalAlignment);
             Font.DrawString(ev.RenderTarget, Text, Color, transformation.WorldCoord + RelativePosition, HorizontalAlignment, VerticalAlignment);
         }
     }

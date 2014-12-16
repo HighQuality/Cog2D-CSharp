@@ -55,18 +55,14 @@ namespace Cog.Modules.Content
 
         public void Add(T value)
         {
-            if (Count + 1 >= Capacity)
-            {
-                Capacity *= 2;
-                Array.Resize(ref items, Capacity);
-            }
+            if (Engine.IsClient)
+                throw new InvalidOperationException("Only the server may modify a SynchronizedList!");
 
+            ForceAdd(value);
             BaseObject.Send(new SynchronizedListAdd(BaseObject, SynchronizationId, serializer.GetBytes(value)));
-            items[Count] = value;
-            Count++;
         }
 
-        public void Insert(int index, T value)
+        private void ForceAdd(T value)
         {
             if (Count + 1 >= Capacity)
             {
@@ -74,7 +70,26 @@ namespace Cog.Modules.Content
                 Array.Resize(ref items, Capacity);
             }
 
+            items[Count] = value;
+            Count++;
+        }
+
+        public void Insert(int index, T value)
+        {
+            if (Engine.IsClient)
+                throw new InvalidOperationException("Only the server may modify a SynchronizedList!");
             BaseObject.Send(new SynchronizedListInsert(BaseObject, SynchronizationId, index, serializer.GetBytes(value)));
+            ForceInsert(index, value);
+        }
+
+        private void ForceInsert(int index, T value)
+        {
+            if (Count + 1 >= Capacity)
+            {
+                Capacity *= 2;
+                Array.Resize(ref items, Capacity);
+            }
+
             // Copy all items after the current index to the right
             Array.Copy(items, index, items, index + 1, Count - index);
             items[index] = value;
@@ -117,27 +132,33 @@ namespace Cog.Modules.Content
         {
             if (index < 0 || index >= Count)
                 throw new ArgumentOutOfRangeException("index must be greater than or equal to zero and less than SynchronizedList.Count!");
+            if (Engine.IsClient)
+                throw new InvalidOperationException("Only the server may modify a SynchronizedList!");
             BaseObject.Send(new SynchronizedListRemoveAt(BaseObject, SynchronizationId, index));
+            ForceRemoveAt(index);
+        }
 
+        private void ForceRemoveAt(int index)
+        {
             Array.Copy(items, index + 1, items, index, Count - index);
             Count--;
         }
 
         public void InsertCommand(object value, int index)
         {
-            if (value == null || typeof(T).IsAssignableFrom(value.GetType()))
+            if (value != null && !(value is T))
                 throw new InvalidOperationException("Value is not of a valid type!");
-            Insert(index, (T)value);
+            ForceInsert(index, (T)value);
         }
         public void AddCommand(object value)
         {
-            if (value == null || typeof(T).IsAssignableFrom(value.GetType()))
+            if (value != null && !(value is T))
                 throw new InvalidOperationException("Value is not of a valid type!");
-            Add((T)value);
+            ForceAdd((T)value);
         }
         public void SetCommand(int index, object value)
         {
-            if (value == null || typeof(T).IsAssignableFrom(value.GetType()))
+            if (value != null && !(value is T))
                 throw new InvalidOperationException("Value is not of a valid type!");
             if (index < 0 || index >= Count)
                 throw new ArgumentOutOfRangeException("index");
@@ -145,7 +166,7 @@ namespace Cog.Modules.Content
         }
         public void RemoveCommand(int index)
         {
-            RemoveAt(index);
+            ForceRemoveAt(index);
         }
 
         public void Clear()
@@ -181,22 +202,22 @@ namespace Cog.Modules.Content
 
         public void Serialize(BinaryWriter writer)
         {
-            writer.Write(Count);
+            writer.Write((UInt16)Capacity);
+            writer.Write((UInt16)Count);
             for (int i=0; i<Count; i++)
                 serializer.GenericWrite(items[i], writer);
         }
 
         public void Deserialize(BinaryReader reader)
         {
+            int capacity = reader.ReadUInt16();
             int count = reader.ReadUInt16();
-            items = new T[count];
-            Capacity = count;
 
-            T[] deserializedItems = new T[count];
+            Capacity = capacity;
+            items = new T[capacity];
+
             for (int i = 0; i < count; i++)
-            {
-                Add((T)serializer.GenericRead(reader));
-            }
+                AddCommand(serializer.GenericRead(reader));
         }
     }
 }

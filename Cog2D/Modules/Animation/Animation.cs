@@ -9,7 +9,10 @@ namespace Cog.Modules.Animation
 {
     public class Animation
     {
-        public List<Keyframe> Keyframes = new List<Keyframe>();
+        public IReadOnlyList<Keyframe> Keyframes { get { return keyframes; } }
+        private List<Keyframe> keyframes = new List<Keyframe>();
+
+        public float Length { get; private set; }
 
         public void AddKeyframe(float duration, Vector2? position, Func<float, float> positionInterpolation, Vector2? scale, Func<float, float> scaleInterpolation, Angle? rotation, Func<float, float> rotationInterpolation)
         {
@@ -45,12 +48,14 @@ namespace Cog.Modules.Animation
             if (rotationInterpolation != null)
                 keyframe.RotationInterpolationFrom = rotationInterpolation;
 
-            Keyframes.Add(keyframe);
+            AddKeyframe(keyframe);
         }
 
         public void AddKeyframe(Keyframe keyframe)
         {
-            Keyframes.Add(keyframe);
+            keyframes.Add(keyframe);
+
+            Length += (float)keyframe.Duration;
         }
     }
 }

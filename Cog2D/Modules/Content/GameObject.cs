@@ -182,7 +182,7 @@ namespace Cog.Modules.Content
         public Vector2 Size { get; set; }
         public Scene Scene { get; internal set; }
         public bool DoRemove { get; private set; }
-        public CogClient Owner { get; internal set; }
+        public event Action OnRemoved;
         /// <summary>
         /// Gets the ID of this object.
         /// SET IS ONLY FOR INTERNAL ENGINE USE
@@ -232,15 +232,6 @@ namespace Cog.Modules.Content
         {
         }
 
-        public bool KeyIsDown(Keyboard.Key key)
-        {
-            if (Engine.IsClient)
-                return Engine.Window.IsKeyDown(key);
-            else if (Owner != null)
-                return Owner.IsKeyDown(key);
-            return false;
-        }
-                
         public void Remove()
         {
             if (Engine.IsClient && IsGlobal)
@@ -282,6 +273,9 @@ namespace Cog.Modules.Content
                 }
             }
             DoRemove = true;
+
+            if (OnRemoved != null)
+                OnRemoved();
         }
         
         public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)

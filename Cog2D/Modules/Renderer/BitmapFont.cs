@@ -167,10 +167,10 @@ namespace Cog.Modules.Renderer
         internal FontRenderer Renderer;
         private Texture texture;
 
-        public BitmapFont(byte[] data)
+        public BitmapFont(byte[] data, Func<string, Texture> loadTexture)
         {
             FontFile fontFile = FontLoader.Load(data);
-            texture = Engine.Renderer.LoadTexture(fontFile.Pages[0].File);
+            texture = loadTexture(fontFile.Pages[0].File);
             Renderer = new FontRenderer(fontFile, texture);
         }
 
