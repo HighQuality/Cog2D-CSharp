@@ -31,7 +31,7 @@ namespace TestGame
             Movement.Down = new KeyCapture(this, Keyboard.Key.S, 0, CaptureRelayMode.NoRelay);
 
             AnimationComponent<TestObject>.RegisterOn(this);
-            AnimationComponent.Animation = new AnimationInstance(new TestAnimation());
+            AnimationComponent.Animation = new AnimationInstance(new TestAnimation(), true);
             Sprite = SpriteComponent.RegisterOn(this, Resources.GetTexture("texture"));
 
             RegisterEvent<UpdateEvent>(0, e => LocalRotation += Angle.FromRadian(e.DeltaTime));
