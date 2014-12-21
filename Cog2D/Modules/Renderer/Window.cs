@@ -9,6 +9,11 @@ namespace Cog.Modules.Renderer
 {
     public abstract class Window
     {
+        public Window()
+        {
+            Engine.Renderer.AlphaBlend.ForceSet(RenderTarget);
+        }
+
         /// <summary>
         /// Gets or Sets the title of the window
         /// </summary>

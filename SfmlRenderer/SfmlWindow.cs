@@ -13,6 +13,9 @@ namespace Cog.SfmlRenderer
     {
         internal RenderWindow InnerWindow;
 
+        public Cog.Modules.Renderer.BlendMode BlendMode { get; set; }
+        public RenderStates RenderState = RenderStates.Default;
+
         private Dictionary<SFML.Window.Keyboard.Key, Action> keyUpEvents = new Dictionary<SFML.Window.Keyboard.Key, Action>();
         public LinkedList<SFML.Window.Keyboard.Key> pressedKeys = new LinkedList<SFML.Window.Keyboard.Key>();
         private string _title;
@@ -276,7 +279,7 @@ namespace Cog.SfmlRenderer
             sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
             sprite.Texture = ((SfmlTexture)texture).Texture;
             sprite.Scale = new SFML.System.Vector2f(1f, 1f);
-            InnerWindow.Draw(sprite);
+            InnerWindow.Draw(sprite, RenderState);
         }
 
         public void RenderTexture(Modules.Renderer.Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
@@ -289,7 +292,7 @@ namespace Cog.SfmlRenderer
             sprite.Texture = ((SfmlTexture)texture).Texture;
             sprite.Rotation = rotation;
             sprite.TextureRect = new IntRect((int)textureRect.TopLeft.X, (int)textureRect.TopLeft.Y, (int)textureRect.Size.X, (int)textureRect.Size.Y);
-            InnerWindow.Draw(sprite);
+            InnerWindow.Draw(sprite, RenderState);
         }
 
         public override bool IsKeyDown(Keyboard.Key key)

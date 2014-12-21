@@ -34,6 +34,14 @@ namespace Cog
             this.A = a;
         }
 
+        public Color Transition(Color to, float progress)
+        {
+            return new Color((int)(((float)to.R - (float)R) * progress) + R,
+                (int)(((float)to.G - (float)G) * progress) + G,
+                (int)(((float)to.B - (float)B) * progress) + B,
+                (int)(((float)to.A - (float)A) * progress) + A);
+        }
+
         public static Color operator*(Color first, float second)
         {
             return new Color(first.R, first.G, first.B, (int)((float)first.A * second));

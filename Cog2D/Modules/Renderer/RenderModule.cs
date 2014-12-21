@@ -9,6 +9,13 @@ namespace Cog.Modules.Renderer
 {
     public abstract class RenderModule
     {
+        public RenderModule()
+        {
+            InitializeBlendModes();
+            if (AlphaBlend == null || AdditiveBlend == null)
+                throw new Exception("One of the blend modes were not assigned!");
+        }
+
         /// <summary>
         /// Creates a Window with the specified parameters
         /// </summary>
@@ -37,5 +44,13 @@ namespace Cog.Modules.Renderer
         /// <param name="image">The image to generate a texture from</param>
         /// <returns>A generated texture</returns>
         public abstract Texture TextureFromImage(Image image);
+
+        public BlendMode AlphaBlend { get; protected set; }
+        public BlendMode AdditiveBlend { get; protected set; }
+
+        /// <summary>
+        /// Initializes AlphaBlend and AdditiveBlend
+        /// </summary>
+        protected abstract void InitializeBlendModes();
     }
 }

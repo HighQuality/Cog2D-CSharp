@@ -84,6 +84,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlphaBlending.cs" />
+    <Compile Include="AdditiveBlending.cs" />
     <Compile Include="SfmlRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SfmlTexture.cs" />

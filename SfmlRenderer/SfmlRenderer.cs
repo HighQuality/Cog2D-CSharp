@@ -29,5 +29,11 @@ namespace Cog.SfmlRenderer
         {
             return new SfmlTexture(image);
         }
+
+        protected override void InitializeBlendModes()
+        {
+            AlphaBlend = new AlphaBlending();
+            AdditiveBlend = new AdditiveBlending();
+        }
     }
 }

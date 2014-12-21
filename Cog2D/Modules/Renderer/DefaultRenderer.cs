@@ -28,5 +28,11 @@ namespace Cog.Modules.Renderer
         {
             return null;
         }
+
+        protected override void InitializeBlendModes()
+        {
+            AlphaBlend = new DefaultBlendMode();
+            AdditiveBlend = new DefaultBlendMode();
+        }
     }
 }

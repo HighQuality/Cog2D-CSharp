@@ -18,6 +18,7 @@ namespace Cog.Interface
         Rectangle Bounds { get; }
         Rectangle ContentBounds { get; }
         Padding Padding { get; }
+        bool DoRemove { get; set; }
 
         bool PredicatePress(Mouse.Button button, Vector2 position);
         bool TriggerPress(Vector2 position, ButtonDownEvent ev);
@@ -33,11 +34,15 @@ namespace Cog.Interface
         void ChildBoundsChanged(Rectangle newBounds);
 
         void AddChild(IInterfaceElement element);
+
+        void Remove();
     }
 
     public class InterfaceElement<TParent> : IInterfaceElement
         where TParent : class, IInterfaceElement
     {
+        public bool DoRemove { get; set; }
+
         public TParent Parent { get; private set; }
         public IInterfaceElement GenericParent { get { return (IInterfaceElement)Parent; } }
         public Vector2 ScreenCoord { get { if (Parent != null) return Parent.ScreenCoord + Location; return Location; } }
@@ -159,14 +164,16 @@ namespace Cog.Interface
             for (int i = children.Count - 1; i >= 0; i--)
             {
                 if (children[i] is T)
-                    yield return (T)children[i];
+                    if (!children[i].DoRemove)
+                        yield return (T)children[i];
             }
         }
 
         public IEnumerable<IInterfaceElement> EnumerateChildren()
         {
             for (int i = children.Count - 1; i >= 0; i--)
-                yield return children[i];
+                if (!children[i].DoRemove)
+                    yield return children[i];
         }
 
         public virtual bool PredicatePress(Mouse.Button button, Vector2 position)
@@ -202,8 +209,14 @@ namespace Cog.Interface
         {
             OnUpdate(ev.DeltaTime);
 
-            foreach (var child in EnumerateChildren())
-                child.TriggerUpdate(ev);
+            for (int i = children.Count - 1; i >= 0; i--)
+            {
+                var child = children[i];
+                if (child.DoRemove)
+                    children.RemoveAt(i);
+                else
+                    child.TriggerUpdate(ev);
+            }
         }
 
         public void TriggerDraw(DrawInterfaceEvent ev, Vector2 screenCoord)
@@ -228,6 +241,11 @@ namespace Cog.Interface
         public virtual bool IsInside(Vector2 position)
         {
             return position.X >= 0f && position.Y >= 0f && position.X < Size.X && position.Y < Size.Y;
+        }
+
+        public void Remove()
+        {
+            DoRemove = true;
         }
     }
 

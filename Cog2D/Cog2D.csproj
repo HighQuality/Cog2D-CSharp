@@ -91,6 +91,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivationContext.cs" />
     <Compile Include="Angle.cs" />
     <Compile Include="Color.cs" />
     <Compile Include="Debug.cs" />
@@ -168,6 +169,8 @@
     <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
     <Compile Include="Modules\Renderer\Alignments.cs" />
     <Compile Include="Modules\Renderer\BitmapFont.cs" />
+    <Compile Include="Modules\Renderer\BlendMode.cs" />
+    <Compile Include="Modules\Renderer\DefaultBlendMode.cs" />
     <Compile Include="Modules\Resources\Resource.cs" />
     <Compile Include="Modules\Resources\ResourceAttribute.cs" />
     <Compile Include="Modules\Resources\ResourceCollection.cs" />

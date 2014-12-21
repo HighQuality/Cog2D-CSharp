@@ -239,7 +239,7 @@ namespace Cog.Modules.Content
 
             ForceRemove();
 
-            if (Engine.IsServer)
+            if (Engine.IsServer && IsGlobal)
             {
                 Send(new RemoveObjectMessage(this));
                 SubscribedClients.Clear();
@@ -248,6 +248,10 @@ namespace Cog.Modules.Content
 
         internal void ForceRemove()
         {
+            if (children != null)
+                for (int i = children.Count - 1; i >= 0; i--)
+                    children[i].ForceRemove();
+
             if (registeredEvents != null)
             {
                 for (int i = registeredEvents.Count - 1; i >= 0; i--)
