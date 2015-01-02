@@ -18,6 +18,11 @@ namespace Cog.Modules.Content
 
         public override void Received()
         {
+            if (Object == null)
+            {
+                Debug.Warning("Tried to remove a null object!");
+                return;
+            }
             Object.ForceRemove();
         }
     }

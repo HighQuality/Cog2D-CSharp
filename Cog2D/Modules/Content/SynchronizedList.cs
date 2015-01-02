@@ -41,7 +41,7 @@ namespace Cog.Modules.Content
 
         public SynchronizedList()
         {
-            serializer = TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]);
+            serializer = TypeSerializer.GetTypeWriter(GetType().GetGenericArguments()[0]);
 
             Capacity = 8;
             items = new T[Capacity];

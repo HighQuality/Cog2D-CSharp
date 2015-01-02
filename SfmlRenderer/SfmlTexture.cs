@@ -15,12 +15,14 @@ namespace Cog.SfmlRenderer
         internal SfmlTexture(string filename)
         {
             this.Texture = new SFML.Graphics.Texture(filename);
+            //Texture.Smooth = true;
             IsLoaded = true;
         }
 
         internal SfmlTexture(byte[] data)
         {
             this.Texture = new SFML.Graphics.Texture(data);
+            //Texture.Smooth = true;
             IsLoaded = true;
         }
 
@@ -36,6 +38,7 @@ namespace Cog.SfmlRenderer
                 }
             }
             this.Texture = new SFML.Graphics.Texture(sfmlImage);
+            //Texture.Smooth = true;
 
             IsLoaded = true;
             IsDynamic = true;

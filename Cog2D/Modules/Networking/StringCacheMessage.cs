@@ -18,9 +18,9 @@ namespace Cog.Modules.Networking
 
         public override void Received()
         {
-            ushort id = (ushort)Sender.CachedStrings.Count;
-            Sender.CachedStrings.Add(CachedString);
-            Sender.CachedStringDictionary.Add(CachedString, id);
+            ushort id = (ushort)Client.CachedStrings.Count;
+            Client.CachedStrings.Add(CachedString);
+            Client.CachedStringDictionary.Add(CachedString, id);
         }
     }
 }

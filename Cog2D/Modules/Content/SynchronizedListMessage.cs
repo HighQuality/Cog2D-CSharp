@@ -23,7 +23,7 @@ namespace Cog.Modules.Content
         {
             var field = GameObject.GetSynchronizedField(Object.GetType(), SynchronizationId);
             var list = (ISynchronizedList)field.GetValue(Object);
-            var typeSerializer = TypeSerializer.GetTypeWriter(field.FieldType.GenericTypeArguments[0]);
+            var typeSerializer = TypeSerializer.GetTypeWriter(field.FieldType.GetGenericArguments()[0]);
             ExecuteCommand(list, typeSerializer);
         }
 

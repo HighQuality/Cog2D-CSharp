@@ -53,7 +53,7 @@ namespace Cog
         /// Gets the current host for timed events
         /// </summary>
         internal static TimedEventHost TimedEventHost { get; private set; }
-
+        
         public static ClientModule ClientModule { get; private set; }
         public static ServerModule ServerModule { get; private set; }
 
@@ -68,7 +68,7 @@ namespace Cog
             nextLocalId;
 
         public static Permissions Permissions;
-
+        
         /// <summary>
         /// Gets or sets the desired resolution.
         /// If a window has already been created the renderer must be restarted for a new resolution to take affect.
@@ -81,7 +81,12 @@ namespace Cog
         public static Vector2 Resolution { get { if (Window != null) return Window.Resolution; return DesiredResolution; } }
 
         public static double TimeStamp { get; private set; }
+        private static object _synchronizedTimeStampLock;
+        private static double _synchronizedTimeStamp;
+        public static double SynchronizedTimeStamp { get { lock (_synchronizedTimeStampLock) return _synchronizedTimeStamp; } private set { lock (_synchronizedTimeStampLock) _synchronizedTimeStamp = value; } }
         private static Stopwatch timeStampWatch;
+
+        public static float FrameTime { get; private set; }
 
         /// <summary>
         /// Initializes Cog2D making it available for use showing the default splash screen while initializing
@@ -112,6 +117,8 @@ namespace Cog
         {
             EventHost = new EventModule();
             TimedEventHost = new TimedEventHost();
+
+            _synchronizedTimeStampLock = new object();
 
             if (splashScreenImage != null)
             {
@@ -327,7 +334,7 @@ namespace Cog
             IsClient = false;
 
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
-            EventHost.RegisterEvent<ExitEvent>(-999, e => { Window.Close(); e.Intercept = true; });
+            EventHost.RegisterEvent<ExitEvent>(-999, e => { Window.Close(); });
             EventHost.RegisterEvent<CloseButtonEvent>(-999, e => { EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null)); e.Intercept = true; });
 
             EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
@@ -341,10 +348,12 @@ namespace Cog
             while (Window.IsOpen)
             {
                 TimeStamp = timeStampWatch.Elapsed.TotalSeconds;
+                SynchronizedTimeStamp = TimeStamp;
                 float deltaTime = (float)watch.Elapsed.TotalSeconds;
                 watch.Restart();
 
-                TimedEventHost.Update();
+                lock (TimedEventHost)
+                    TimedEventHost.Update();
 
                 Window.DispatchEvents();
 
@@ -366,6 +375,7 @@ namespace Cog
                 EventHost.GetEvent<DrawInterfaceEvent>().Trigger(new DrawInterfaceEvent(null, Window.RenderTarget));
 
                 float frameTime = (float)watch.Elapsed.TotalMilliseconds;
+                Engine.FrameTime = frameTime;
                 Window.Display();
 
                 if (SceneHost.CurrentScene == null)
@@ -373,14 +383,14 @@ namespace Cog
             }
         }
 
-        public static void StartServer(int port)
+        public static void StartServer(int port, Func<TcpClient, CogClient> createClient)
         {
             IsServer = true;
             IsClient = false;
 
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
 
-            ServerModule = new ServerModule(port);
+            ServerModule = new ServerModule(port, createClient);
 
             EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
 
@@ -390,10 +400,12 @@ namespace Cog
             while (SceneHost.CurrentScene != null)
             {
                 TimeStamp = timeStampWatch.Elapsed.TotalSeconds;
+                SynchronizedTimeStamp = TimeStamp;
                 float deltaTime = (float)watch.Elapsed.TotalSeconds;
                 watch.Restart();
 
-                TimedEventHost.Update();
+                lock (TimedEventHost)
+                    TimedEventHost.Update();
 
                 accumulator += deltaTime;
                 while(accumulator >= PhysicsTimeStep)
@@ -436,8 +448,9 @@ namespace Cog
         /// </summary>
         public static TimedEvent InvokeTimed(float timeInSeconds, Action<float> action)
         {
-            var ev = new TimedEvent(action, TimeStamp + (double)timeInSeconds);
-            TimedEventHost.Schedule(ev);
+            var ev = new TimedEvent(action, SynchronizedTimeStamp + (double)timeInSeconds);
+            lock (TimedEventHost)
+                TimedEventHost.Schedule(ev);
             return ev;
         }
 

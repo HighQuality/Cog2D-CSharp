@@ -60,8 +60,9 @@ namespace Cog.SfmlRenderer
                 default:
                     throw new ArgumentOutOfRangeException("style");
             }
+            var contextSettings = new SFML.Window.ContextSettings(0, 0, 0);
 
-            InnerWindow = new RenderWindow(new SFML.Window.VideoMode((uint)width, (uint)height), title, sfmlStyle);
+            InnerWindow = new RenderWindow(new SFML.Window.VideoMode((uint)width, (uint)height), title, sfmlStyle, contextSettings);
             _title = title;
             _visible = true;
 

@@ -49,7 +49,7 @@ namespace Cog.Modules.Resources
             {
                 c = new ResourceCollection();
 
-                foreach (var attribute in type.GetCustomAttributes<ResourceAttribute>())
+                foreach (var attribute in type.GetCustomAttributes(typeof(ResourceAttribute), true).Select(o => (ResourceAttribute)o))
                 {
                     var container = GetContainer(attribute.ContainerName);
                     c.AddResource(attribute.Key, container.Load(attribute.Filename));

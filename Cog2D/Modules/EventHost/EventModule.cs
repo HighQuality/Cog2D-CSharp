@@ -57,7 +57,7 @@ namespace Cog.Modules.EventHost
             else
             {
                 if (!(eventObject is Event<T>))
-                    throw new ArgumentException("Template \"" + typeof(T).FullName + "\" did not match " + eventObject.GetType().GenericTypeArguments[0].FullName);
+                    throw new ArgumentException("Template \"" + typeof(T).FullName + "\" did not match " + eventObject.GetType().GetGenericArguments()[0].FullName);
             }
             return (Event<T>)eventObject;
         }

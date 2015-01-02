@@ -1,4 +1,5 @@
 ﻿using Cog.Modules.EventHost;
+using Cog.Scenes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Networking
 {
-    public class TcpSocket : IStringCacher
+    public abstract class CogClient : IStringCacher
     {
         private TcpClient client;
         private NetworkStream stream;
@@ -27,7 +28,7 @@ namespace Cog.Modules.Networking
         private Dictionary<string, ushort> sentStrings = new Dictionary<string, ushort>();
         public Permissions Permissions;
 
-        internal TcpSocket(TcpClient client, Permissions permissions)
+        public CogClient(TcpClient client, Permissions permissions)
         {
             this.Permissions = permissions;
             this.client = client;
@@ -79,7 +80,7 @@ namespace Cog.Modules.Networking
                     var type = NetworkMessage.GetType(typeId);
                     var data = NetworkMessage.ReadMessageData(typeId, this, Reader);
 
-                    var properties = type.GetCustomAttribute<MessageExecutionAttribute>();
+                    var properties = (MessageExecutionAttribute)type.GetCustomAttributes(typeof(MessageExecutionAttribute), true).FirstOrDefault();
                     if (properties != null && properties.Immediate)
                     {
                         var msg = NetworkMessage.ReadMessage(typeId, data, this);
@@ -123,6 +124,17 @@ namespace Cog.Modules.Networking
         {
             IsDisconnected = true;
             client.Close();
+        }
+
+        public void SubscribeTo(Scene scene)
+        {
+            Send(scene.CreateSceneCreationMessage());
+            scene.AddSubscription(this);
+        }
+
+        public bool IsKeyDown(Keyboard.Key key)
+        {
+            return false;
         }
     }
 }

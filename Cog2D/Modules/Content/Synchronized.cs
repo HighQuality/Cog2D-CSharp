@@ -27,7 +27,7 @@ namespace Cog.Modules.Content
 
         private Synchronized()
         {
-            serializer = TypeSerializer.GetTypeWriter(GetType().GenericTypeArguments[0]);
+            serializer = TypeSerializer.GetTypeWriter(GetType().GetGenericArguments()[0]);
         }
 
         public void Initialize(GameObject obj, ushort synchronizationId)

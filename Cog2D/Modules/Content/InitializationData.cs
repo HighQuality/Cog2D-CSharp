@@ -10,5 +10,6 @@ namespace Cog.Modules.Content
     internal class InitializationData
     {
         public ISynchronized[] SynchronizedFields;
+        public byte[] UserData;
     }
 }

@@ -15,13 +15,15 @@ namespace Cog.Modules.Networking
         private Thread thread;
         private TcpListener listener;
         private List<CogClient> clients;
-        private Queue<CogClient> queuedClients = new Queue<CogClient>();
+        private Queue<TcpClient> queuedClients = new Queue<TcpClient>();
         private IEventListener updateListener;
         public int Port { get; private set; }
+        private Func<TcpClient, CogClient> createClient;
 
-        public ServerModule(int port)
+        public ServerModule(int port, Func<TcpClient, CogClient> createClient)
         {
             this.Port = port;
+            this.createClient = createClient;
 
             listener = new TcpListener(System.Net.IPAddress.Any, port);
             try
@@ -50,7 +52,8 @@ namespace Cog.Modules.Networking
             {
                 while (queuedClients.Count > 0)
                 {
-                    var client = queuedClients.Dequeue();
+                    var client = createClient(queuedClients.Dequeue());
+                    Debug.Info("{0} Connected!", client.IpAddress);
                     clients.Add(client);
                     Engine.EventHost.GetEvent<NewClientEvent>().Trigger(new NewClientEvent(this, client));
                 }
@@ -95,11 +98,8 @@ namespace Cog.Modules.Networking
                     var tcpClient = listener.AcceptTcpClient();
                     try
                     {
-                        var client = new CogClient(tcpClient);
-                        Debug.Info("{0} Connected!", client.IpAddress);
-
                         lock (queuedClients)
-                            queuedClients.Enqueue(client);
+                            queuedClients.Enqueue(tcpClient);
                     }
                     catch (InvalidVersionException e)
                     {

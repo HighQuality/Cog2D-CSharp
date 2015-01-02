@@ -11,7 +11,7 @@ namespace Cog.Modules.Networking
 {
     public class ClientModule
     {
-        TcpSocket client;
+        ServerConnection client;
         private IEventListener updateListener;
         public string Hostname { get; private set; }
         public int Port { get; private set; }
@@ -23,7 +23,7 @@ namespace Cog.Modules.Networking
             var tcpClient = new TcpClient();
             tcpClient.Connect(hostname, port);
             
-            client = new TcpSocket(tcpClient, Permissions.FullPermissions);
+            client = new ServerConnection(tcpClient);
             updateListener = Engine.EventHost.RegisterEvent<UpdateEvent>(int.MaxValue - 1, Update);
         }
 

@@ -25,6 +25,7 @@ namespace Cog.Modules.Renderer
                 foreach (var fontCharacter in FontFile.Chars)
                 {
                     char c = (char)fontCharacter.ID;
+                    if (!CharacterMap.ContainsKey(c))
                     CharacterMap.Add(c, fontCharacter);
                 }
             }
@@ -33,18 +34,21 @@ namespace Cog.Modules.Renderer
             internal FontFile FontFile;
             internal Texture Texture;
 
-            public void DrawString(IRenderTarget renderTarget, string text, Color color, Vector2 position, HAlign horizontalAlignment, VAlign verticalAlignment)
+            public void DrawString(IRenderTarget renderTarget, string text, float fontSize, Color color, Vector2 position, HAlign horizontalAlignment, VAlign verticalAlignment)
             {
+                float sizeFactor = (fontSize / (float)FontFile.Info.Size);
+                float lineHeight = FontFile.Common.LineHeight * sizeFactor;
+
                 if (horizontalAlignment != HAlign.Left)
                 {
                     var lines = text.Split('\n');
                     for (int i = 0; i < lines.Length; i++)
                     {
-                        var size = MeassureString(lines[i]);
+                        var size = MeassureString(lines[i], fontSize);
                         if (horizontalAlignment == HAlign.Right)
-                            DrawString(renderTarget, text, color, position - new Vector2(size.X, 0f), HAlign.Left, verticalAlignment);
+                            DrawString(renderTarget, text, fontSize, color, position - new Vector2(size.X, 0f), HAlign.Left, verticalAlignment);
                         else
-                            DrawString(renderTarget, text, color, position - new Vector2(size.X / 2f, 0f), HAlign.Left, verticalAlignment);
+                            DrawString(renderTarget, text, fontSize, color, position - new Vector2(size.X / 2f, 0f), HAlign.Left, verticalAlignment);
                         position.Y += size.Y;
                     }
                 }
@@ -52,13 +56,13 @@ namespace Cog.Modules.Renderer
                 {
                     if (verticalAlignment != VAlign.Top)
                     {
-                        var verticalOffset = MeassureString(text).Y;
+                        var verticalOffset = MeassureString(text, fontSize).Y;
                         if (verticalAlignment == VAlign.Center)
                             verticalOffset /= 2f;
                         position.Y -= verticalOffset;
                     }
-                    int dx = (int)position.X;
-                    int dy = (int)position.Y;
+                    float dx = (int)position.X;
+                    float dy = (int)position.Y;
 
                     foreach (char c in text)
                     {
@@ -66,23 +70,26 @@ namespace Cog.Modules.Renderer
                         if (c == '\n')
                         {
                             dx = (int)position.X;
-                            dy += FontFile.Common.LineHeight;
+                            dy += lineHeight;
                         }
                         else if (CharacterMap.TryGetValue(c, out fc))
                         {
-                            renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset, dy + fc.YOffset), color, Vector2.One, Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
+                            renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
 
-                            dx += fc.XAdvance;
+                            dx += fc.XAdvance * sizeFactor;
                         }
                     }
                 }
             }
 
-            public void DrawString(IRenderTarget renderTarget, string text, Color color, Rectangle rect)
+            public void DrawString(IRenderTarget renderTarget, string text, float fontSize, Color color, Rectangle rect)
             {
-                int dx = (int)rect.Left;
-                int dy = (int)rect.Top;
-                int wordWidth = 0;
+                float sizeFactor = (fontSize / (float)FontFile.Info.Size);
+                float lineHeight = FontFile.Common.LineHeight * sizeFactor;
+
+                float dx = (int)rect.Left;
+                float dy = (int)rect.Top;
+                float wordWidth = 0f;
                 Action drawWord = null;
 
                 foreach (char c in text)
@@ -91,14 +98,14 @@ namespace Cog.Modules.Renderer
                     if (c == '\n')
                     {
                         dx = (int)rect.Left;
-                        dy += FontFile.Common.LineHeight;
+                        dy += lineHeight;
                     }
                     else if (CharacterMap.TryGetValue(c, out fc))
                     {
                         if (dx + fc.XAdvance > rect.Right)
                         {
                             dx = (int)rect.Left;
-                            dy += FontFile.Common.LineHeight;
+                            dy += lineHeight;
                             if (drawWord != null)
                             {
                                 drawWord();
@@ -113,19 +120,19 @@ namespace Cog.Modules.Renderer
                                 drawWord = null;
                             }
 
-                            renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset, dy + fc.YOffset), color, Vector2.One, Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
-                            dx += fc.XAdvance;
+                            renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
+                            dx += fc.XAdvance * sizeFactor;
                         }
                         else
                         {
-                            int xx = dx;
-                            int yy = dy;
+                            float xx = dx;
+                            float yy = dy;
                             drawWord += () =>
                             {
-                                renderTarget.RenderTexture(Texture, new Vector2(xx + fc.XOffset, yy + fc.YOffset), color, Vector2.One, Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
+                                renderTarget.RenderTexture(Texture, new Vector2(xx + fc.XOffset * sizeFactor, yy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
                             };
-                            dx += fc.XAdvance;
-                            wordWidth += fc.XAdvance;
+                            dx += fc.XAdvance * sizeFactor;
+                            wordWidth += fc.XAdvance * sizeFactor;
                         }
                     }
                 }
@@ -136,12 +143,18 @@ namespace Cog.Modules.Renderer
                 }
             }
 
-            public Vector2 MeassureString(string text)
+            public Vector2 MeassureString(string text, float fontSize)
             {
-                int maxWidth = 0;
-                int maxHeight = FontFile.Common.LineHeight;
+                float sizeFactor = (fontSize / (float)FontFile.Info.Size);
+                float lineHeight = FontFile.Common.LineHeight * sizeFactor;
 
-                int lineWidth = 0;
+                float maxWidth = 0f;
+                float maxHeight = 0f;
+                // Whitespaces count too, newline moves down by line height when rendering
+                if (text.Length > 0)
+                    maxHeight = lineHeight;
+
+                float lineWidth = 0;
 
                 foreach (char c in text)
                 {
@@ -149,12 +162,12 @@ namespace Cog.Modules.Renderer
 
                     if (c == '\n')
                     {
-                        maxHeight += FontFile.Common.LineHeight;
+                        maxHeight += lineHeight;
                         lineWidth = 0;
                     }
                     else if (CharacterMap.TryGetValue(c, out fc))
                     {
-                        lineWidth += fc.XAdvance;
+                        lineWidth += (float)fc.XAdvance * sizeFactor;
                         if (lineWidth > maxWidth)
                             maxWidth = lineWidth;
                     }
@@ -166,6 +179,7 @@ namespace Cog.Modules.Renderer
 
         internal FontRenderer Renderer;
         private Texture texture;
+        public int RenderSize { get { return Renderer.FontFile.Info.Size; } }
 
         public BitmapFont(byte[] data, Func<string, Texture> loadTexture)
         {
@@ -174,19 +188,19 @@ namespace Cog.Modules.Renderer
             Renderer = new FontRenderer(fontFile, texture);
         }
 
-        public void DrawString(IRenderTarget target, string text, Color color, Vector2 position, HAlign horizontalAlignment, VAlign verticalAlignment)
+        public void DrawString(IRenderTarget target, string text, float fontSize, Color color, Vector2 position, HAlign horizontalAlignment, VAlign verticalAlignment)
         {
-            Renderer.DrawString(target, text, color, position, horizontalAlignment, verticalAlignment);
+            Renderer.DrawString(target, text, fontSize, color, position, horizontalAlignment, verticalAlignment);
         }
 
-        public void DrawString(IRenderTarget target, string text, Color color, Rectangle rect)
+        public void DrawString(IRenderTarget target, string text, float fontSize, Color color, Rectangle rect)
         {
-            Renderer.DrawString(target, text, color, rect);
+            Renderer.DrawString(target, text, fontSize, color, rect);
         }
 
-        public Vector2 MeassureString(string str)
+        public Vector2 MeassureString(string str, float fontSize)
         {
-            return Renderer.MeassureString(str);
+            return Renderer.MeassureString(str, fontSize);
         }
 
         public override void Dispose()

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.EventHost
 {
-    class FinishedLoadingEvent : EventParameters
+    public class FinishedLoadingEvent : EventParameters
     {
         public FinishedLoadingEvent(Object sender)
             : base(sender)

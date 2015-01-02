@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Cog.Modules.Resources;
 using System.IO;
+using Cog.Modules.Networking;
 
 namespace Cog.Scenes
 {
@@ -108,7 +109,7 @@ namespace Cog.Scenes
 
                 for (int i = toBeRemoved.Count - 1; i >= 0; i--)
                 {
-                    Debug.Event("Stopped listening for " + globalListeners[toBeRemoved[i]].IEvent.GetType().GenericTypeArguments[0].Name + " events");
+                    Debug.Event("Stopped listening for " + globalListeners[toBeRemoved[i]].IEvent.GetType().GetGenericArguments()[0].Name + " events");
 
                     // Cancel and remove the global listener (Engine.EventModule -> this scene's event module)
                     globalListeners[toBeRemoved[i]].Cancel();
@@ -130,23 +131,28 @@ namespace Cog.Scenes
                 var info = DrawCellMoveQueue.Dequeue();
                 var obj = info.Object;
 
-                if (!info.IsInitialPlacement)
+                // If we're eligible, our parent may have changed since we first enqueued
+                if (obj.Parent == null)
                 {
-                    var currentSet = DrawCells[obj.CurrentDrawCell];
-                    currentSet.Remove(obj);
-                    if (currentSet.Count == 0)
-                        DrawCells.Remove(obj.CurrentDrawCell);
-                }
+                    if (!info.IsInitialPlacement)
+                    {
+                        // Remove our old entry
+                        var currentSet = DrawCells[obj.CurrentDrawCell];
+                        currentSet.Remove(obj);
+                        if (currentSet.Count == 0)
+                            DrawCells.Remove(obj.CurrentDrawCell);
+                    }
 
-                obj.CurrentDrawCell = new DrawCell((int)Math.Floor(obj.LocalCoord.X / (float)DrawCell.DrawCellSize), (int)Math.Floor(obj.LocalCoord.Y / (float)DrawCell.DrawCellSize));
+                    obj.CurrentDrawCell = new DrawCell((int)Math.Floor(obj.LocalCoord.X / (float)DrawCell.DrawCellSize), (int)Math.Floor(obj.LocalCoord.Y / (float)DrawCell.DrawCellSize));
 
-                HashSet<GameObject> newSet;
-                if (!DrawCells.TryGetValue(obj.CurrentDrawCell, out newSet))
-                {
-                    newSet = new HashSet<GameObject>();
-                    DrawCells.Add(obj.CurrentDrawCell, newSet);
+                    HashSet<GameObject> newSet;
+                    if (!DrawCells.TryGetValue(obj.CurrentDrawCell, out newSet))
+                    {
+                        newSet = new HashSet<GameObject>();
+                        DrawCells.Add(obj.CurrentDrawCell, newSet);
+                    }
+                    newSet.Add(obj);
                 }
-                newSet.Add(obj);
 
                 obj.IsScheduledForDrawCellMove = false;
             }
@@ -160,16 +166,16 @@ namespace Cog.Scenes
 
             Vector2 cameraSize = Engine.Resolution * Camera.WorldScale;
             Vector2 cameraPosition = Camera.WorldCoord - cameraSize / 2f;
-            int x1 = (int)Math.Floor(cameraPosition.X / (int)DrawCell.DrawCellSize),
-                y1 = (int)Math.Floor(cameraPosition.Y / (int)DrawCell.DrawCellSize),
+            int x1 = (int)Math.Floor(cameraPosition.X / (float)DrawCell.DrawCellSize),
+                y1 = (int)Math.Floor(cameraPosition.Y / (float)DrawCell.DrawCellSize),
                 x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize),
                 y2 = y1 + (int)Math.Ceiling(cameraSize.Y / (float)DrawCell.DrawCellSize);
 
             List<Tuple<float, Action>> drawList = new List<Tuple<float, Action>>();
 
-            for (int x = x1; x < x2; x++)
+            for (int x = x1; x <= x2; x++)
             {
-                for (int y = y1; y < y2; y++)
+                for (int y = y1; y <= y2; y++)
                 {
                     HashSet<GameObject> objectSet;
                     DrawCell cell;
@@ -295,7 +301,7 @@ namespace Cog.Scenes
                 data.SynchronizedFields[i - 1] = (ISynchronized)Activator.CreateInstance(synchronizedFields[i].FieldType, true);
                 data.SynchronizedFields[i - 1].Initialize(obj, (ushort)i);
             }
-
+            
             obj.InitializationData = data;
 
             if (parent == null)
@@ -369,7 +375,7 @@ namespace Cog.Scenes
         public void Preload<T>()
             where T : GameObject
         {
-            foreach (var attribute in typeof(T).GetCustomAttributes<ResourceAttribute>())
+            foreach (var attribute in typeof(T).GetCustomAttributes(typeof(ResourceAttribute), true).Select(o => (ResourceAttribute)o))
             {
                 //var container = Engine.GetResourceContainer(attribute.ContainerName);
             }

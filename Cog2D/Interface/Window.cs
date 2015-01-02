@@ -121,7 +121,7 @@ namespace Cog.Interface
             textRect.TopLeft += Location;
 
             font.DrawString(target, @"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque accumsan, risus sed luctus vulputate, magna ex egestas lorem, id posuere tellus velit quis ipsum. Morbi efficitur felis sed congue convallis. Pellentesque id dapibus mauris. Phasellus commodo sodales eleifend. Donec non fermentum risus. Morbi pretium ex ligula, tristique finibus ante dapibus et. In vitae massa id turpis rhoncus lobortis. Aliquam auctor ligula mauris, sed semper est porta vehicula.",
-                Color.Black, textRect);
+                font.RenderSize, Color.Black, textRect);
 
             base.OnDraw(target, drawPosition);
         }

@@ -18,7 +18,15 @@ namespace Cog.Modules.Resources
 
         public override byte[] ReadData(string file)
         {
-            return File.ReadAllBytes(System.IO.Path.Combine(Path, file));
+            try
+            {
+                var path = System.IO.Path.Combine(Path, file).Replace('/', '\\');
+                return File.ReadAllBytes(path);
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
         }
 
         private void UpdateData(string file, byte[] data)

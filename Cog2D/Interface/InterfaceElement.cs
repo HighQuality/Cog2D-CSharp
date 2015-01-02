@@ -1,6 +1,7 @@
 ﻿using Cog;
 using Cog.Modules.EventHost;
 using Cog.Modules.Renderer;
+using Cog.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,7 @@ namespace Cog.Interface
         where TParent : class, IInterfaceElement
     {
         public bool DoRemove { get; set; }
+        public event Action OnRemoved;
 
         public TParent Parent { get; private set; }
         public IInterfaceElement GenericParent { get { return (IInterfaceElement)Parent; } }
@@ -135,6 +137,8 @@ namespace Cog.Interface
             }
         }
 
+        private List<IEventListener> listeners = new List<IEventListener>();
+
         public InterfaceElement(TParent parent, Vector2 location)
         {
             this.Location = location;
@@ -144,11 +148,20 @@ namespace Cog.Interface
                 parent.AddChild(this);
                 Parent = parent;
             }
+
+            OnRemoved += InterfaceElement_OnRemoved;
         }
 
         public InterfaceElement(Vector2 location)
             : this(null, location)
         {
+        }
+
+        void InterfaceElement_OnRemoved()
+        {
+            foreach (var listener in listeners)
+                listener.Cancel();
+            listeners.Clear();
         }
 
         public void AddChild(IInterfaceElement element)
@@ -243,9 +256,35 @@ namespace Cog.Interface
             return position.X >= 0f && position.Y >= 0f && position.X < Size.X && position.Y < Size.Y;
         }
 
+        public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)
+            where T : EventParameters
+        {
+            return RegisterEvent<T>(null, priority, action);
+        }
+
+        public EventListener<T> RegisterEvent<T>(object uniqueIdentifer, int priority, Action<T> action)
+            where T : EventParameters
+        {
+            var listener = Engine.EventHost.RegisterEvent<T>(uniqueIdentifer, priority, ev =>
+            {
+                // TODO: Add scene active check
+                action(ev);
+            });
+
+            listeners.Add(listener);
+
+            return listener;
+        }
+
         public void Remove()
         {
-            DoRemove = true;
+            if (!DoRemove)
+            {
+                DoRemove = true;
+
+                if (OnRemoved != null)
+                    OnRemoved();
+            }
         }
     }
 

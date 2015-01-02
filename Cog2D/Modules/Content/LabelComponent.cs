@@ -13,16 +13,18 @@ namespace Cog.Modules.Content
         public GameObject GameObject;
         public BitmapFont Font;
         public string Text;
+        public float FontSize;
         public Color Color = Color.Black;
         public Vector2 RelativePosition;
         public HAlign HorizontalAlignment = HAlign.Left;
         public VAlign VerticalAlignment = VAlign.Top;
         public bool HasShadow;
 
-        public static LabelComponent RegisterOn(GameObject gameObject, BitmapFont font)
+        public static LabelComponent RegisterOn(GameObject gameObject, BitmapFont font, float fontSize)
         {
             var c = new LabelComponent(gameObject);
             c.Font = font;
+            c.FontSize = fontSize;
             if (gameObject.OnDraw == null)
                 gameObject.OnDraw = new List<Action<DrawEvent, DrawTransformation>>();
             gameObject.OnDraw.Add(c.Draw);
@@ -38,8 +40,8 @@ namespace Cog.Modules.Content
         public void Draw(DrawEvent ev, DrawTransformation transformation)
         {
             if (HasShadow)
-                Font.DrawString(ev.RenderTarget, Text, Color.Black, transformation.WorldCoord + RelativePosition + new Vector2(1f, 1f), HorizontalAlignment, VerticalAlignment);
-            Font.DrawString(ev.RenderTarget, Text, Color, transformation.WorldCoord + RelativePosition, HorizontalAlignment, VerticalAlignment);
+                Font.DrawString(ev.RenderTarget, Text, FontSize, Color.Black, transformation.WorldCoord + RelativePosition + new Vector2(1f, 1f), HorizontalAlignment, VerticalAlignment);
+            Font.DrawString(ev.RenderTarget, Text, FontSize, Color, transformation.WorldCoord + RelativePosition, HorizontalAlignment, VerticalAlignment);
         }
     }
 }

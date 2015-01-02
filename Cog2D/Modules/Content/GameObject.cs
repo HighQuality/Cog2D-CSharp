@@ -41,16 +41,16 @@ namespace Cog.Modules.Content
                     {
                         // We're now a base object
                         Scene.BaseObjects.AddLast(this);
-                        HashSet<GameObject> objectSet;
-                        DrawCell cell;
-                        cell.X = (int)LocalCoord.X / DrawCell.DrawCellSize;
-                        cell.Y = (int)LocalCoord.Y / DrawCell.DrawCellSize;
-                        if (!Scene.DrawCells.TryGetValue(cell, out objectSet))
+
+                        if (!IsScheduledForDrawCellMove)
                         {
-                            objectSet = new HashSet<GameObject>();
-                            Scene.DrawCells.Add(cell, objectSet);
+                            IsScheduledForDrawCellMove = true;
+                            Scene.DrawCellMoveQueue.Enqueue(new DrawCellMoveInfo
+                            {
+                                Object = this,
+                                IsInitialPlacement = true
+                            });
                         }
-                        objectSet.Add(this);
                     }
                 }
                 else if (value != null)
@@ -93,6 +93,7 @@ namespace Cog.Modules.Content
 
         public HashSet<CogClient> SubscribedClients = new HashSet<CogClient>();
 
+        public bool IsVisible = true;
         internal bool IsScheduledForDrawCellMove;
         internal DrawCell CurrentDrawCell;
 
@@ -122,7 +123,7 @@ namespace Cog.Modules.Content
                 _localCoord = value;
             }
         }
-        public virtual Vector2 WorldCoord
+        public Vector2 WorldCoord
         {
             get
             {
@@ -140,7 +141,7 @@ namespace Cog.Modules.Content
         }
 
         public Angle LocalRotation { get; set; }
-        public virtual Angle WorldRotation
+        public Angle WorldRotation
         {
             get
             {
@@ -159,7 +160,7 @@ namespace Cog.Modules.Content
 
         private Vector2 _localScale = Vector2.One;
         public Vector2 LocalScale { get { return _localScale; } set { _localScale = value; } }
-        public virtual Vector2 WorldScale
+        public Vector2 WorldScale
         {
             get
             {
@@ -223,6 +224,11 @@ namespace Cog.Modules.Content
 
             for (int i = 1; i < fields.Length; i++)
                 fields[i].SetValue(this, InitializationData.SynchronizedFields[i - 1]);
+
+            if (InitializationData.UserData != null)
+                using (MemoryStream userDataStream = new MemoryStream(InitializationData.UserData))
+                using (BinaryReader userDataReader = new BinaryReader(userDataStream))
+                    ReadUserData(userDataReader);
 
             // Initialization has finished, get rid of data that is no longer necessary
             InitializationData = null;
@@ -380,12 +386,17 @@ namespace Cog.Modules.Content
                 sync.Serialize(writer);
             }
 
-            // TODO: User Data
-            /*
-             var userData = obj.WriteUserData();
-             writer.Write((UInt32)userData.Length);
-             writer.Write((byte[])userData);
-             */
+            using (MemoryStream userDataStream = new MemoryStream())
+            {
+                using (BinaryWriter userDataWriter = new BinaryWriter(userDataStream))
+                {
+                    WriteUserData(userDataWriter);
+
+                    var userData = userDataStream.ToArray();
+                    writer.Write((UInt32)userData.Length);
+                    writer.Write((byte[])userData);
+                }
+            }
         }
 
         internal void Deserialize(BinaryReader reader)
@@ -395,6 +406,7 @@ namespace Cog.Modules.Content
             long parentId = reader.ReadInt64();
             if (parentId != 0)
             {
+                // TODO: Change this to InitialSetParent?
                 Parent = Engine.Resolve<GameObject>(parentId);
                 if (Parent == null)
                     throw new Exception("Could not find parent with ID " + parentId.ToString());
@@ -422,9 +434,17 @@ namespace Cog.Modules.Content
                 InitializationData.SynchronizedFields[i - 1].Deserialize(reader);
             }
 
-            // TODO: User data
-            /*var userSize = reader.ReadUInt32();
-            var userData = reader.ReadBytes((int)userSize);*/
+            var userSize = reader.ReadUInt32();
+            if (userSize > 0)
+                InitializationData.UserData = reader.ReadBytes((int)userSize);
+        }
+
+        public virtual void ReadUserData(BinaryReader reader)
+        {
+        }
+
+        public virtual void WriteUserData(BinaryWriter writer)
+        {
         }
 
         internal static Type TypeFromId(ushort id)
@@ -439,6 +459,9 @@ namespace Cog.Modules.Content
 
         internal void Draw(DrawEvent ev, DrawTransformation transform, List<Tuple<float, Action>> drawList)
         {
+            if (!IsVisible)
+                return;
+
             if (children != null)
             {
                 transform.WorldCoord += (LocalCoord * transform.ParentWorldScale).Rotate(transform.ParentWorldRotation);

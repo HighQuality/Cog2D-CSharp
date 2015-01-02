@@ -9,8 +9,7 @@ namespace Cog.Modules.Animation
 {
     public class Animation
     {
-        public IReadOnlyList<Keyframe> Keyframes { get { return keyframes; } }
-        private List<Keyframe> keyframes = new List<Keyframe>();
+        public List<Keyframe> Keyframes = new List<Keyframe>();
 
         public float Length { get; private set; }
 
@@ -53,7 +52,7 @@ namespace Cog.Modules.Animation
 
         public void AddKeyframe(Keyframe keyframe)
         {
-            keyframes.Add(keyframe);
+            Keyframes.Add(keyframe);
 
             Length += (float)keyframe.Duration;
         }

@@ -23,7 +23,7 @@ namespace Cog.Modules.Content
             if (Object != null)
             {
                 var field = GameObject.GetSynchronizedField(Object.GetType(), SynchronizationId);
-                var converter = TypeSerializer.GetTypeWriter(field.FieldType.GenericTypeArguments[0]);
+                var converter = TypeSerializer.GetTypeWriter(field.FieldType.GetGenericArguments()[0]);
 
                 ISynchronized prop = (ISynchronized)field.GetValue(Object);
                 using (MemoryStream stream = new MemoryStream(Data))

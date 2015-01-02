@@ -102,6 +102,11 @@ namespace Cog
 
         public static ITypeWriter GetTypeWriter(Type type)
         {
+            if (type.IsEnum)
+            {
+                return GetTypeWriter<Int32>();
+            }
+
             ITypeWriter writer;
             typeWriters.TryGetValue(type, out writer);
             return writer;

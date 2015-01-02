@@ -9,11 +9,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cog</RootNamespace>
     <AssemblyName>Cog2D</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -165,6 +166,7 @@
     <Compile Include="Modules\Networking\MessageData.cs" />
     <Compile Include="Modules\Networking\MessageExecutionProperty.cs" />
     <Compile Include="Modules\Networking\NewClientEvent.cs" />
+    <Compile Include="Modules\Networking\ServerConnection.cs" />
     <Compile Include="Modules\Networking\StringCacheMessage.cs" />
     <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
     <Compile Include="Modules\Renderer\Alignments.cs" />
@@ -180,7 +182,7 @@
     <Compile Include="Modules\Resources\SQLiteContainer.cs" />
     <Compile Include="Modules\Content\SetSynchronizedValueMessage.cs" />
     <Compile Include="NoSerializerException.cs" />
-    <Compile Include="Modules\Networking\TcpSocket.cs" />
+    <Compile Include="Modules\Networking\CogClient.cs" />
     <Compile Include="Modules\Networking\ClientModule.cs" />
     <Compile Include="Modules\Networking\NetworkHashMismatchException.cs" />
     <Compile Include="Modules\Networking\InvalidVersionException.cs" />
@@ -208,7 +210,6 @@
     <Compile Include="Modules\Renderer\Texture.cs" />
     <Compile Include="Modules\Renderer\Window.cs" />
     <Compile Include="Modules\Renderer\WindowStyle.cs" />
-    <Compile Include="Modules\SquareClient.cs" />
     <Compile Include="Noise.cs" />
     <Compile Include="Permissions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

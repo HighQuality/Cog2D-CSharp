@@ -24,12 +24,8 @@ namespace Cog.Modules.Networking
         public static byte[] NetworkingHash;
 
         [NetworkIgnore()]
-        private TcpSocket _sender;
-        /// <summary>
-        /// The TcpSocket which sent us this message
-        /// </summary>
-        public TcpSocket Sender { get { return _sender; } internal set { _sender = value; } }
-        public CogClient Client { get { return _sender as CogClient; } }
+        private CogClient _client;
+        public CogClient Client { get { return _client; } internal set { _client = value; } }
 
         public NetworkMessage()
         {
@@ -80,7 +76,7 @@ namespace Cog.Modules.Networking
             // Iterate through all fields contained within the type alphabetically
             foreach (var currentField in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).OrderBy(o => o.Name))
             {
-                if (currentField.GetCustomAttribute<NetworkIgnoreAttribute>() == null)
+                if (currentField.GetCustomAttributes(typeof(NetworkIgnoreAttribute), true).Length == 0)
                 {
                     // Create a new local variable to access the current field, this variable will be accessed later as messages are written to the stream
                     var field = currentField;
@@ -89,7 +85,7 @@ namespace Cog.Modules.Networking
                     // Find the specific type's writer/reader helper
                     if (fieldType == typeof(string))
                     {
-                        var properties = field.GetCustomAttribute<StringPropertiesAttribute>();
+                        var properties = (StringPropertiesAttribute)field.GetCustomAttributes(typeof(StringPropertiesAttribute), true).FirstOrDefault();
                         if (properties == null)
                             properties = new StringPropertiesAttribute(StringSendType.DynamicUShort);
                         switch (properties.Type)
@@ -198,7 +194,7 @@ namespace Cog.Modules.Networking
                 // Iterate through all fields contained within the type alphabetically
                 foreach (var currentField in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).OrderBy(o => o.Name))
                 {
-                    if (currentField.GetCustomAttribute<NetworkIgnoreAttribute>() == null)
+                    if (currentField.GetCustomAttributes(typeof(NetworkIgnoreAttribute), true).FirstOrDefault() == null)
                     {
                         // Create a new local variable to access the current field, this variable will be accessed later as messages are written to the stream
                         var field = currentField;
@@ -220,7 +216,7 @@ namespace Cog.Modules.Networking
         /// <summary>
         /// Creates a byte array portraying the given NetworkEvent, including event ID and size
         /// </summary>
-        internal static void WriteToSocket<T>(T message, TcpSocket socket)
+        internal static void WriteToSocket<T>(T message, CogClient socket)
             where T : NetworkMessage
         {
             var id = GetId<T>();
@@ -254,7 +250,7 @@ namespace Cog.Modules.Networking
         /// <summary>
         /// Reads an event of the given type from the given BinaryReader
         /// </summary>
-        internal static byte[] ReadMessageData(UInt16 type, TcpSocket socket, BinaryReader reader)
+        internal static byte[] ReadMessageData(UInt16 type, CogClient socket, BinaryReader reader)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -269,15 +265,15 @@ namespace Cog.Modules.Networking
             }
         }
 
-        internal static NetworkMessage ReadMessage(UInt16 typeId, byte[] data, TcpSocket socket)
+        internal static NetworkMessage ReadMessage(UInt16 typeId, byte[] data, CogClient client)
         {
             using (MemoryStream stream = new MemoryStream(data))
             using (BinaryReader reader = new BinaryReader(stream))
             {
                 var type = GetType(typeId);
                 NetworkMessage ev = eventCreators[typeId]();
-                messageReaderCache[typeId](ev, reader, socket);
-                ev.Sender = socket;
+                messageReaderCache[typeId](ev, reader, client);
+                ev.Client = client;
                 return ev;
             }
         }

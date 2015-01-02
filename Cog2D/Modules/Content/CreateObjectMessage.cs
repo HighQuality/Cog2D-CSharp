@@ -25,8 +25,8 @@ namespace Cog.Modules.Content
 
         public override void Received()
         {
-            if (!Sender.Permissions.CreateGlobalObjects)
-                throw new Exception(string.Format("{0} may not create global objects!", Sender.Identifier));
+            if (!Client.Permissions.CreateGlobalObjects)
+                throw new Exception(string.Format("{0} may not create global objects!", Client.Identifier));
             if (Scene == null)
                 throw new Exception("Tried to create an object in a scene that does not exist!");
 

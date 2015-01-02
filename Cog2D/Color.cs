@@ -14,7 +14,10 @@ namespace Cog
             Red = new Color(255, 0, 0, 255),
             Green = new Color(0, 255, 0, 255),
             Gray = new Color(128, 128, 128, 255),
-            Black = new Color(0, 0, 0);
+            Black = new Color(0, 0, 0),
+            Yellow = new Color(255, 255, 0),
+            Purple = new Color(255, 0, 255),
+            Cyan = new Color(0, 255, 255);
 
         public int R,
             G,
