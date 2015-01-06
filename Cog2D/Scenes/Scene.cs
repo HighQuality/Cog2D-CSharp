@@ -422,13 +422,12 @@ namespace Cog.Scenes
         }
 
         public IEnumerable<T> EnumerateObjects<T>()
-            where T : GameObject
         {
             var current = Objects.First;
             while (current != null)
             {
                 if (current.Value is T)
-                    yield return (T)current.Value;
+                    yield return (T)(object)current.Value;
                 current = current.Next;
             }
         }
