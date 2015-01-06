@@ -16,7 +16,7 @@ namespace Cog
         public float Width { get { return _size.X; } set { _size.X = value; } }
         public float Height { get { return _size.Y; } set { _size.Y = value; } }
         public float Right { get { return Left + Width; } }
-        public float Bottom { get { return Top + Bottom; } }
+        public float Bottom { get { return Top + Height; } }
 
         public Vector2 TopLeft { get { return _topLeft; } set { _topLeft = value; } }
         public Vector2 TopRight { get { return TopLeft + new Vector2(Size.X, 0f); } }
