@@ -340,7 +340,7 @@ namespace Cog
             EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
 
             Window = Renderer.CreateWindow(title, (int)DesiredResolution.X, (int)DesiredResolution.Y, style, EventHost);
-            Window.VerticalSynchronization = true;
+            // Window.VerticalSynchronization = true;
 
             timeStampWatch = Stopwatch.StartNew();
             Stopwatch watch = Stopwatch.StartNew();
