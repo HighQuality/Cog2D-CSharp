@@ -12,6 +12,8 @@ namespace Cog
     {
         public enum Key
         {
+            None,
+
             Left,
             Right,
             Up,

@@ -18,7 +18,18 @@ namespace Cog.Modules.EventHost
         private static bool[] buttonState;
         private static Action[] buttonUpCallbacks;
 
-        public static Vector2 Location { get; set; }
+        public static Vector2 Location
+        {
+            get
+            {
+                return Engine.Window.MousePosition;
+            }
+
+            set
+            {
+                Engine.Window.MousePosition = value;
+            }
+        }
 
         public static void Initialize()
         {

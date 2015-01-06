@@ -367,7 +367,10 @@ namespace Cog
 
                 EventHost.GetEvent<BeginDrawEvent>().Trigger(new BeginDrawEvent(null, Window.RenderTarget));
 
-                Window.Clear(Color.CornflowerBlue);
+                if (SceneHost.CurrentScene == null)
+                    Window.Clear(Color.White);
+                else
+                    Window.Clear(SceneHost.CurrentScene.BackgroundColor);
 
                 EventHost.GetEvent<DrawEvent>().Trigger(new DrawEvent(null, Window.RenderTarget));
 

@@ -32,7 +32,9 @@ namespace Cog.Scenes
         private float eventStrengthUpdateTimer = 0f;
         public GameInterface Interface;
         private List<Resource> loadedResources = new List<Resource>();
-        
+
+        public Color BackgroundColor = Color.CornflowerBlue;
+
         internal LinkedList<GameObject> BaseObjects = new LinkedList<GameObject>();
 
         private Camera _camera;

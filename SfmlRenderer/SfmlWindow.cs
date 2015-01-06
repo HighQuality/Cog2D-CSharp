@@ -22,6 +22,8 @@ namespace Cog.SfmlRenderer
         public override string Title { get { return _title; } set { _title = value; InnerWindow.SetTitle(_title); } }
         public override Vector2 Resolution { get { var size = InnerWindow.Size; return new Vector2((float)size.X, (float)size.Y); } set { InnerWindow.Size = new SFML.System.Vector2u((uint)value.X, (uint)value.Y); } }
         public override Vector2 Position { get { var position = InnerWindow.Position; return new Vector2((float)position.X, (float)position.Y); } set { InnerWindow.Position = new SFML.System.Vector2i((int)value.X, (int)value.Y); } }
+        private Vector2 _mousePosition;
+        public override Vector2 MousePosition { get { return _mousePosition; } set { SFML.Window.Mouse.SetPosition(new SFML.System.Vector2i((int)value.X, (int)value.Y), InnerWindow); _mousePosition = value; } }
         private bool _visible;
         public override bool Visible { get { return _visible; } set { _visible = value; InnerWindow.SetVisible(value); } }
         public override bool IsOpen { get { return InnerWindow.IsOpen; } }
@@ -83,7 +85,7 @@ namespace Cog.SfmlRenderer
 
         private void InnerWindow_MouseMoved(object sender, SFML.Window.MouseMoveEventArgs e)
         {
-            Mouse.Location = new Vector2(e.X, e.Y);
+            _mousePosition = new Vector2(e.X, e.Y);
         }
 
         private void InnerWindow_MouseButtonPressed(object sender, SFML.Window.MouseButtonEventArgs e)

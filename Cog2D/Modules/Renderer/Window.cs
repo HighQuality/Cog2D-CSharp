@@ -26,6 +26,7 @@ namespace Cog.Modules.Renderer
         /// Gets or Sets the position of the window
         /// </summary>
         public abstract Vector2 Position { get; set; }
+        public abstract Vector2 MousePosition { get; set; }
         /// <summary>
         /// Gets or Sets the visibility of the window
         /// </summary>
