@@ -377,7 +377,7 @@ namespace Cog
                 Engine.Window.RenderTarget.SetTransformation(Engine.Resolution / 2f, Vector2.One, Angle.FromDegree(0f));
                 EventHost.GetEvent<DrawInterfaceEvent>().Trigger(new DrawInterfaceEvent(null, Window.RenderTarget));
 
-                float frameTime = (float)watch.Elapsed.TotalMilliseconds;
+                float frameTime = (float)watch.Elapsed.TotalSeconds;
                 Engine.FrameTime = frameTime;
                 Window.Display();
 

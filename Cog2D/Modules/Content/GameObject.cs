@@ -271,15 +271,19 @@ namespace Cog.Modules.Content
             {
                 Scene.BaseObjects.Remove(this);
 
-                HashSet<GameObject> objectSet;
-                DrawCell cell;
-                cell.X = (int)LocalCoord.X / DrawCell.DrawCellSize;
-                cell.Y = (int)LocalCoord.Y / DrawCell.DrawCellSize;
-                if (Scene.DrawCells.TryGetValue(cell, out objectSet))
+                if (!IsScheduledForDrawCellMove)
                 {
-                    objectSet.Remove(this);
-                    if (objectSet.Count == 0)
-                        Scene.DrawCells.Remove(cell);
+                    HashSet<GameObject> objectSet;
+                    if (Scene.DrawCells.TryGetValue(CurrentDrawCell, out objectSet))
+                    {
+                        objectSet.Remove(this);
+                        if (objectSet.Count == 0)
+                            Scene.DrawCells.Remove(CurrentDrawCell);
+                    }
+                    else
+                    {
+                        Debug.Error("=(");
+                    }
                 }
             }
             DoRemove = true;

@@ -133,27 +133,30 @@ namespace Cog.Scenes
                 var info = DrawCellMoveQueue.Dequeue();
                 var obj = info.Object;
 
-                // If we're eligible, our parent may have changed since we first enqueued
-                if (obj.Parent == null)
+                if (!obj.DoRemove)
                 {
-                    if (!info.IsInitialPlacement)
+                    // If we're eligible, our parent may have changed since we first enqueued
+                    if (obj.Parent == null)
                     {
-                        // Remove our old entry
-                        var currentSet = DrawCells[obj.CurrentDrawCell];
-                        currentSet.Remove(obj);
-                        if (currentSet.Count == 0)
-                            DrawCells.Remove(obj.CurrentDrawCell);
-                    }
+                        if (!info.IsInitialPlacement)
+                        {
+                            // Remove our old entry
+                            var currentSet = DrawCells[obj.CurrentDrawCell];
+                            currentSet.Remove(obj);
+                            if (currentSet.Count == 0)
+                                DrawCells.Remove(obj.CurrentDrawCell);
+                        }
 
-                    obj.CurrentDrawCell = new DrawCell((int)Math.Floor(obj.LocalCoord.X / (float)DrawCell.DrawCellSize), (int)Math.Floor(obj.LocalCoord.Y / (float)DrawCell.DrawCellSize));
+                        obj.CurrentDrawCell = new DrawCell((int)Math.Floor(obj.LocalCoord.X / (float)DrawCell.DrawCellSize), (int)Math.Floor(obj.LocalCoord.Y / (float)DrawCell.DrawCellSize));
 
-                    HashSet<GameObject> newSet;
-                    if (!DrawCells.TryGetValue(obj.CurrentDrawCell, out newSet))
-                    {
-                        newSet = new HashSet<GameObject>();
-                        DrawCells.Add(obj.CurrentDrawCell, newSet);
+                        HashSet<GameObject> newSet;
+                        if (!DrawCells.TryGetValue(obj.CurrentDrawCell, out newSet))
+                        {
+                            newSet = new HashSet<GameObject>();
+                            DrawCells.Add(obj.CurrentDrawCell, newSet);
+                        }
+                        newSet.Add(obj);
                     }
-                    newSet.Add(obj);
                 }
 
                 obj.IsScheduledForDrawCellMove = false;
