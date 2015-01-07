@@ -10,9 +10,9 @@ namespace Cog.SfmlRenderer
 {
     public class SfmlRenderer : RenderModule
     {
-        public override Window CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
+        public override Window CreateWindow(string title, int width, int height, WindowStyle style)
         {
-            return new SfmlWindow(title, width, height, style, eventHost);
+            return new SfmlWindow(title, width, height, style);
         }
 
         public override Texture LoadTexture(string filename)

@@ -25,7 +25,7 @@ namespace TestGame
             if (!isResponse)
             {
                 isResponse = true;
-                Sender.Send(this);
+                Client.Send(this);
             }
         }
     }

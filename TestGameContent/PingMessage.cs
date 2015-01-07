@@ -39,7 +39,7 @@ namespace TestGame
             {
                 // Return message
                 IsResponse = true;
-                Sender.Send<PingMessage>(this);
+                Client.Send<PingMessage>(this);
             }
         }
     }

@@ -24,7 +24,7 @@ namespace Cog.Modules.Renderer
         /// <param name="height">The Inner Height in pixels</param>
         /// <param name="style">The style of the window</param>
         /// <returns>Instantiated Window</returns>
-        public abstract Window CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost);
+        public abstract Window CreateWindow(string title, int width, int height, WindowStyle style);
 
         /// <summary>
         /// Loads a texture from the specified filename.

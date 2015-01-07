@@ -58,7 +58,7 @@ namespace TestGameServer
                 }
             });
 
-            Engine.StartServer(1234);
+            Engine.StartServer(1234, tcpClient => new CogClient(tcpClient, Permissions.DefaultClientPermissions));
         }
     }
 }

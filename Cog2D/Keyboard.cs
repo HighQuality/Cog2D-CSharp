@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Cog
 {
@@ -22,8 +23,6 @@ namespace Cog
             RShift,
             LCtrl,
             RCtrl,
-            LAlt,
-            RAlt,
             Space,
             Backspace,
             Escape,

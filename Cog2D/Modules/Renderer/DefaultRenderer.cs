@@ -9,7 +9,7 @@ namespace Cog.Modules.Renderer
 {
     public class DefaultRenderer : RenderModule
     {
-        public override Window CreateWindow(string title, int width, int height, WindowStyle style, EventModule eventHost)
+        public override Window CreateWindow(string title, int width, int height, WindowStyle style)
         {
             return null;
         }

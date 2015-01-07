@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Networking
 {
-    public abstract class CogClient : IStringCacher
+    public class CogClient : IStringCacher
     {
         private TcpClient client;
         private NetworkStream stream;
