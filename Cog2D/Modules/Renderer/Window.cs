@@ -102,6 +102,7 @@ namespace Cog.Modules.Renderer
             window = new WFWindow();
             window.ClientSize = new System.Drawing.Size(width, height);
             window.FormBorderStyle = FormBorderStyle.Fixed3D;
+            window.MaximizeBox = false;
             window.FormClosed += (_, __) => IsOpen = false;
             window.MouseMove += (s, par) =>
             {
