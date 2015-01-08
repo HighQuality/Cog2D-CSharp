@@ -97,25 +97,25 @@ namespace Cog.Interface
         public override void OnDraw(IRenderTarget target, Vector2 drawPosition)
         {
             // Top Left
-            target.RenderTexture(windowTexture, drawPosition, Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 0f, 8f, 20f));
+            target.DrawTexture(windowTexture, drawPosition, Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 0f, 8f, 20f));
             // Top Right
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(Size.X - 8f, 0f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(windowTexture.Size.X - 8f, 0f, 8f, 20f));
+            target.DrawTexture(windowTexture, drawPosition + new Vector2(Size.X - 8f, 0f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(windowTexture.Size.X - 8f, 0f, 8f, 20f));
             // Bottom Left
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(0f, Size.Y - 8f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 23f, 8f, 8f));
+            target.DrawTexture(windowTexture, drawPosition + new Vector2(0f, Size.Y - 8f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(0f, 23f, 8f, 8f));
             // Bottom Right
-            target.RenderTexture(windowTexture, drawPosition + Size - new Vector2(8f, 8f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(11f, 23f, 8f, 8f));
+            target.DrawTexture(windowTexture, drawPosition + Size - new Vector2(8f, 8f), Color.White, Vector2.One, Vector2.Zero, 0f, new Rectangle(11f, 23f, 8f, 8f));
 
             // Top
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, 0f), Color.White, new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 0f, 1f, 20f));
+            target.DrawTexture(windowTexture, drawPosition + new Vector2(8f, 0f), Color.White, new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 0f, 1f, 20f));
             // Bottom
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, Size.Y + -8f), Color.White, new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 23, 1f, 8f));
+            target.DrawTexture(windowTexture, drawPosition + new Vector2(8f, Size.Y + -8f), Color.White, new Vector2(Size.X - 16f, 1f), Vector2.Zero, 0f, new Rectangle(9f, 23, 1f, 8f));
             // Left
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(0f, 20f), Color.White, new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(0f, 21f, 8f, 1f));
+            target.DrawTexture(windowTexture, drawPosition + new Vector2(0f, 20f), Color.White, new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(0f, 21f, 8f, 1f));
             // Right
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(Size.X + -8f, 20f), Color.White, new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(11f, 21f, 8f, 1f));
+            target.DrawTexture(windowTexture, drawPosition + new Vector2(Size.X + -8f, 20f), Color.White, new Vector2(1f, Size.Y - 28f), Vector2.Zero, 0f, new Rectangle(11f, 21f, 8f, 1f));
 
             // Middle Texture
-            target.RenderTexture(windowTexture, drawPosition + new Vector2(8f, 20f), Color.White, Size - new Vector2(16f, 28f), Vector2.Zero, 0f, new Rectangle(9f, 21f, 1f, 1f));
+            target.DrawTexture(windowTexture, drawPosition + new Vector2(8f, 20f), Color.White, Size - new Vector2(16f, 28f), Vector2.Zero, 0f, new Rectangle(9f, 21f, 1f, 1f));
 
             var textRect = ContentBounds;
             textRect.TopLeft += Location;

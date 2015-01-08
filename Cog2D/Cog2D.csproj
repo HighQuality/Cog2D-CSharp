@@ -175,6 +175,7 @@
     <Compile Include="Modules\Renderer\BitmapFont.cs" />
     <Compile Include="Modules\Renderer\BlendMode.cs" />
     <Compile Include="Modules\Renderer\DefaultBlendMode.cs" />
+    <Compile Include="Modules\Renderer\RenderTexture.cs" />
     <Compile Include="Modules\Resources\Resource.cs" />
     <Compile Include="Modules\Resources\ResourceAttribute.cs" />
     <Compile Include="Modules\Resources\ResourceCollection.cs" />

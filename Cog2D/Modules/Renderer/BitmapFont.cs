@@ -74,7 +74,7 @@ namespace Cog.Modules.Renderer
                         }
                         else if (CharacterMap.TryGetValue(c, out fc))
                         {
-                            renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
+                            renderTarget.DrawTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
 
                             dx += fc.XAdvance * sizeFactor;
                         }
@@ -120,7 +120,7 @@ namespace Cog.Modules.Renderer
                                 drawWord = null;
                             }
 
-                            renderTarget.RenderTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
+                            renderTarget.DrawTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
                             dx += fc.XAdvance * sizeFactor;
                         }
                         else
@@ -129,7 +129,7 @@ namespace Cog.Modules.Renderer
                             float yy = dy;
                             drawWord += () =>
                             {
-                                renderTarget.RenderTexture(Texture, new Vector2(xx + fc.XOffset * sizeFactor, yy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
+                                renderTarget.DrawTexture(Texture, new Vector2(xx + fc.XOffset * sizeFactor, yy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
                             };
                             dx += fc.XAdvance * sizeFactor;
                             wordWidth += fc.XAdvance * sizeFactor;

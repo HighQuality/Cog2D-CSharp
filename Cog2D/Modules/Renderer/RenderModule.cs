@@ -9,11 +9,15 @@ namespace Cog.Modules.Renderer
 {
     public abstract class RenderModule
     {
+        public BlendMode BlendMode { get; internal set; }
+
         public RenderModule()
         {
             InitializeBlendModes();
             if (AlphaBlend == null || AdditiveBlend == null)
                 throw new Exception("One of the blend modes were not assigned!");
+            BlendMode = AlphaBlend;
+            BlendMode.ForceActivate();
         }
 
         /// <summary>
@@ -25,6 +29,8 @@ namespace Cog.Modules.Renderer
         /// <param name="style">The style of the window</param>
         /// <returns>Instantiated Window</returns>
         public abstract Window CreateWindow(string title, int width, int height, WindowStyle style);
+
+        public abstract RenderTexture CreateRenderTexture(int width, int height);
 
         /// <summary>
         /// Loads a texture from the specified filename.

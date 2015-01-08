@@ -97,9 +97,10 @@ namespace Cog.Modules.Renderer
             { MouseButtons.Middle, EventHost.Mouse.Button.Middle }
         };
 
-        public Window(int width, int height, WindowStyle style)
+        public Window(string title, int width, int height, WindowStyle style)
         {
             window = new WFWindow();
+            window.Text = title;
             window.ClientSize = new System.Drawing.Size(width, height);
             window.FormBorderStyle = FormBorderStyle.Fixed3D;
             window.MaximizeBox = false;
@@ -125,8 +126,6 @@ namespace Cog.Modules.Renderer
                 foreach (var pair in keymap)
                     reverseKeyMap[pair.Value] = pair.Key;
             }
-
-            Engine.Renderer.AlphaBlend.ForceSet(RenderTarget);
         }
 
         private void Window_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -209,7 +208,7 @@ namespace Cog.Modules.Renderer
         /// <summary>
         /// Commands the window to dispatch it's queued events
         /// </summary>
-        public virtual void DispatchEvents()
+        public void DispatchEvents()
         {
             System.Windows.Forms.Application.DoEvents();
 

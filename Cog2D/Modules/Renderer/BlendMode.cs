@@ -12,26 +12,25 @@ namespace Cog.Modules.Renderer
         /// Sets the blend mode of the passed window.
         /// Returns an activation context that must be disposed and resets the blend mode to the previous one
         /// </summary>
-        public ActivationContext ActivateOn(IRenderTarget target)
+        public ActivationContext Activate()
         {
-            var oldBlendMode = target.BlendMode;
-            target.BlendMode = this;
+            var oldBlendMode = Engine.Renderer.BlendMode;
+            Engine.Renderer.BlendMode = this;
 
-            Set(target);
+            Set();
 
             return new ActivationContext(() =>
             {
-                target.BlendMode = oldBlendMode;
-                target.BlendMode.Set(target);
+                Engine.Renderer.BlendMode = oldBlendMode;
+                Engine.Renderer.BlendMode.Set();
             });
         }
 
-        internal void ForceSet(IRenderTarget target)
+        internal void ForceActivate()
         {
-            target.BlendMode = this;
-            Set(target);
+            Set();
         }
 
-        protected abstract void Set(IRenderTarget window);
+        protected abstract void Set();
     }
 }

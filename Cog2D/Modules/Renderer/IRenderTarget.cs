@@ -8,11 +8,9 @@ namespace Cog.Modules.Renderer
 {
     public interface IRenderTarget
     {
-        BlendMode BlendMode { get; set; }
-
         void SetTransformation(Vector2 center, Vector2 scale, Angle angle);
-        void RenderTexture(Texture texture, Vector2 windowCoords);
-        void RenderTexture(Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect);
+        void DrawTexture(Texture texture, Vector2 windowCoords);
+        void DrawTexture(Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect);
 
         void Clear(Color color);
     }

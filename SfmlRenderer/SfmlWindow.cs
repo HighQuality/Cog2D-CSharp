@@ -13,9 +13,6 @@ namespace Cog.SfmlRenderer
     {
         internal RenderWindow InnerWindow;
 
-        public Cog.Modules.Renderer.BlendMode BlendMode { get; set; }
-        public RenderStates RenderState = RenderStates.Default;
-
         private Dictionary<SFML.Window.Keyboard.Key, Action> keyUpEvents = new Dictionary<SFML.Window.Keyboard.Key, Action>();
         private LinkedList<SFML.Window.Keyboard.Key> pressedKeys = new LinkedList<SFML.Window.Keyboard.Key>();
         bool _vsync;
@@ -26,7 +23,7 @@ namespace Cog.SfmlRenderer
         private bool[] mouseButtons = new bool[(int)SFML.Window.Mouse.Button.ButtonCount];
 
         public SfmlWindow(string title, int width, int height, WindowStyle style)
-            : base(width, height, style)
+            : base(title, width, height, style)
         {
             var contextSettings = new SFML.Window.ContextSettings(0, 0, 16);
 
@@ -55,16 +52,16 @@ namespace Cog.SfmlRenderer
             InnerWindow.Display();
         }
         
-        public void RenderTexture(Modules.Renderer.Texture texture, Vector2 windowCoords)
+        public void DrawTexture(Modules.Renderer.Texture texture, Vector2 windowCoords)
         {
             Sprite sprite = new Sprite();
             sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
             sprite.Texture = ((SfmlTexture)texture).Texture;
             sprite.Scale = new SFML.System.Vector2f(1f, 1f);
-            InnerWindow.Draw(sprite, RenderState);
+            InnerWindow.Draw(sprite, SfmlRenderer.RenderState);
         }
 
-        public void RenderTexture(Modules.Renderer.Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
+        public void DrawTexture(Modules.Renderer.Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
         {
             Sprite sprite = new Sprite();
             sprite.Position = new SFML.System.Vector2f(windowCoords.X, windowCoords.Y);
@@ -74,7 +71,7 @@ namespace Cog.SfmlRenderer
             sprite.Texture = ((SfmlTexture)texture).Texture;
             sprite.Rotation = rotation;
             sprite.TextureRect = new IntRect((int)textureRect.TopLeft.X, (int)textureRect.TopLeft.Y, (int)textureRect.Size.X, (int)textureRect.Size.Y);
-            InnerWindow.Draw(sprite, RenderState);
+            InnerWindow.Draw(sprite, SfmlRenderer.RenderState);
         }
     }
 }

@@ -10,9 +10,16 @@ namespace Cog.SfmlRenderer
 {
     public class SfmlRenderer : RenderModule
     {
+        internal static SFML.Graphics.RenderStates RenderState { get; set; }
+
         public override Window CreateWindow(string title, int width, int height, WindowStyle style)
         {
             return new SfmlWindow(title, width, height, style);
+        }
+
+        public override RenderTexture CreateRenderTexture(int width, int height)
+        {
+            return new SfmlRenderTexture(width, height);
         }
 
         public override Texture LoadTexture(string filename)

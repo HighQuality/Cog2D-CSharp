@@ -8,7 +8,7 @@ namespace Cog.Modules.Renderer
 {
     public class DefaultBlendMode : BlendMode
     {
-        protected override void Set(IRenderTarget target)
+        protected override void Set()
         {
         }
     }

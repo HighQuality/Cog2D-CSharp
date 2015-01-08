@@ -14,6 +14,11 @@ namespace Cog.Modules.Renderer
             return null;
         }
 
+        public override RenderTexture CreateRenderTexture(int width, int height)
+        {
+            return null;
+        }
+
         public override Texture LoadTexture(string filename)
         {
             return null;

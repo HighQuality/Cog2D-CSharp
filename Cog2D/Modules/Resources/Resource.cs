@@ -13,7 +13,7 @@ namespace Cog.Modules.Resources
         /// </summary>
         public bool IsDynamic { get; protected set; }
         /// <summary>
-        /// Gets a value whether or not this resource is currently loaded into memory
+        /// Gets a value indicating whether or not this resource is currently loaded into memory
         /// </summary>
         public bool IsLoaded { get; protected set; }
         /// <summary>

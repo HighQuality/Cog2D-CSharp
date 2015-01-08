@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGameContent", "TestGame
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SfmlAudio", "SfmlAudio\SfmlAudio.csproj", "{82BE15E4-8DDE-41E0-9CA1-A7D2375590EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3DRenderer", "D3DRenderer\D3DRenderer.csproj", "{B126D090-A28F-44AD-899F-AEA07F2EE95E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -114,6 +116,18 @@ Global
 		{82BE15E4-8DDE-41E0-9CA1-A7D2375590EB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{82BE15E4-8DDE-41E0-9CA1-A7D2375590EB}.Release|x64.ActiveCfg = Release|Any CPU
 		{82BE15E4-8DDE-41E0-9CA1-A7D2375590EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Release|x64.ActiveCfg = Release|Any CPU
+		{B126D090-A28F-44AD-899F-AEA07F2EE95E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

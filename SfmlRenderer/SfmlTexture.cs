@@ -19,6 +19,11 @@ namespace Cog.SfmlRenderer
             IsLoaded = true;
         }
 
+        internal SfmlTexture(SfmlRenderTexture renderTexture)
+        {
+            Texture = renderTexture.InnerRenderTexture.Texture;
+        }
+
         internal SfmlTexture(byte[] data)
         {
             this.Texture = new SFML.Graphics.Texture(data);

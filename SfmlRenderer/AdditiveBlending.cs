@@ -9,12 +9,9 @@ namespace Cog.SfmlRenderer
 {
     class AdditiveBlending : BlendMode
     {
-        protected override void Set(IRenderTarget window)
+        protected override void Set()
         {
-            if (!(window is SfmlWindow))
-                throw new ArgumentException("window must be an SfmlWindow!");
-            SfmlWindow w = (SfmlWindow)window;
-            w.RenderState = new SFML.Graphics.RenderStates(SFML.Graphics.BlendMode.Add);
+            SfmlRenderer.RenderState = new SFML.Graphics.RenderStates(SFML.Graphics.BlendMode.Add);
         }
     }
 }
