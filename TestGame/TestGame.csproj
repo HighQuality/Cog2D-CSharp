@@ -103,6 +103,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\D3DRenderer\D3DRenderer.csproj">
+      <Project>{b126d090-a28f-44ad-899f-aea07f2ee95e}</Project>
+      <Name>D3DRenderer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SfmlAudio\SfmlAudio.csproj">
       <Project>{82be15e4-8dde-41e0-9ca1-a7d2375590eb}</Project>
       <Name>SfmlAudio</Name>

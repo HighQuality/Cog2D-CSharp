@@ -22,12 +22,13 @@ namespace D3DRenderer
 
         protected override void InitializeBlendModes()
         {
-            throw new NotImplementedException();
+            AlphaBlend = new AlphaBlend();
+            AdditiveBlend = new AlphaBlend();
         }
 
         public override Texture LoadTexture(byte[] data)
         {
-            throw new NotImplementedException();
+            return new D3DTexture(data);
         }
 
         public override Texture LoadTexture(string filename)
@@ -37,7 +38,7 @@ namespace D3DRenderer
 
         public override Texture TextureFromImage(Cog.Image image)
         {
-            throw new NotImplementedException();
+            return new D3DTexture(image);
         }
     }
 }

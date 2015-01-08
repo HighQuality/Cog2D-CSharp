@@ -19,7 +19,7 @@ namespace Cog.SfmlRenderer
 
         public override RenderTexture CreateRenderTexture(int width, int height)
         {
-            return new SfmlRenderTexture(width, height);
+            return new SfmlDrawTexture(width, height);
         }
 
         public override Texture LoadTexture(string filename)

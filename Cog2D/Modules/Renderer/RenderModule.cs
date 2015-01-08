@@ -13,6 +13,10 @@ namespace Cog.Modules.Renderer
 
         public RenderModule()
         {
+        }
+
+        internal void CreateBlendModes()
+        {
             InitializeBlendModes();
             if (AlphaBlend == null || AdditiveBlend == null)
                 throw new Exception("One of the blend modes were not assigned!");

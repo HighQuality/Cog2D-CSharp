@@ -20,10 +20,12 @@ namespace TestGame
     {
         static void Main(string[] args)
         {
-            Engine.Initialize<SfmlRenderer, SfmlAudioModule>();
+            Engine.Initialize<D3DRenderer.D3DRenderer, SfmlAudioModule>();
             float time = 0f;
 
             var container = Engine.ResourceHost.LoadDictionary("main", "resources");
+
+            Texture texture = null;
 
             LoadingScene scene = null;
 
@@ -35,6 +37,8 @@ namespace TestGame
                 else
                     Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);
 
+                texture = Engine.Renderer.LoadTexture("splash.png");
+
                 scene = Engine.SceneHost.CreateLocal<LoadingScene>();
             });
             
@@ -45,6 +49,7 @@ namespace TestGame
             
             Engine.EventHost.RegisterEvent<DrawEvent>(1, e =>
             {
+                e.RenderTarget.DrawTexture(texture, new Vector2((float)Engine.TimeStamp * 32f, 0f), Color.White, new Vector2(2f, 0.25f), texture.Size / 2f, (float)Engine.TimeStamp * 45f, new Rectangle(Vector2.Zero, texture.Size));
             });
 
             Engine.EventHost.RegisterEvent<ExitEvent>(0, e =>

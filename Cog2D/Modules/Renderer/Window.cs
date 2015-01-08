@@ -100,6 +100,8 @@ namespace Cog.Modules.Renderer
         public Window(string title, int width, int height, WindowStyle style)
         {
             window = new WFWindow();
+            window.Hide();
+            Visible = false;
             window.Text = title;
             window.ClientSize = new System.Drawing.Size(width, height);
             window.FormBorderStyle = FormBorderStyle.Fixed3D;
@@ -117,7 +119,6 @@ namespace Cog.Modules.Renderer
             window.MouseUp += Window_MouseUp;
             window.KeyPress += Window_KeyPress;
             window.KeyDown += Window_KeyDown;
-            // window.Show();
             IsOpen = true;
 
             if (reverseKeyMap == null)

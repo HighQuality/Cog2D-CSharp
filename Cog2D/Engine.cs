@@ -333,14 +333,17 @@ namespace Cog
             // You're only a client if you're connected to a server
             IsClient = false;
 
+            Window = Renderer.CreateWindow(title, (int)DesiredResolution.X, (int)DesiredResolution.Y, style);
+            // Window.VerticalSynchronization = true;
+            Renderer.CreateBlendModes();
+
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
             EventHost.RegisterEvent<ExitEvent>(-999, e => { Window.Close(); });
             EventHost.RegisterEvent<CloseButtonEvent>(-999, e => { EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null)); e.Intercept = true; });
 
-            EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
+            Window.Visible = true;
 
-            Window = Renderer.CreateWindow(title, (int)DesiredResolution.X, (int)DesiredResolution.Y, style);
-            // Window.VerticalSynchronization = true;
+            EventHost.GetEvent<FinishedLoadingEvent>().Trigger(new FinishedLoadingEvent(null));
 
             timeStampWatch = Stopwatch.StartNew();
             Stopwatch watch = Stopwatch.StartNew();

@@ -6,41 +6,41 @@ using System.Text;
 
 namespace Cog.SfmlRenderer
 {
-    public class SfmlRenderTexture : RenderTexture
+    public class SfmlDrawTexture : RenderTexture
     {
-        internal SFML.Graphics.RenderTexture InnerRenderTexture;
+        internal SFML.Graphics.RenderTexture InnerDrawTexture;
         private Texture _texture;
         public override Texture Texture { get { return _texture; } }
         public override Vector2 Size { get { return _texture.Size; } }
 
-        public SfmlRenderTexture(int width, int height)
+        public SfmlDrawTexture(int width, int height)
         {
-            InnerRenderTexture = new SFML.Graphics.RenderTexture((uint)width, (uint)height, false);
+            InnerDrawTexture = new SFML.Graphics.RenderTexture((uint)width, (uint)height, false);
             _texture = new SfmlTexture(this);
         }
 
         public override void Dispose(bool disposing)
         {
             Texture.Dispose();
-            InnerRenderTexture.Dispose();
+            InnerDrawTexture.Dispose();
         }
 
         public override void Clear(Color color)
         {
-            InnerRenderTexture.Clear(new SFML.Graphics.Color((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A));
-            InnerRenderTexture.Display();
+            InnerDrawTexture.Clear(new SFML.Graphics.Color((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A));
+            InnerDrawTexture.Display();
         }
 
         public override void DrawTexture(Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
         {
-            DrawHelper.DrawTexture(InnerRenderTexture, texture, windowCoords, color, scale, origin, rotation, textureRect);
-            InnerRenderTexture.Display();
+            DrawHelper.DrawTexture(InnerDrawTexture, texture, windowCoords, color, scale, origin, rotation, textureRect);
+            InnerDrawTexture.Display();
         }
 
         public override void DrawTexture(Texture texture, Vector2 windowCoords)
         {
-            DrawHelper.DrawTexture(InnerRenderTexture, texture, windowCoords);
-            InnerRenderTexture.Display();
+            DrawHelper.DrawTexture(InnerDrawTexture, texture, windowCoords);
+            InnerDrawTexture.Display();
         }
 
         public override void SetTransformation(Vector2 center, Vector2 scale, Angle angle)
@@ -50,7 +50,7 @@ namespace Cog.SfmlRenderer
             var size = Size / scale;
             view.Size = new SFML.System.Vector2f(size.X, size.Y);
             view.Rotation = angle.Degree;
-            InnerRenderTexture.SetView(view);
+            InnerDrawTexture.SetView(view);
         }
     }
 }
