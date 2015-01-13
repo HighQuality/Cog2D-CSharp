@@ -9,6 +9,8 @@ using System.Text;
 using Device = SlimDX.Direct3D11.Device;
 using Resource = SlimDX.Direct3D11.Resource;
 using Buffer = SlimDX.Direct3D11.Buffer;
+using System.Diagnostics;
+using System.Threading;
 
 namespace D3DRenderer
 {
@@ -70,6 +72,8 @@ namespace D3DRenderer
             }
         }
 
+        private static List<Vertex> vertices;
+
         public D3DWindow(string title, int width, int height, WindowStyle style)
             : base(title, width, height, style)
         {
@@ -87,7 +91,7 @@ namespace D3DRenderer
                 SwapEffect = SwapEffect.Discard
             };
 
-            SlimDX.Direct3D11.Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.SingleThreaded, description, out Device, out swapChain);
+            SlimDX.Direct3D11.Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.None, description, out Device, out swapChain);
 
             using (var resource = Resource.FromSwapChain<Texture2D>(swapChain, 0))
                 renderTarget = new RenderTargetView(Device, resource);
@@ -171,27 +175,28 @@ namespace D3DRenderer
             }
         }
 
-        private static List<Vertex> vertices;
         private static VertexBuffer<Vertex> vertexBuffer;
         internal static void DrawBuffer()
         {
             if (vertices.Count == 0)
                 return;
-            
             if (vertexBuffer == null)
+            {
                 vertexBuffer = new VertexBuffer<Vertex>(1024);
+                Context.InputAssembler.SetVertexBuffers(0, vertexBuffer.Binding);
+            }
 
             // TODO: Redo to single operation
             while (vertexBuffer.VertexCount < vertices.Count)
             {
                 vertexBuffer.Dispose();
                 vertexBuffer = new VertexBuffer<Vertex>(vertexBuffer.VertexCount * 2);
+                Context.InputAssembler.SetVertexBuffers(0, vertexBuffer.Binding);
             }
 
             vertexBuffer.SetData(vertices.ToArray());
-            Context.InputAssembler.SetVertexBuffers(0, vertexBuffer.Binding);
             Context.Draw(vertices.Count, 0);
-            // Context.DrawInstanced(4, vertices.Count / 4, 0, 0);
+            //Context.DrawInstanced(4, vertices.Count / 4, 0, 0);
             vertices.Clear();
         }
 
@@ -210,17 +215,16 @@ namespace D3DRenderer
             vertices.Add(bottomLeft);
             vertices.Add(topRight);
 
-            vertices.Add(topRight);
             vertices.Add(bottomLeft);
             vertices.Add(bottomRight);
+            vertices.Add(topRight);
         }
 
         public void DrawTexture(Texture texture, Vector2 windowCoords, Color color, Vector2 scale, Vector2 origin, float rotation, Rectangle textureRect)
         {
             SetTexture((D3DTexture)texture);
-            
-            var m = SlimDX.Matrix.Identity *
-                SlimDX.Matrix.Translation(-origin.X, -origin.Y, 0f) *
+
+            var m = SlimDX.Matrix.Translation(-origin.X, -origin.Y, 0f) *
                 SlimDX.Matrix.Scaling(scale.X, scale.Y, 1f) *
                 SlimDX.Matrix.RotationZ(rotation / 180f * Mathf.Pi) *
                 SlimDX.Matrix.Translation(windowCoords.X, windowCoords.Y, 0f);
@@ -241,9 +245,9 @@ namespace D3DRenderer
             vertices.Add(bottomLeft);
             vertices.Add(topRight);
 
-            vertices.Add(topRight);
             vertices.Add(bottomLeft);
             vertices.Add(bottomRight);
+            vertices.Add(topRight);
         }
     }
 }

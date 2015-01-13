@@ -49,6 +49,7 @@
     <Compile Include="ConstantBuffer.cs" />
     <Compile Include="ConstantBuffers.cs" />
     <Compile Include="D3DRenderer.cs" />
+    <Compile Include="D3DRenderTexture.cs" />
     <Compile Include="D3DTexture.cs" />
     <Compile Include="D3DWindow.cs" />
     <Compile Include="DefaultShader.cs" />
