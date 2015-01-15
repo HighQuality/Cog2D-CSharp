@@ -20,7 +20,7 @@ namespace TestGame
     {
         static void Main(string[] args)
         {
-            Engine.Initialize<D3DRenderer.D3DRenderer, SfmlAudioModule>();
+            Engine.Initialize<XnaRenderer.XnaRenderer, SfmlAudioModule>();
             float time = 0f;
 
             var container = Engine.ResourceHost.LoadDictionary("main", "resources");

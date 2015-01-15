@@ -426,7 +426,7 @@ namespace Cog.Scenes
             var current = Objects.First;
             while (current != null)
             {
-                if (current.Value is T)
+                if (current.Value is T && !current.Value.DoRemove)
                     yield return (T)(object)current.Value;
                 current = current.Next;
             }

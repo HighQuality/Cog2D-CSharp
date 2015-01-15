@@ -124,6 +124,10 @@
       <Name>TestGameContent</Name>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
+    <ProjectReference Include="..\XnaRenderer\XnaRenderer.csproj">
+      <Project>{c06e9138-2ea5-4dbe-933b-a1036cce391d}</Project>
+      <Name>XnaRenderer</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
