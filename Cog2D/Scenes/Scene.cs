@@ -133,20 +133,20 @@ namespace Cog.Scenes
                 var info = DrawCellMoveQueue.Dequeue();
                 var obj = info.Object;
 
+                if (!info.IsInitialPlacement)
+                {
+                    // Remove our old entry
+                    var currentSet = DrawCells[obj.CurrentDrawCell];
+                    currentSet.Remove(obj);
+                    if (currentSet.Count == 0)
+                        DrawCells.Remove(obj.CurrentDrawCell);
+                }
+
                 if (!obj.DoRemove)
                 {
                     // If we're eligible, our parent may have changed since we first enqueued
                     if (obj.Parent == null)
                     {
-                        if (!info.IsInitialPlacement)
-                        {
-                            // Remove our old entry
-                            var currentSet = DrawCells[obj.CurrentDrawCell];
-                            currentSet.Remove(obj);
-                            if (currentSet.Count == 0)
-                                DrawCells.Remove(obj.CurrentDrawCell);
-                        }
-
                         obj.CurrentDrawCell = new DrawCell((int)Math.Floor(obj.LocalCoord.X / (float)DrawCell.DrawCellSize), (int)Math.Floor(obj.LocalCoord.Y / (float)DrawCell.DrawCellSize));
 
                         HashSet<GameObject> newSet;
@@ -176,7 +176,7 @@ namespace Cog.Scenes
                 x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize),
                 y2 = y1 + (int)Math.Ceiling(cameraSize.Y / (float)DrawCell.DrawCellSize);
 
-            List<Tuple<float, Action>> drawList = new List<Tuple<float, Action>>();
+            List<DrawOperation> drawList = new List<DrawOperation>();
 
             for (int x = x1; x <= x2; x++)
             {
@@ -189,12 +189,13 @@ namespace Cog.Scenes
 
                     if (DrawCells.TryGetValue(cell, out objectSet))
                         foreach (var obj in objectSet)
-                            obj.Draw(ev, transform, drawList);
+                            if (!obj.DoRemove)
+                                obj.Draw(ev, transform, drawList);
                 }
             }
 
-            foreach (var obj in drawList.OrderBy(o => -o.Item1))
-                obj.Item2();
+            foreach (var drawOp in drawList.OrderBy(o => Mathf.Abs(o.ObjectId)).OrderBy(o => -o.Depth))
+                drawOp.Action();
         }
 
         internal SceneCreationMessage CreateSceneCreationMessage()

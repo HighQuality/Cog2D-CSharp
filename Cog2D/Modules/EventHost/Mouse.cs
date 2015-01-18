@@ -43,7 +43,7 @@ namespace Cog.Modules.EventHost
         public static void SetDown(Mouse.Button button)
         {
             if (buttonState[(int)button])
-                throw new InvalidOperationException("The button is already down!");
+                return;
             buttonState[(int)button] = true;
             var ev = new ButtonDownEvent(null, button, Mouse.Location);
             Engine.SceneHost.TriggerButton(ev);
@@ -56,7 +56,7 @@ namespace Cog.Modules.EventHost
         public static void SetReleased(Mouse.Button button)
         {
             if (!buttonState[(int)button])
-                throw new InvalidOperationException("The button is already up!");
+                return;
             buttonState[(int)button] = false;
             if (buttonUpCallbacks[(int)button] != null)
             {

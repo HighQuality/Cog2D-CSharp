@@ -9,15 +9,21 @@ using System.Windows.Forms;
 
 namespace Cog.Modules.Window
 {
-    public partial class WFWindow : Form
+    public partial class EditorWindow : Form
     {
-        public IntPtr RenderTarget { get { return pictureBox1.Handle; } }
+        public Control GameControl;
         public event Action UserClosing;
         public bool RerouteClose = true;
 
-        public WFWindow()
+        public EditorWindow()
         {
             InitializeComponent();
+            GameControl = pictureBox1;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine(comboBox1.SelectedIndex);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

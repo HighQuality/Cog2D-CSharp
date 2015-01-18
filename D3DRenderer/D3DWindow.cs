@@ -110,18 +110,6 @@ namespace D3DRenderer
             using (var factory = swapChain.GetParent<Factory>())
                 factory.SetWindowAssociation(Handle, WindowAssociationFlags.IgnoreAltEnter);
 
-            /*form.UserResized += (o, e) =>
-            {
-                renderTarget.Dispose();
-
-                swapChain.ResizeBuffers(2, 0, 0, Format.R8G8B8A8_UNorm, SwapChainFlags.AllowModeSwitch);
-                using (var resource = Resource.FromSwapChain<Texture2D>(swapChain, 0))
-                    renderTarget = new RenderTargetView(Device, resource);
-
-                Context.OutputMerger.SetTargets(renderTarget);
-                Context.Rasterizer.SetViewports(new Viewport(0.0f, 0.0f, form.ClientSize.Width, form.ClientSize.Height));
-            };*/
-
             Context.Rasterizer.State = RasterizerState.FromDescription(Device, new RasterizerStateDescription
             {
                 CullMode = CullMode.None,
@@ -248,6 +236,18 @@ namespace D3DRenderer
             vertices.Add(bottomLeft);
             vertices.Add(bottomRight);
             vertices.Add(topRight);
+        }
+
+        public override void ResizeBackBuffer(Vector2 newResolution)
+        {
+            renderTarget.Dispose();
+
+            swapChain.ResizeBuffers(2, 0, 0, Format.R8G8B8A8_UNorm, SwapChainFlags.AllowModeSwitch);
+            using (var resource = Resource.FromSwapChain<Texture2D>(swapChain, 0))
+                renderTarget = new RenderTargetView(Device, resource);
+
+            Context.OutputMerger.SetTargets(renderTarget);
+            Context.Rasterizer.SetViewports(new Viewport(0.0f, 0.0f, newResolution.X, newResolution.Y));
         }
     }
 }

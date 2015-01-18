@@ -42,5 +42,12 @@ namespace Cog
         {
             return (float)Math.Cos(value);
         }
+
+        public static float Abs(float value)
+        {
+            if (value < 0f)
+                return -value;
+            return value;
+        }
     }
 }

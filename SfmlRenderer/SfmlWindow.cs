@@ -73,5 +73,10 @@ namespace Cog.SfmlRenderer
             sprite.TextureRect = new IntRect((int)textureRect.TopLeft.X, (int)textureRect.TopLeft.Y, (int)textureRect.Size.X, (int)textureRect.Size.Y);
             InnerWindow.Draw(sprite, SfmlRenderer.RenderState);
         }
+
+        public override void ResizeBackBuffer(Vector2 newResolution)
+        {
+            InnerWindow.Size = new SFML.System.Vector2u((uint)newResolution.X, (uint)newResolution.Y);
+        }
     }
 }

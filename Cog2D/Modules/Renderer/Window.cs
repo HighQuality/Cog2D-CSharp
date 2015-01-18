@@ -12,8 +12,8 @@ namespace Cog.Modules.Renderer
 {
     public abstract class Window
     {
-        private WFWindow window;
-        public IntPtr Handle { get { return window.Handle; } }
+        private EditorWindow window;
+        public IntPtr Handle;
 
         private Dictionary<Keys, Action> keyUpEvents = new Dictionary<Keys, Action>();
         private LinkedList<Keys> pressedKeys = new LinkedList<Keys>();
@@ -99,15 +99,16 @@ namespace Cog.Modules.Renderer
 
         public Window(string title, int width, int height, WindowStyle style)
         {
-            window = new WFWindow();
+            window = new EditorWindow();
+            Handle = window.GameControl.Handle;
             window.Hide();
             Visible = false;
             window.Text = title;
             window.ClientSize = new System.Drawing.Size(width, height);
-            window.FormBorderStyle = FormBorderStyle.Fixed3D;
-            window.MaximizeBox = false;
+            // window.FormBorderStyle = FormBorderStyle.Fixed3D;
+            // window.MaximizeBox = false;
             window.FormClosed += (_, __) => IsOpen = false;
-            window.MouseMove += (s, par) =>
+            window.GameControl.MouseMove += (s, par) =>
             {
                 _mousePosition = new Vector2(par.Location.X, par.Location.Y);
             };
@@ -115,11 +116,14 @@ namespace Cog.Modules.Renderer
             {
                 Engine.EventHost.GetEvent<CloseButtonEvent>().Trigger(new CloseButtonEvent(this));
             };
-            window.MouseDown += Window_MouseDown;
-            window.MouseUp += Window_MouseUp;
-            window.KeyPress += Window_KeyPress;
-            window.KeyDown += Window_KeyDown;
+            window.GameControl.MouseDown += Window_MouseDown;
+            window.GameControl.SizeChanged += GameControl_SizeChanged;
+            window.GameControl.MouseUp += Window_MouseUp;
+            window.GameControl.KeyPress += Window_KeyPress;
+            window.GameControl.KeyDown += Window_KeyDown;
             IsOpen = true;
+
+            window.GameControl.Focus();
 
             if (reverseKeyMap == null)
             {
@@ -129,8 +133,15 @@ namespace Cog.Modules.Renderer
             }
         }
 
+        void GameControl_SizeChanged(object sender, EventArgs e)
+        {
+            ResizeBackBuffer(new Vector2(window.GameControl.Size.Width, window.GameControl.Size.Height));
+        }
+
         private void Window_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            window.GameControl.Focus();
+            
             EventHost.Mouse.Button cogButton;
             if (wfbuttonToCogButton.TryGetValue(e.Button, out cogButton))
                 Cog.Modules.EventHost.Mouse.SetDown(cogButton);
@@ -153,6 +164,8 @@ namespace Cog.Modules.Renderer
 
         private void Window_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
+            Console.WriteLine(e.KeyCode.ToString());
+
             if (!keyUpEvents.ContainsKey(e.KeyCode))
             {
                 var newKey = WinKeyToCog(e.KeyCode);
@@ -184,13 +197,13 @@ namespace Cog.Modules.Renderer
         /// <summary>
         /// Gets or Sets the size of the window
         /// </summary>
-        public Vector2 Resolution { get { return new Vector2(window.ClientSize.Width, window.ClientSize.Height); } set { window.ClientSize = new System.Drawing.Size((int)value.X, (int)value.Y); } }
+        public Vector2 Resolution { get { return new Vector2(window.GameControl.Size.Width, window.GameControl.Size.Height); } }
         /// <summary>
         /// Gets or Sets the position of the window
         /// </summary>
         public Vector2 Position { get { return new Vector2(window.Location.X, window.Location.Y); } set { window.Location = new System.Drawing.Point((int)value.X, (int)value.Y); } }
         private Vector2 _mousePosition;
-        public Vector2 MousePosition { get { return _mousePosition; } set { System.Windows.Forms.Cursor.Position = window.PointToScreen(new System.Drawing.Point((int)value.X, (int)value.Y)); } }
+        public Vector2 MousePosition { get { return _mousePosition; } set { System.Windows.Forms.Cursor.Position = window.GameControl.PointToScreen(new System.Drawing.Point((int)value.X, (int)value.Y)); } }
         /// <summary>
         /// Gets or Sets the visibility of the window
         /// </summary>
@@ -253,6 +266,8 @@ namespace Cog.Modules.Renderer
             window.RerouteClose = false;
             window.Close();
         }
+
+        public abstract void ResizeBackBuffer(Vector2 newResolution);
         
         /// <summary>
         /// Checks whether a key is down or not.

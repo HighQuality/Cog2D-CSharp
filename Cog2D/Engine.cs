@@ -508,6 +508,11 @@ namespace Cog
             resolveDictionary.Add(id, obj);
         }
 
+        internal static void FreeId(long id)
+        {
+            resolveDictionary.Remove(id);
+        }
+
         public static T Resolve<T>(long id)
             where T : IIdentifier
         {

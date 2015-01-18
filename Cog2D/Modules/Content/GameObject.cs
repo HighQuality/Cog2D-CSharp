@@ -242,6 +242,8 @@ namespace Cog.Modules.Content
         {
             if (Engine.IsClient && IsGlobal)
                 throw new InvalidOperationException("Can not Remove a global object when connected to a server!");
+            if (DoRemove)
+                return;
 
             ForceRemove();
 
@@ -254,42 +256,55 @@ namespace Cog.Modules.Content
 
         internal void ForceRemove()
         {
-            if (children != null)
-                for (int i = children.Count - 1; i >= 0; i--)
-                    children[i].ForceRemove();
-
-            if (registeredEvents != null)
+            if (!DoRemove)
             {
-                for (int i = registeredEvents.Count - 1; i >= 0; i--)
-                    registeredEvents[i].Cancel();
-                registeredEvents = null;
-            }
+                // Remove children
+                if (children != null)
+                    for (int i = children.Count - 1; i >= 0; i--)
+                        children[i].ForceRemove();
 
-            if (Parent != null)
-                Parent.children.Remove(this);
-            else
-            {
-                Scene.BaseObjects.Remove(this);
-
-                if (!IsScheduledForDrawCellMove)
+                // Events are safe to cancel mid-enumeration, just sets flag
+                if (registeredEvents != null)
                 {
-                    HashSet<GameObject> objectSet;
-                    if (Scene.DrawCells.TryGetValue(CurrentDrawCell, out objectSet))
-                    {
-                        objectSet.Remove(this);
-                        if (objectSet.Count == 0)
-                            Scene.DrawCells.Remove(CurrentDrawCell);
-                    }
+                    for (int i = registeredEvents.Count - 1; i >= 0; i--)
+                        registeredEvents[i].Cancel();
+                    registeredEvents = null;
+                }
+
+                // Schedule us for removal during the next frame
+                // Ensures no data structures are modified mid-enumeration
+                Engine.InvokeTimed(0f, o =>
+                {
+                    if (Parent != null)
+                        Parent.children.Remove(this);
                     else
+                        Scene.BaseObjects.Remove(this);
+
+                    if (OnRemovalComplete != null)
+                        OnRemovalComplete();
+                });
+
+                // Engine's object dictionary is not for enumeration and is therefore safe to remove immediately
+                Engine.FreeId(Id);
+
+                if (Parent == null)
+                {
+                    // Make sure we're scheduled for a draw cell move, removed objects are removed from their draw cell
+                    if (!IsScheduledForDrawCellMove)
                     {
-                        Debug.Error("=(");
+                        Scene.DrawCellMoveQueue.Enqueue(new DrawCellMoveInfo
+                        {
+                            IsInitialPlacement = false,
+                            Object = this
+                        });
                     }
                 }
-            }
-            DoRemove = true;
 
-            if (OnRemoved != null)
-                OnRemoved();
+                DoRemove = true;
+
+                if (OnRemoved != null)
+                    OnRemoved();
+            }
         }
         
         public EventListener<T> RegisterEvent<T>(int priority, Action<T> action)
@@ -461,7 +476,7 @@ namespace Cog.Modules.Content
             return objectsDictionary[type];
         }
 
-        internal void Draw(DrawEvent ev, DrawTransformation transform, List<Tuple<float, Action>> drawList)
+        internal void Draw(DrawEvent ev, DrawTransformation transform, List<DrawOperation> drawList)
         {
             if (!IsVisible)
                 return;
@@ -476,11 +491,16 @@ namespace Cog.Modules.Content
                 {
                     // Copy the transformation variable, otherwise it'll be modified before OnDraw is called
                     var myTransform = transform;
-                    drawList.Add(Tuple.Create<float, Action>(Depth, () =>
+                    drawList.Add(new DrawOperation
                     {
-                        for (int i = 0; i < OnDraw.Count; i++)
-                            OnDraw[i](ev, myTransform);
-                    }));
+                        Depth = this.Depth,
+                        ObjectId = Id,
+                        Action = () =>
+                        {
+                            for (int i = 0; i < OnDraw.Count; i++)
+                                OnDraw[i](ev, myTransform);
+                        }
+                    });
                 }
 
                 transform.ParentWorldCoord = transform.WorldCoord;
@@ -498,11 +518,16 @@ namespace Cog.Modules.Content
                 transform.WorldRotation += transform.WorldScale.X < 0f ? -LocalRotation : LocalRotation;
 
                 var myTransform = transform;
-                drawList.Add(Tuple.Create<float, Action>(Depth, () =>
+                drawList.Add(new DrawOperation
                 {
-                    for (int i = 0; i < OnDraw.Count; i++)
-                        OnDraw[i](ev, myTransform);
-                }));
+                    Depth = this.Depth,
+                    ObjectId = this.Id,
+                    Action = () =>
+                    {
+                        for (int i = 0; i < OnDraw.Count; i++)
+                            OnDraw[i](ev, myTransform);
+                    }
+                });
             }
         }
 

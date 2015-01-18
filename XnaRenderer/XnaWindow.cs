@@ -33,26 +33,7 @@ namespace XnaRenderer
         public XnaWindow(string title, int width, int height, WindowStyle style)
             : base(title, width, height, style)
         {
-            PresentationParameters pp = new PresentationParameters();
-            pp.DeviceWindowHandle = Handle;
-
-            pp.BackBufferFormat = SurfaceFormat.Color;
-            pp.BackBufferWidth = (int)Resolution.X;
-            pp.BackBufferHeight = (int)Resolution.Y;
-            pp.RenderTargetUsage = RenderTargetUsage.DiscardContents;
-            pp.IsFullScreen = false;
-
-            pp.MultiSampleCount = 16;
-
-            pp.DepthStencilFormat = DepthFormat.Depth24Stencil8;
-
-            GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter,
-                                                      GraphicsProfile.HiDef,
-                                                      pp);
-
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            Begin(Microsoft.Xna.Framework.Matrix.Identity, BlendState.AlphaBlend);
+            ResizeBackBuffer(Resolution);
         }
 
         public override void Clear(Cog.Color color)
@@ -71,9 +52,10 @@ namespace XnaRenderer
         {
             TryEnd();
 
-            var matrix = Microsoft.Xna.Framework.Matrix.Identity * Microsoft.Xna.Framework.Matrix.CreateTranslation(-center.X + Resolution.X / 2f, -center.Y + Resolution.Y / 2f, 0.5f) *
+            var matrix = Microsoft.Xna.Framework.Matrix.Identity * Microsoft.Xna.Framework.Matrix.CreateTranslation(-center.X, -center.Y, 0.5f) *
                 Microsoft.Xna.Framework.Matrix.CreateRotationZ(-angle.Radian) *
-                Microsoft.Xna.Framework.Matrix.CreateScale(scale.X, scale.Y, 1f);
+                Microsoft.Xna.Framework.Matrix.CreateScale(scale.X, scale.Y, 1f) *
+                Microsoft.Xna.Framework.Matrix.CreateTranslation(Resolution.X / 2f, Resolution.Y / 2f, 0f);
 
             Begin(matrix, CurrentBlendState);
         }
@@ -117,6 +99,37 @@ namespace XnaRenderer
             CurrentMatrix = matrix;
 
             spriteBatch.Begin(SpriteSortMode.Immediate, blendState, null, null, null, null, matrix);
+        }
+
+        public override void ResizeBackBuffer(Cog.Vector2 newResolution)
+        {
+            PresentationParameters pp = new PresentationParameters();
+            pp.DeviceWindowHandle = Handle;
+
+            pp.BackBufferFormat = SurfaceFormat.Color;
+            pp.BackBufferWidth = (int)newResolution.X;
+            pp.BackBufferHeight = (int)newResolution.Y;
+            pp.RenderTargetUsage = RenderTargetUsage.DiscardContents;
+            pp.IsFullScreen = false;
+
+            pp.MultiSampleCount = 16;
+
+            pp.DepthStencilFormat = DepthFormat.Depth24Stencil8;
+
+            if (GraphicsDevice == null)
+            {
+                GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter,
+                                                          GraphicsProfile.HiDef,
+                                                          pp);
+
+                spriteBatch = new SpriteBatch(GraphicsDevice);
+
+                Begin(Microsoft.Xna.Framework.Matrix.Identity, BlendState.AlphaBlend);
+            }
+            else
+            {
+                GraphicsDevice.Reset(pp);
+            }
         }
     }
 }
