@@ -184,6 +184,7 @@ namespace Cog.Modules.Content
         public Scene Scene { get; internal set; }
         public bool DoRemove { get; private set; }
         public event Action OnRemoved;
+        public event Action OnRemovalComplete;
         /// <summary>
         /// Gets the ID of this object.
         /// SET IS ONLY FOR INTERNAL ENGINE USE
