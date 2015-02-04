@@ -14,6 +14,12 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Content
 {
+    public abstract class GameObject<SceneType> : GameObject
+        where SceneType : Scene
+    {
+        new Scene Scene { get { return (SceneType)base.Scene; } }
+    }
+
     public abstract class GameObject : IBoundingBox, IIdentifier
     {
         private static Dictionary<Type, UInt16> objectsDictionary;
