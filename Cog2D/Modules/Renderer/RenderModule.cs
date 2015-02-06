@@ -10,6 +10,7 @@ namespace Cog.Modules.Renderer
     public abstract class RenderModule
     {
         public BlendMode BlendMode { get; internal set; }
+        public Shader Shader { get; internal set; }
 
         public RenderModule()
         {
@@ -22,6 +23,15 @@ namespace Cog.Modules.Renderer
                 throw new Exception("One of the blend modes were not assigned!");
             BlendMode = AlphaBlend;
             BlendMode.ForceActivate();
+        }
+
+        internal void CreateShaders()
+        {
+            InitializeShaders();
+            if (DefaultShader == null)
+                throw new Exception("No default shader was created!");
+            Shader = DefaultShader;
+            Shader.ForceActivate();
         }
 
         /// <summary>
@@ -55,6 +65,8 @@ namespace Cog.Modules.Renderer
         /// <returns>A generated texture</returns>
         public abstract Texture TextureFromImage(Image image);
 
+        public abstract GlslShader LoadGlslShader(string vertexShaderSource, string fragmentShaderSource);
+
         public BlendMode AlphaBlend { get; protected set; }
         public BlendMode AdditiveBlend { get; protected set; }
 
@@ -62,5 +74,9 @@ namespace Cog.Modules.Renderer
         /// Initializes AlphaBlend and AdditiveBlend
         /// </summary>
         protected abstract void InitializeBlendModes();
+
+        public Shader DefaultShader { get; protected set; }
+
+        protected abstract void InitializeShaders();
     }
 }

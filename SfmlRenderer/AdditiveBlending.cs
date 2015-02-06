@@ -11,7 +11,9 @@ namespace Cog.SfmlRenderer
     {
         protected override void Set()
         {
-            SfmlRenderer.RenderState = new SFML.Graphics.RenderStates(SFML.Graphics.BlendMode.Add);
+            var rs = SfmlRenderer.RenderState;
+            rs.BlendMode = SFML.Graphics.BlendMode.Add;
+            SfmlRenderer.RenderState = rs;
         }
     }
 }

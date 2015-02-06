@@ -174,8 +174,12 @@
     <Compile Include="Modules\Renderer\Alignments.cs" />
     <Compile Include="Modules\Renderer\BitmapFont.cs" />
     <Compile Include="Modules\Renderer\BlendMode.cs" />
+    <Compile Include="Modules\Renderer\ConstantBufferData.cs" />
     <Compile Include="Modules\Renderer\DefaultBlendMode.cs" />
+    <Compile Include="Modules\Renderer\DefaultShader.cs" />
+    <Compile Include="Modules\Renderer\GlslShader.cs" />
     <Compile Include="Modules\Renderer\RenderTexture.cs" />
+    <Compile Include="Modules\Renderer\Shader.cs" />
     <Compile Include="Modules\Resources\Resource.cs" />
     <Compile Include="Modules\Resources\ResourceAttribute.cs" />
     <Compile Include="Modules\Resources\ResourceCollection.cs" />
