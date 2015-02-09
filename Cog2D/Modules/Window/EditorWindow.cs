@@ -37,5 +37,13 @@ namespace Cog.Modules.Window
                 e.Cancel = true;
             }
         }
+
+        private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Right)
+            {
+                gameRightClickMenu.Show(pictureBox1, e.Location);
+            }
+        }
     }
 }
