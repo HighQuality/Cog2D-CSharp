@@ -293,6 +293,20 @@ namespace Cog.Scenes
 
         public GameObject CreateUninitializedObject(Type type, GameObject parent)
         {
+            // TODO: Cache results of type check
+            /*Type currentType = type;
+            do
+            {
+                if (currentType.IsGenericParameter && currentType.GetGenericTypeDefinition() == typeof(GameObject<>) && !currentType.GetGenericParameterConstraints()[0].IsAssignableFrom(GetType()))
+                {
+                    throw new InvalidOperationException("Tried to create an object that requires a {0} scene in a {1} scene!");
+                }
+                currentType = currentType.BaseType;
+                if (currentType == null)
+                    throw new InvalidOperationException("Tried to create a non-gameobject object!");
+            }
+            while (currentType != typeof(GameObject));*/
+
             // Create an object of this type without invoking the constructor
             GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(type);
             obj.Scene = this;

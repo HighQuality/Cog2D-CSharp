@@ -14,6 +14,12 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Content
 {
+    public abstract class GameObject<SceneType> : GameObject
+        where SceneType : Scene
+    {
+        new Scene Scene { get { return (SceneType)base.Scene; } }
+    }
+
     public abstract class GameObject : IBoundingBox, IIdentifier
     {
         private static Dictionary<Type, UInt16> objectsDictionary;
@@ -184,6 +190,7 @@ namespace Cog.Modules.Content
         public Scene Scene { get; internal set; }
         public bool DoRemove { get; private set; }
         public event Action OnRemoved;
+        public event Action OnRemovalComplete;
         /// <summary>
         /// Gets the ID of this object.
         /// SET IS ONLY FOR INTERNAL ENGINE USE

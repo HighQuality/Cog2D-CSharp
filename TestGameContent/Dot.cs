@@ -1,5 +1,6 @@
 ﻿using Cog;
 using Cog.Modules.Content;
+using Cog.Modules.EventHost;
 using Cog.Modules.Renderer;
 using System;
 using System.Collections.Generic;

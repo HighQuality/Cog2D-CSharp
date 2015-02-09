@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace TestGame
 {
     [Resource(ContainerName = "main", Filename = "valid.png", Key = "texture")]
-    public class StationaryObject : GameObject
+    public class StationaryObject : GameObject<LoadingScene>
     {
         public StationaryObject()
         {

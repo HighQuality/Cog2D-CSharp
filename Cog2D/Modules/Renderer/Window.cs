@@ -12,7 +12,7 @@ namespace Cog.Modules.Renderer
 {
     public abstract class Window
     {
-        private EditorWindow window;
+        private WFWindow window;
         public IntPtr Handle;
 
         private Dictionary<Keys, Action> keyUpEvents = new Dictionary<Keys, Action>();
@@ -99,7 +99,7 @@ namespace Cog.Modules.Renderer
 
         public Window(string title, int width, int height, WindowStyle style)
         {
-            window = new EditorWindow();
+            window = new WFWindow();
             Handle = window.GameControl.Handle;
             window.Hide();
             Visible = false;

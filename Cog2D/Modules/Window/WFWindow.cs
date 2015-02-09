@@ -14,6 +14,7 @@ namespace Cog.Modules.Window
         public IntPtr RenderTarget { get { return pictureBox1.Handle; } }
         public event Action UserClosing;
         public bool RerouteClose = true;
+        public Control GameControl { get { return pictureBox1; } }
 
         public WFWindow()
         {
