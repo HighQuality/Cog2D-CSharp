@@ -336,6 +336,7 @@ namespace Cog
             Window = Renderer.CreateWindow(title, (int)DesiredResolution.X, (int)DesiredResolution.Y, style);
             // Window.VerticalSynchronization = true;
             Renderer.CreateBlendModes();
+            Renderer.CreateShaders();
 
             EventHost.GetEvent<InitializeEvent>().Trigger(new InitializeEvent(null));
             EventHost.RegisterEvent<ExitEvent>(-999, e => { Window.Close(); });
