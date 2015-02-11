@@ -46,6 +46,7 @@ namespace Cog.SfmlRenderer
 
         protected override void InitializeShaders()
         {
+            DefaultShader = new SfmlDefaultShader();
         }
 
         public override GlslShader LoadGlslShader(string vertexShaderSource, string fragmentShaderSource)

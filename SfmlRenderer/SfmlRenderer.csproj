@@ -89,6 +89,7 @@
     <Compile Include="AlphaBlending.cs" />
     <Compile Include="AdditiveBlending.cs" />
     <Compile Include="DrawHelper.cs" />
+    <Compile Include="SfmlDefaultShader.cs" />
     <Compile Include="SfmlRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SfmlRenderTexture.cs" />
