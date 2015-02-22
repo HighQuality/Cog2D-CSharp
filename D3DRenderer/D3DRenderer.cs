@@ -26,6 +26,11 @@ namespace D3DRenderer
             AdditiveBlend = new AlphaBlend();
         }
 
+        protected override void InitializeShaders()
+        {
+            throw new NotImplementedException();
+        }
+
         public override Texture LoadTexture(byte[] data)
         {
             return new D3DTexture(data);
@@ -39,6 +44,11 @@ namespace D3DRenderer
         public override Texture TextureFromImage(Cog.Image image)
         {
             return new D3DTexture(image);
+        }
+
+        public override GlslShader LoadGlslShader(string vertexShaderSource, string fragmentShaderSource)
+        {
+            throw new InvalidOperationException("D3DRenderer does not support GLSL shaders!");
         }
     }
 }

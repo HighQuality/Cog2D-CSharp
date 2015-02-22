@@ -34,10 +34,20 @@ namespace Cog.Modules.Renderer
             return null;
         }
 
+        public override GlslShader LoadGlslShader(string vertexShaderSource, string fragmentShaderSource)
+        {
+            return null;
+        }
+
         protected override void InitializeBlendModes()
         {
             AlphaBlend = new DefaultBlendMode();
             AdditiveBlend = new DefaultBlendMode();
+        }
+
+        protected override void InitializeShaders()
+        {
+            DefaultShader = new DefaultShader();
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Cog.SfmlRenderer
 
         public override Window CreateWindow(string title, int width, int height, WindowStyle style)
         {
+            RenderState = SFML.Graphics.RenderStates.Default;
             return new SfmlWindow(title, width, height, style);
         }
 
@@ -41,6 +42,16 @@ namespace Cog.SfmlRenderer
         {
             AlphaBlend = new AlphaBlending();
             AdditiveBlend = new AdditiveBlending();
+        }
+
+        protected override void InitializeShaders()
+        {
+            DefaultShader = new SfmlDefaultShader();
+        }
+
+        public override GlslShader LoadGlslShader(string vertexShaderSource, string fragmentShaderSource)
+        {
+            return new SfmlShader(vertexShaderSource, fragmentShaderSource);
         }
     }
 }

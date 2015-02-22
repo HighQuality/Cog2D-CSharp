@@ -3,17 +3,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Cog.SfmlRenderer
 {
-    class AdditiveBlending : BlendMode
+    class SfmlDefaultShader : Shader
     {
+        public SfmlDefaultShader()
+        {
+
+        }
+
         protected override void Set()
         {
             var rs = SfmlRenderer.RenderState;
-            rs.BlendMode = SFML.Graphics.BlendMode.Add;
+            rs.Shader = null;
             SfmlRenderer.RenderState = rs;
+        }
+
+        public override void Dispose()
+        {
         }
     }
 }
