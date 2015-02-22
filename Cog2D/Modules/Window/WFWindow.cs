@@ -9,15 +9,16 @@ using System.Windows.Forms;
 
 namespace Cog.Modules.Window
 {
-    public partial class WFWindow : Form
+    public partial class WFWindow : Form, IGameWindow
     {
-        public IntPtr RenderTarget { get { return pictureBox1.Handle; } }
-        public event Action UserClosing;
-        public bool RerouteClose = true;
+        public Action UserClosing { get; set; }
+        public bool RerouteClose { get; set; }
         public Control GameControl { get { return pictureBox1; } }
+        public Form Form { get { return this; } }
 
         public WFWindow()
         {
+            RerouteClose = true;
             InitializeComponent();
         }
 

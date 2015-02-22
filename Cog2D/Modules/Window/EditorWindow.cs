@@ -9,16 +9,17 @@ using System.Windows.Forms;
 
 namespace Cog.Modules.Window
 {
-    public partial class EditorWindow : Form
+    public partial class EditorWindow : Form, IGameWindow
     {
-        public Control GameControl;
-        public event Action UserClosing;
-        public bool RerouteClose = true;
+        public Control GameControl { get { return pictureBox1; } }
+        public Form Form { get { return this; } }
+        public Action UserClosing { get; set; }
+        public bool RerouteClose { get; set; }
 
         public EditorWindow()
         {
+            RerouteClose = true;
             InitializeComponent();
-            GameControl = pictureBox1;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
