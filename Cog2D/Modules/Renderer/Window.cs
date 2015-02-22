@@ -12,7 +12,7 @@ namespace Cog.Modules.Renderer
 {
     public abstract class Window
     {
-        private WFWindow window;
+        private IGameWindow window;
         public IntPtr Handle;
 
         private Dictionary<Keys, Action> keyUpEvents = new Dictionary<Keys, Action>();
@@ -97,17 +97,22 @@ namespace Cog.Modules.Renderer
             { MouseButtons.Middle, EventHost.Mouse.Button.Middle }
         };
 
+        internal static Func<IGameWindow> CreateWindow;
+
         public Window(string title, int width, int height, WindowStyle style)
         {
-            window = new WFWindow();
+            if (CreateWindow != null)
+                window = CreateWindow();
+            else
+                window = new WFWindow();
             Handle = window.GameControl.Handle;
-            window.Hide();
+            window.Form.Hide();
             Visible = false;
-            window.Text = title;
-            window.ClientSize = new System.Drawing.Size(width, height);
+            window.Form.Text = title;
+            window.Form.ClientSize = new System.Drawing.Size(width, height);
             // window.FormBorderStyle = FormBorderStyle.Fixed3D;
             // window.MaximizeBox = false;
-            window.FormClosed += (_, __) => IsOpen = false;
+            window.Form.FormClosed += (_, __) => IsOpen = false;
             window.GameControl.MouseMove += (s, par) =>
             {
                 _mousePosition = new Vector2(par.Location.X, par.Location.Y);
@@ -193,7 +198,7 @@ namespace Cog.Modules.Renderer
         /// <summary>
         /// Gets or Sets the title of the window
         /// </summary>
-        public string Title { get { return window.Text; } set { window.Text = value; } }
+        public string Title { get { return window.Form.Text; } set { window.Form.Text = value; } }
         /// <summary>
         /// Gets or Sets the size of the window
         /// </summary>
@@ -201,13 +206,13 @@ namespace Cog.Modules.Renderer
         /// <summary>
         /// Gets or Sets the position of the window
         /// </summary>
-        public Vector2 Position { get { return new Vector2(window.Location.X, window.Location.Y); } set { window.Location = new System.Drawing.Point((int)value.X, (int)value.Y); } }
+        public Vector2 Position { get { return new Vector2(window.Form.Location.X, window.Form.Location.Y); } set { window.Form.Location = new System.Drawing.Point((int)value.X, (int)value.Y); } }
         private Vector2 _mousePosition;
         public Vector2 MousePosition { get { return _mousePosition; } set { System.Windows.Forms.Cursor.Position = window.GameControl.PointToScreen(new System.Drawing.Point((int)value.X, (int)value.Y)); } }
         /// <summary>
         /// Gets or Sets the visibility of the window
         /// </summary>
-        public bool Visible { get { return window.Visible; } set { window.Visible = true; } }
+        public bool Visible { get { return window.Form.Visible; } set { window.Form.Visible = true; } }
         /// <summary>
         /// Gets if the window is still open
         /// </summary>
@@ -264,7 +269,7 @@ namespace Cog.Modules.Renderer
         {
             // No longer reroute close to the CloseButtonEvent
             window.RerouteClose = false;
-            window.Close();
+            window.Form.Close();
         }
 
         public abstract void ResizeBackBuffer(Vector2 newResolution);

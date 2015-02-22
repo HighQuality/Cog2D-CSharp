@@ -323,6 +323,12 @@ namespace Cog
             Debug.NewLine();
         }
 
+        public static void StartEditor(string title, WindowStyle style)
+        {
+            Window.CreateWindow = () => new Modules.Window.EditorWindow();
+            StartGame(title, style);
+        }
+
         /// <summary>
         /// Starts the game.
         /// Iniitalize must be called first.

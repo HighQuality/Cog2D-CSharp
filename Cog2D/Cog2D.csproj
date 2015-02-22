@@ -194,6 +194,7 @@
     <Compile Include="Modules\Window\EditorWindow.Designer.cs">
       <DependentUpon>EditorWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="Modules\Window\IGameWindow.cs" />
     <Compile Include="Modules\Window\WFWindow.cs">
       <SubType>Form</SubType>
     </Compile>
