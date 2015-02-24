@@ -1,4 +1,5 @@
-﻿using Cog.Modules.EventHost;
+﻿using Cog.Editor;
+using Cog.Modules.EventHost;
 using Cog.Modules.Renderer;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Cog.Modules.Content
 {
+    [HideInEditor()]
     public class Camera : GameObject
     {
         public IEventListener beginDrawEvent;

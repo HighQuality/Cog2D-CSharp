@@ -88,6 +88,10 @@ namespace Cog
 
         public static float FrameTime { get; private set; }
 
+        private static List<Type> gameObjectTypes,
+            sceneTypes,
+            networkMessageTypes;
+
         /// <summary>
         /// Initializes Cog2D making it available for use showing the default splash screen while initializing
         /// </summary>
@@ -264,6 +268,10 @@ namespace Cog
 
             Debug.Success("Finished Registrating Type Serializers! ({0}ms)", watch.Elapsed.TotalMilliseconds);
 
+            gameObjectTypes = new List<Type>();
+            sceneTypes = new List<Type>();
+            networkMessageTypes = new List<Type>();
+
             // Cache event registrators for Object Components
             Debug.Event("Generating Game Meta Data...");
             watch.Restart();
@@ -272,24 +280,35 @@ namespace Cog
 
                 foreach (var assembly in loadedAssemblies.Values.OrderBy(o => o.FullName))
                 {
-                    foreach (var type in assembly.GetTypes().OrderBy(o => o.FullName))
+                    foreach (var _type in assembly.GetTypes().OrderBy(o => o.FullName))
                     {
+                        var type = _type;
+
                         if (typeof(GameObject).IsAssignableFrom(type))
                         {
                             if (!type.IsAbstract)
+                            {
                                 jobQueue.Add(() => GameObject.CreateCache(type));
+                                gameObjectTypes.Add(type);
+                            }
                             TypeSerializer.RegisterDescendant<GameObject>(type);
                         }
                         else if (typeof(Scene).IsAssignableFrom(type))
                         {
                             if (!type.IsAbstract)
+                            {
                                 jobQueue.Add(() => SceneCache.CreateCache(type));
+                                sceneTypes.Add(type);
+                            }
                             TypeSerializer.RegisterDescendant<Scene>(type);
                         }
                         else if (typeof(NetworkMessage).IsAssignableFrom(type))
                         {
                             if (!type.IsAbstract)
+                            {
                                 jobQueue.Add(() => NetworkMessage.CreateCache(type));
+                                networkMessageTypes.Add(type);
+                            }
                         }
                     }
                 }
@@ -528,6 +547,19 @@ namespace Cog
             if (obj is T || obj == null)
                 return (T)obj;
             throw new Exception(string.Format("{0} with ID {1} is not a {2}", obj.GetType().Name, id, typeof(T).Name));
+        }
+
+        public static IEnumerable<Type> EnumerateGameObjectTypes()
+        {
+            return gameObjectTypes;
+        }
+        public static IEnumerable<Type> EnumerateSceneTypes()
+        {
+            return sceneTypes;
+        }
+        public static IEnumerable<Type> EnumerateNetworkMessageTypes()
+        {
+            return networkMessageTypes;
         }
     }
 }

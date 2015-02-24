@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cog.Editor;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Cog.Modules.EventHost;
 
 namespace Cog.Modules.Window
 {
@@ -20,6 +22,25 @@ namespace Cog.Modules.Window
         {
             RerouteClose = true;
             InitializeComponent();
+        }
+
+        private void EditorWindow_Load(object sender, EventArgs e)
+        {
+            foreach (var _type in Engine.EnumerateGameObjectTypes().OrderBy(o => o.Name))
+            {
+                var type = _type;
+                if (type.GetCustomAttributes(typeof(HideInEditorAttribute), true).Length == 0)
+                {
+                    var item = createGlobalToolStripMenuItem.DropDownItems.Add(type.Name);
+                    item.Click += (ev, s) =>
+                    {
+                        Engine.InvokeTimed(0f, offset =>
+                        {
+                            Engine.SceneHost.CurrentScene.CreateObjectFromType(type, null, Mouse.Location - Engine.Resolution / 2f);
+                        });
+                    };
+                }
+            }
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)

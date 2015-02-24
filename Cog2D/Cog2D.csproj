@@ -98,6 +98,7 @@
     <Compile Include="Angle.cs" />
     <Compile Include="Color.cs" />
     <Compile Include="Debug.cs" />
+    <Compile Include="Editor\HideInEditorAttribute.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Extensions\ByteArrayExtensions.cs" />
     <Compile Include="Image.cs" />
@@ -288,6 +289,9 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>(if exist "$(TargetDir)*old.pdb" del "$(TargetDir)*old.pdb") &amp; (if exist "$(TargetDir)*.pdb" ren "$(TargetDir)*.pdb" *.old.pdb)</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
