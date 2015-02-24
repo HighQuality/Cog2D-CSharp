@@ -291,6 +291,25 @@ namespace Cog.Scenes
             return obj;
         }
 
+        public GameObject CreateObjectFromType(Type type, GameObject parent, Vector2 localCoord)
+        {
+            if (!typeof(GameObject).IsAssignableFrom(type))
+                throw new InvalidOperationException("type must inherit from GameObject!");
+            if (Engine.IsClient)
+                throw new Exception("Can not create global objects when connected to a server!");
+
+            GameObject obj = (GameObject)CreateUninitializedObject(type, parent);
+            Engine.GenerateGlobalId(obj);
+            obj.LocalCoord = localCoord;
+
+            // Engine/Object Constructor
+            InitializeObject(obj);
+            // Object Initialization
+            obj.Initialize();
+
+            return obj;
+        }
+
         public GameObject CreateUninitializedObject(Type type, GameObject parent)
         {
             // TODO: Cache results of type check

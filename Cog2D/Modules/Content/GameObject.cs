@@ -17,7 +17,21 @@ namespace Cog.Modules.Content
     public abstract class GameObject<SceneType> : GameObject
         where SceneType : Scene
     {
-        new Scene Scene { get { return (SceneType)base.Scene; } }
+        new public SceneType Scene { get { return (SceneType)base.Scene; } }
+    }
+
+    public abstract class GameObject<SceneType, ParentType> : GameObject
+        where SceneType : Scene
+        where ParentType : GameObject
+    {
+        new public SceneType Scene { get { return (SceneType)base.Scene; } }
+        new public ParentType Parent { get { return (ParentType)base.Parent; } }
+    }
+
+    public abstract class GameObject<ParentType> : GameObject
+        where ParentType : GameObject
+    {
+        new public ParentType Parent { get { return (ParentType)base.Parent; } }
     }
 
     public abstract class GameObject : IBoundingBox, IIdentifier
