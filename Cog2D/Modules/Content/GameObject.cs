@@ -20,20 +20,6 @@ namespace Cog.Modules.Content
         new public SceneType Scene { get { return (SceneType)base.Scene; } }
     }
 
-    public abstract class GameObject<SceneType, ParentType> : GameObject
-        where SceneType : Scene
-        where ParentType : GameObject
-    {
-        new public SceneType Scene { get { return (SceneType)base.Scene; } }
-        new public ParentType Parent { get { return (ParentType)base.Parent; } }
-    }
-
-    public abstract class GameObject<ParentType> : GameObject
-        where ParentType : GameObject
-    {
-        new public ParentType Parent { get { return (ParentType)base.Parent; } }
-    }
-
     public abstract class GameObject : IBoundingBox, IIdentifier
     {
         private static Dictionary<Type, UInt16> objectsDictionary;
