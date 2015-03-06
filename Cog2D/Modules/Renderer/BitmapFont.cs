@@ -3,6 +3,8 @@
 // ---- There's no license restrictions, use as you will. ----
 // ---- Credits to http://www.angelcode.com/ -----------------
 
+// ---- Heavily modified by HighQuality
+
 using Cog.Modules.Resources;
 using System;
 using System.Collections.Generic;
@@ -28,6 +30,11 @@ namespace Cog.Modules.Renderer
                     if (!CharacterMap.ContainsKey(c))
                     CharacterMap.Add(c, fontCharacter);
                 }
+
+                var spaceChar = CharacterMap['X'].Clone();
+                spaceChar.Width = 0;
+                spaceChar.Height = 0;
+                CharacterMap[' '] = spaceChar;
             }
 
             internal Dictionary<char, FontChar> CharacterMap;
@@ -63,6 +70,7 @@ namespace Cog.Modules.Renderer
                     }
                     float dx = (int)position.X;
                     float dy = (int)position.Y;
+                    float latestXAdvance = 0f;
 
                     foreach (char c in text)
                     {
@@ -76,7 +84,15 @@ namespace Cog.Modules.Renderer
                         {
                             renderTarget.DrawTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
 
-                            dx += fc.XAdvance * sizeFactor;
+                            if (!char.IsWhiteSpace(c))
+                            {
+                                dx += fc.XAdvance * sizeFactor;
+                                latestXAdvance = fc.XAdvance * sizeFactor;
+                            }
+                            else
+                            {
+                                dx += latestXAdvance;
+                            }
                         }
                     }
                 }
@@ -91,6 +107,7 @@ namespace Cog.Modules.Renderer
                 float dy = (int)rect.Top;
                 float wordWidth = 0f;
                 Action drawWord = null;
+                float latestXAdvance = 0f;
 
                 foreach (char c in text)
                 {
@@ -121,7 +138,15 @@ namespace Cog.Modules.Renderer
                             }
 
                             renderTarget.DrawTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
-                            dx += fc.XAdvance * sizeFactor;
+
+                            if (fc.XAdvance > 0f)
+                            {
+                                dx += fc.XAdvance * sizeFactor;
+                            }
+                            else
+                            {
+                                dx += latestXAdvance;
+                            }
                         }
                         else
                         {
@@ -133,6 +158,11 @@ namespace Cog.Modules.Renderer
                             };
                             dx += fc.XAdvance * sizeFactor;
                             wordWidth += fc.XAdvance * sizeFactor;
+                        }
+
+                        if (fc.XAdvance > 0f)
+                        {
+                            latestXAdvance = fc.XAdvance * sizeFactor;
                         }
                     }
                 }
@@ -155,6 +185,7 @@ namespace Cog.Modules.Renderer
                     maxHeight = lineHeight;
 
                 float lineWidth = 0;
+                float latestXAdvance = 0f;
 
                 foreach (char c in text)
                 {
@@ -167,7 +198,13 @@ namespace Cog.Modules.Renderer
                     }
                     else if (CharacterMap.TryGetValue(c, out fc))
                     {
-                        lineWidth += (float)fc.XAdvance * sizeFactor;
+                        if (fc.XAdvance > 0f)
+                        {
+                            latestXAdvance = (float)fc.XAdvance * sizeFactor;
+                            lineWidth += latestXAdvance;
+                        }
+                        else if (char.IsWhiteSpace(c))
+                            lineWidth += latestXAdvance;
                         if (lineWidth > maxWidth)
                             maxWidth = lineWidth;
                     }
@@ -465,6 +502,11 @@ namespace Cog.Modules.Renderer
     [Serializable]
     public class FontChar
     {
+        public FontChar Clone()
+        {
+            return (FontChar)MemberwiseClone();
+        }
+
         [XmlAttribute("id")]
         public Int32 ID
         {
