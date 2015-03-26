@@ -165,10 +165,12 @@
     <Compile Include="Modules\EventHost\PhysicsUpdateEvent.cs" />
     <Compile Include="Modules\EventHost\TextEnteredEvent.cs" />
     <Compile Include="Modules\EventHost\UpdateEvent.cs" />
+    <Compile Include="Modules\Networking\ClientOnlyAttribute.cs" />
     <Compile Include="Modules\Networking\IStringCacher.cs" />
     <Compile Include="Modules\Networking\MessageData.cs" />
     <Compile Include="Modules\Networking\MessageExecutionProperty.cs" />
     <Compile Include="Modules\Networking\NewClientEvent.cs" />
+    <Compile Include="Modules\Networking\NotNullAttribute.cs" />
     <Compile Include="Modules\Networking\ServerConnection.cs" />
     <Compile Include="Modules\Networking\StringCacheMessage.cs" />
     <Compile Include="Modules\Networking\StringPropertiesAttribute.cs" />
