@@ -180,6 +180,7 @@
     <Compile Include="Modules\Renderer\DefaultShader.cs" />
     <Compile Include="Modules\Renderer\GlslShader.cs" />
     <Compile Include="Modules\Renderer\RenderTexture.cs" />
+    <Compile Include="Modules\Renderer\ResolutionChangedEvent.cs" />
     <Compile Include="Modules\Renderer\Shader.cs" />
     <Compile Include="Modules\Resources\Resource.cs" />
     <Compile Include="Modules\Resources\ResourceAttribute.cs" />

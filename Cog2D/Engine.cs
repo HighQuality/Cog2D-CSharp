@@ -74,6 +74,8 @@ namespace Cog
         /// If a window has already been created the renderer must be restarted for a new resolution to take affect.
         /// </summary>
         public static Vector2 DesiredResolution { get; set; }
+        private static Vector2 _minimumResolution;
+        public static Vector2 MinimumResolution { get { return _minimumResolution; } set { _minimumResolution = value; if (Window != null) Window.MinimumResolution = value; } }
         /// <summary>
         /// If there is no window currently created, gets the desired resolution.
         /// Otherwise gets the window's actual resolution.

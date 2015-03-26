@@ -17,6 +17,7 @@ namespace Cog.Modules.Window
         public Form Form { get { return this; } }
         public Action UserClosing { get; set; }
         public bool RerouteClose { get; set; }
+        public Vector2 MinimumResolution { get { return new Vector2(MinimumSize.Width, MinimumSize.Height); } set { MinimumSize = new Size((int)value.X, (int)value.Y); } }
 
         public EditorWindow()
         {

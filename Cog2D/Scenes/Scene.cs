@@ -78,6 +78,8 @@ namespace Cog.Scenes
             RegisterEvent<BeginDrawEvent>(1000, BeginDraw);
             RegisterEvent<DrawEvent>(0, e => { Draw(e); });
             RegisterEvent<DrawInterfaceEvent>(0, e => { Interface.TriggerDraw(e, new Vector2()); });
+
+            RegisterEvent<ResolutionChangedEvent>(0, e => { if (Interface != null) Interface.Size = new Vector2(e.Width, e.Height); });
             
             Camera = CreateLocalObject<Camera>(new Vector2());
         }
