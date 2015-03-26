@@ -15,6 +15,7 @@ namespace Cog.Modules.Window
         public bool RerouteClose { get; set; }
         public Control GameControl { get { return pictureBox1; } }
         public Form Form { get { return this; } }
+        public Vector2 MinimumResolution { get { return new Vector2(MinimumSize.Width, MinimumSize.Height); } set { MinimumSize = new Size((int)value.X, (int)value.Y); } }
 
         public WFWindow()
         {

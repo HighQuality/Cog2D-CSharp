@@ -216,6 +216,7 @@ namespace Cog.Modules.Renderer
 
         internal FontRenderer Renderer;
         private Texture texture;
+        public float RenderLineHeight { get { return Renderer.FontFile.Common.LineHeight; } }
         public int RenderSize { get { return Renderer.FontFile.Info.Size; } }
 
         public BitmapFont(byte[] data, Func<string, Texture> loadTexture)

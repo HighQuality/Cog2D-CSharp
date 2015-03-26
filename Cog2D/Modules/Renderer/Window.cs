@@ -98,6 +98,7 @@ namespace Cog.Modules.Renderer
         };
 
         internal static Func<IGameWindow> CreateWindow;
+        internal Vector2 MinimumResolution { get { return new Vector2(window.Form.MinimumSize.Width, window.Form.MinimumSize.Height); } set { window.Form.MinimumSize = new System.Drawing.Size((int)value.X, (int)value.Y); } }
 
         public Window(string title, int width, int height, WindowStyle style)
         {
@@ -109,6 +110,7 @@ namespace Cog.Modules.Renderer
             window.Form.Hide();
             Visible = false;
             window.Form.Text = title;
+            window.Form.MinimumSize = new System.Drawing.Size((int)Engine.MinimumResolution.X, (int)Engine.MinimumResolution.Y);
             window.Form.ClientSize = new System.Drawing.Size(width, height);
             // window.FormBorderStyle = FormBorderStyle.Fixed3D;
             // window.MaximizeBox = false;
@@ -141,6 +143,7 @@ namespace Cog.Modules.Renderer
         void GameControl_SizeChanged(object sender, EventArgs e)
         {
             ResizeBackBuffer(new Vector2(window.GameControl.Size.Width, window.GameControl.Size.Height));
+            Engine.EventHost.GetEvent<ResolutionChangedEvent>().Trigger(new ResolutionChangedEvent(window.GameControl.Size.Width, window.GameControl.Size.Height));
         }
 
         private void Window_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -169,8 +172,6 @@ namespace Cog.Modules.Renderer
 
         private void Window_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            Console.WriteLine(e.KeyCode.ToString());
-
             if (!keyUpEvents.ContainsKey(e.KeyCode))
             {
                 var newKey = WinKeyToCog(e.KeyCode);
