@@ -47,7 +47,8 @@ namespace Cog.Modules.Content
 
         private void Draw(DrawEvent ev, DrawTransformation transformation)
         {
-            ev.RenderTarget.DrawTexture(Texture, transformation.WorldCoord, Color, transformation.WorldScale * Scale, Origin, transformation.WorldRotation.Degree, TextureRect);
+            if (Texture != null)
+                ev.RenderTarget.DrawTexture(Texture, transformation.WorldCoord, Color, transformation.WorldScale * Scale, Origin, transformation.WorldRotation.Degree, TextureRect);
         }
     }
 }
