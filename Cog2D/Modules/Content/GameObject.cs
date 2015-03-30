@@ -245,6 +245,10 @@ namespace Cog.Modules.Content
         {
         }
 
+        public virtual void CreationData(object[] creationData)
+        {
+        }
+
         public void Remove()
         {
             if (Engine.IsClient && IsGlobal)

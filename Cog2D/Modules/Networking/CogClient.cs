@@ -53,14 +53,17 @@ namespace Cog.Modules.Networking
             thread.IsBackground = true;
             thread.Start();
         }
-        
+
         public void DispatchMessages()
         {
-            while (messages.Count > 0)
+            lock (messages)
             {
-                var msgData = messages.Dequeue();
-                var msg = NetworkMessage.ReadMessage(msgData.TypeId, msgData.Data, this);
-                msg.Received();
+                while (messages.Count > 0)
+                {
+                    var msgData = messages.Dequeue();
+                    var msg = NetworkMessage.ReadMessage(msgData.TypeId, msgData.Data, this);
+                    msg.Received();
+                }
             }
         }
         

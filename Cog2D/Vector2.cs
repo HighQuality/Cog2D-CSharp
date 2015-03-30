@@ -61,6 +61,14 @@ namespace Cog
             }
         }
 
+        public Vector2 Floor
+        {
+            get
+            {
+                return new Vector2((int)X, (int)Y);
+            }
+        }
+
         /// <summary>
         /// Instantiates a Vector2 with the specified parameters
         /// </summary>
@@ -115,7 +123,7 @@ namespace Cog
         {
             return first.X != second.X || first.Y != second.Y;
         }
-
+        
         public override bool Equals(object obj)
         {
             return base.Equals(obj);

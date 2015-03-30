@@ -266,16 +266,22 @@ namespace Cog.Scenes
         public T CreateObject<T>(Vector2 localCord)
             where T : GameObject, new()
         {
-            return CreateObject<T>(null, null, localCord);
+            return InnerCreateObject<T>(null, localCord, null);
         }
 
         public T CreateObject<T>(GameObject parent, Vector2 localCord)
             where T : GameObject, new()
         {
-            return CreateObject<T>(null, parent, localCord);
+            return InnerCreateObject<T>(parent, localCord, null);
+        }
+        
+        public T CreateObject<T>(GameObject parent, Vector2 localCoord, params object[] creationData)
+            where T : GameObject, new()
+        {
+            return InnerCreateObject<T>(parent, localCoord, creationData);
         }
 
-        public T CreateObject<T>(CogClient owner, GameObject parent, Vector2 localCoord)
+        private T InnerCreateObject<T>(GameObject parent, Vector2 localCoord, object[] creationData)
             where T : GameObject, new()
         {
             if (Engine.IsClient)
@@ -286,7 +292,7 @@ namespace Cog.Scenes
             obj.LocalCoord = localCoord;
 
             // Engine/Object Constructor
-            InitializeObject(obj);
+            InitializeObject(obj, creationData);
             // Object Initialization
             obj.Initialize();
 
@@ -305,7 +311,7 @@ namespace Cog.Scenes
             obj.LocalCoord = localCoord;
 
             // Engine/Object Constructor
-            InitializeObject(obj);
+            InitializeObject(obj, null);
             // Object Initialization
             obj.Initialize();
 
@@ -363,8 +369,16 @@ namespace Cog.Scenes
 
         public void InitializeObject(GameObject obj)
         {
+            InitializeObject(obj, null);
+        }
+
+        public void InitializeObject(GameObject obj, object[] creationData)
+        {
             // Invoke the constructor
             obj.GetType().GetConstructor(new Type[0]).Invoke(obj, new object[0]);
+
+            if (creationData != null && creationData.Length > 0)
+                obj.CreationData(creationData);
 
             Engine.EventHost.GetEvent<ObjectCreated>().Trigger(new ObjectCreated(this, obj));
 
@@ -382,10 +396,22 @@ namespace Cog.Scenes
         public T CreateLocalObject<T>(Vector2 localCoord)
             where T : GameObject, new()
         {
-            return CreateLocalObject<T>(null, localCoord);
+            return InnerCreateLocalObject<T>(null, localCoord, null);
         }
 
         public T CreateLocalObject<T>(GameObject parent, Vector2 localCoord)
+            where T : GameObject, new()
+        {
+            return InnerCreateLocalObject<T>(parent, localCoord, null);
+        }
+
+        public T CreateLocalObject<T>(GameObject parent, Vector2 localCoord, params object[] creationData)
+            where T : GameObject, new()
+        {
+            return InnerCreateLocalObject<T>(parent, localCoord, creationData);
+        }
+
+        public T InnerCreateLocalObject<T>(GameObject parent, Vector2 localCoord, object[] creationData)
             where T : GameObject, new()
         {
             T obj = (T)CreateUninitializedObject(typeof(T), parent);
@@ -393,7 +419,7 @@ namespace Cog.Scenes
             obj.LocalCoord = localCoord;
 
             // Engine/object constructor
-            InitializeObject(obj);
+            InitializeObject(obj, creationData);
             // Object initialization
             obj.Initialize();
 

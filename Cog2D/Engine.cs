@@ -448,7 +448,9 @@ namespace Cog
                     accumulator -= PhysicsTimeStep;
                 }
                 EventHost.GetEvent<UpdateEvent>().Trigger(new UpdateEvent(null, deltaTime));
-                
+
+                Engine.FrameTime = (float)watch.Elapsed.TotalSeconds;
+
                 Thread.Sleep(1);
             }
 
