@@ -70,6 +70,11 @@ namespace Cog.Modules.Content
             _value = (T)serializer.GenericRead(reader);
         }
 
+        public static implicit operator T(Synchronized<T> s)
+        {
+            return s.Value;
+        }
+
         public override string ToString()
         {
             return _value.ToString();
