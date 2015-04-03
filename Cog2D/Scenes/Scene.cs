@@ -33,6 +33,8 @@ namespace Cog.Scenes
         public GameInterface Interface;
         private List<Resource> loadedResources = new List<Resource>();
 
+        private int disableObjectCreation;
+
         public Color BackgroundColor = Color.CornflowerBlue;
 
         internal LinkedList<GameObject> BaseObjects = new LinkedList<GameObject>();
@@ -249,7 +251,7 @@ namespace Cog.Scenes
                     {
                         ushort typeId = reader.ReadUInt16();
                         long id = reader.ReadInt64();
-                        objects[i] = CreateUninitializedObject(GameObject.TypeFromId(typeId), null);
+                        objects[i] = CreateUninitializedObject(GameObject.TypeFromId(typeId), null, true);
                         Engine.AssignId(objects[i], id);
                     }
 
@@ -287,7 +289,7 @@ namespace Cog.Scenes
             if (Engine.IsClient)
                 throw new Exception("Can not create global objects when connected to a server!");
 
-            T obj = (T)CreateUninitializedObject(typeof(T), parent);
+            T obj = (T)CreateUninitializedObject(typeof(T), parent, true);
             Engine.GenerateGlobalId(obj);
             obj.LocalCoord = localCoord;
 
@@ -306,7 +308,7 @@ namespace Cog.Scenes
             if (Engine.IsClient)
                 throw new Exception("Can not create global objects when connected to a server!");
 
-            GameObject obj = (GameObject)CreateUninitializedObject(type, parent);
+            GameObject obj = (GameObject)CreateUninitializedObject(type, parent, true);
             Engine.GenerateGlobalId(obj);
             obj.LocalCoord = localCoord;
 
@@ -318,8 +320,11 @@ namespace Cog.Scenes
             return obj;
         }
 
-        public GameObject CreateUninitializedObject(Type type, GameObject parent)
+        public GameObject CreateUninitializedObject(Type type, GameObject parent, bool isGlobal)
         {
+            if (disableObjectCreation > 0 && isGlobal)
+                throw new InvalidOperationException("Global object creation may not occur in a constructor, please override GameObject.Initialize instead!");
+
             // TODO: Cache results of type check
             /*Type currentType = type;
             do
@@ -375,7 +380,9 @@ namespace Cog.Scenes
         public void InitializeObject(GameObject obj, object[] creationData)
         {
             // Invoke the constructor
+            disableObjectCreation++;
             obj.GetType().GetConstructor(new Type[0]).Invoke(obj, new object[0]);
+            disableObjectCreation--;
 
             if (creationData != null && creationData.Length > 0)
                 obj.CreationData(creationData);
@@ -385,10 +392,27 @@ namespace Cog.Scenes
             if (Engine.IsServer && obj.IsGlobal)
             {
                 var msg = obj.CreateCreationMessage();
-                foreach (var client in EnumerateSubscribedClients())
+
+                // If we got a parent the clients may not know about it
+                if (obj.Parent == null)
                 {
-                    client.Send(msg);
-                    obj.SubscribedClients.Add(client);
+                    foreach (var client in EnumerateSubscribedClients())
+                    {
+                        client.Send(msg);
+                        obj.SubscribedClients.Add(client);
+                    }
+                }
+                else
+                {
+                    var upperParent = obj.Parent;
+                    while (upperParent.Parent != null)
+                        upperParent = upperParent.Parent;
+
+                    foreach (var client in upperParent.SubscribedClients)
+                    {
+                        client.Send(msg);
+                        obj.SubscribedClients.Add(client);
+                    }
                 }
             }
         }
@@ -414,7 +438,7 @@ namespace Cog.Scenes
         public T InnerCreateLocalObject<T>(GameObject parent, Vector2 localCoord, object[] creationData)
             where T : GameObject, new()
         {
-            T obj = (T)CreateUninitializedObject(typeof(T), parent);
+            T obj = (T)CreateUninitializedObject(typeof(T), parent, false);
             Engine.GenerateLocalId(obj);
             obj.LocalCoord = localCoord;
 
