@@ -30,7 +30,7 @@ namespace Cog.Modules.Content
             if (Scene == null)
                 throw new Exception("Tried to create an object in a scene that does not exist!");
 
-            var obj = Scene.CreateUninitializedObject(GameObject.TypeFromId(TypeId), null);
+            var obj = Scene.CreateUninitializedObject(GameObject.TypeFromId(TypeId), null, true);
             Engine.AssignId(obj, ObjectId);
 
             using (var stream = new MemoryStream(ObjectData))

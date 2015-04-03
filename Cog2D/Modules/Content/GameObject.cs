@@ -338,14 +338,14 @@ namespace Cog.Modules.Content
         public void Send<T>(T message)
             where T : NetworkMessage
         {
-            foreach (var client in Scene.EnumerateSubscribedClients())
+            foreach (var client in SubscribedClients)
                 client.Send(message);
         }
 
         public void Send<T>(T message, CogClient except)
             where T : NetworkMessage
         {
-            foreach (var client in Scene.EnumerateSubscribedClients())
+            foreach (var client in SubscribedClients)
                 if (client != except)
                     client.Send(message);
         }

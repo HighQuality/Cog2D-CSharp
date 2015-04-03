@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Cog.Modules.Content;
 
 namespace Cog.Modules.Networking
 {
@@ -131,6 +132,13 @@ namespace Cog.Modules.Networking
 
         public void SubscribeTo(Scene scene)
         {
+            foreach (var obj in scene.EnumerateObjects<GameObject>())
+            {
+                if (obj.IsGlobal)
+                {
+                    obj.SubscribedClients.Add(this);
+                }
+            }
             Send(scene.CreateSceneCreationMessage());
             scene.AddSubscription(this);
         }
