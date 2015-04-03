@@ -20,7 +20,8 @@ namespace Cog.Modules.Resources
         {
             try
             {
-                var path = System.IO.Path.Combine(Path, file).Replace('/', '\\');
+                //var path = System.IO.Path.Combine(Path, file).Replace('/', '\\');
+                var path = System.IO.Path.Combine(Path, file).Replace('\\', '/');
                 return File.ReadAllBytes(path);
             }
             catch (FileNotFoundException)
