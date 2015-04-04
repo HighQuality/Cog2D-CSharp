@@ -94,6 +94,8 @@ namespace Cog
             sceneTypes,
             networkMessageTypes;
 
+        public static bool ServerSleepsEachFrame { get; set; }
+
         /// <summary>
         /// Initializes Cog2D making it available for use showing the default splash screen while initializing
         /// </summary>
@@ -156,6 +158,8 @@ namespace Cog
             resolveDictionary = new Dictionary<long, IIdentifier>();
 
             DesiredResolution = new Vector2(640f, 480f);
+
+            ServerSleepsEachFrame = true;
 
             NetworkMessage.InitializeCache();
             GameObject.InitializeCache();
@@ -451,7 +455,8 @@ namespace Cog
 
                 Engine.FrameTime = (float)watch.Elapsed.TotalSeconds;
 
-                Thread.Sleep(1);
+                if (ServerSleepsEachFrame)
+                    Thread.Sleep(1);
             }
 
             EventHost.GetEvent<ExitEvent>().Trigger(new ExitEvent(null));
