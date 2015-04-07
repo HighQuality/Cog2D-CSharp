@@ -23,18 +23,22 @@ namespace Cog.Modules.Renderer
                 FontFile = fontFile;
                 Texture = fontTexture;
                 CharacterMap = new Dictionary<char, FontChar>();
-                
+
                 foreach (var fontCharacter in FontFile.Chars)
                 {
                     char c = (char)fontCharacter.ID;
                     if (!CharacterMap.ContainsKey(c))
-                    CharacterMap.Add(c, fontCharacter);
+                        CharacterMap.Add(c, fontCharacter);
                 }
 
-                var spaceChar = CharacterMap['X'].Clone();
-                spaceChar.Width = 0;
-                spaceChar.Height = 0;
-                CharacterMap[' '] = spaceChar;
+                var spaceChar = CharacterMap[' '];
+                if (spaceChar.XAdvance == 0)
+                {
+                    spaceChar = CharacterMap['X'].Clone();
+                    spaceChar.Width = 0;
+                    spaceChar.Height = 0;
+                    CharacterMap[' '] = spaceChar;
+                }
             }
 
             internal Dictionary<char, FontChar> CharacterMap;
@@ -43,6 +47,9 @@ namespace Cog.Modules.Renderer
 
             public void DrawString(IRenderTarget renderTarget, string text, float fontSize, Color color, Vector2 position, HAlign horizontalAlignment, VAlign verticalAlignment)
             {
+                if (text == null)
+                    return;
+
                 float sizeFactor = (fontSize / (float)FontFile.Info.Size);
                 float lineHeight = FontFile.Common.LineHeight * sizeFactor;
 
@@ -100,6 +107,9 @@ namespace Cog.Modules.Renderer
 
             public void DrawString(IRenderTarget renderTarget, string text, float fontSize, Color color, Rectangle rect)
             {
+                if (text == null)
+                    return;
+
                 float sizeFactor = (fontSize / (float)FontFile.Info.Size);
                 float lineHeight = FontFile.Common.LineHeight * sizeFactor;
 

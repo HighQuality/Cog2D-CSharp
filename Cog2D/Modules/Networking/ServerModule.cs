@@ -80,6 +80,15 @@ namespace Cog.Modules.Networking
                     clients[i].Send<T>(message);
         }
 
+        public void Send<T>(T message, CogClient except)
+            where T : NetworkMessage
+        {
+            lock (clients)
+                for (int i = clients.Count - 1; i >= 0; i--)
+                    if (clients[i] != except)
+                        clients[i].Send<T>(message);
+        }
+
         public void StopServer()
         {
             listener.Stop();

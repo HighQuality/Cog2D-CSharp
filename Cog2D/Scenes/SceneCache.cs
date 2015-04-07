@@ -31,7 +31,7 @@ namespace Cog.Scenes
 
         internal static Scene CreateFromId(ushort typeId, long id)
         {
-            if (id < 1 || id >= idToType.Count)
+            if (typeId < 1 || typeId >= idToType.Count)
                 throw new ArgumentOutOfRangeException("Scene ID " + id.ToString() + " is not cached!");
 
             var type = idToType[(int)typeId];

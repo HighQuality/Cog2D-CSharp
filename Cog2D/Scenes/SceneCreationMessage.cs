@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Cog.Scenes
 {
@@ -13,6 +14,7 @@ namespace Cog.Scenes
         public long Id;
         public string SceneName;
         public byte[] Data;
+        public byte[] UserData;
 
         public SceneCreationMessage()
         {
@@ -27,6 +29,13 @@ namespace Cog.Scenes
 
             var scene = SceneCache.CreateFromId(TypeId, Id);
             scene.ReadSceneCreationData(Data);
+            using (var stream = new MemoryStream(UserData))
+            {
+                using (var reader = new BinaryReader(stream))
+                {
+                    scene.ReadUserData(reader);
+                }
+            }
             
             // TODO: Add to Engine resolve dictionary and fire SceneReceivedEvent instead of pushing
             Engine.SceneHost.Push(scene);

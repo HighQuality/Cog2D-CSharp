@@ -36,9 +36,7 @@ namespace Cog.Scenes
         private int disableObjectCreation;
 
         public Color BackgroundColor = Color.CornflowerBlue;
-
-        internal LinkedList<GameObject> BaseObjects = new LinkedList<GameObject>();
-
+        
         private Camera _camera;
         public Camera Camera
         {
@@ -61,6 +59,8 @@ namespace Cog.Scenes
         public long Id { get; set; }
         public bool IsGlobal { get { return Id > 0; } }
         public bool IsLocal { get { return Id < 0; } }
+
+        public bool DoRemove { get; private set; }
 
         public Scene(string name)
         {
@@ -88,14 +88,24 @@ namespace Cog.Scenes
 
         private void Update(UpdateEvent args)
         {
+            int removed = 0;
             {
                 var current = Objects.First;
                 while (current != null)
                 {
                     if (current.Value.DoRemove)
+                    {
+                        var next = current.Next;
                         Objects.Remove(current);
-                    current = current.Next;
+                        current = next;
+                        removed++;
+                    }
+                    else
+                        current = current.Next;
                 }
+
+                if (removed > 0)
+                    Debug.Info(removed.ToString());
             }
 
             eventStrengthUpdateTimer += args.DeltaTime;
@@ -216,7 +226,16 @@ namespace Cog.Scenes
             {
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    var objects = Objects.Where(o => o.IsGlobal).ToArray();
+                    WriteUserData(writer);
+                    msg.UserData = stream.ToArray();
+                }
+            }
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    var objects = Objects.Where(o => o.IsGlobal && !o.DoRemove).ToArray();
                     writer.Write((UInt32)objects.Length);
 
                     for (int i = 0; i < objects.Length; i++)
@@ -264,6 +283,9 @@ namespace Cog.Scenes
                 }
             }
         }
+
+        public virtual void WriteUserData(BinaryWriter writer) { }
+        public virtual void ReadUserData(BinaryReader reader) { }
 
         public T CreateObject<T>(Vector2 localCord)
             where T : GameObject, new()
@@ -450,17 +472,64 @@ namespace Cog.Scenes
             return obj;
         }
 
+        public void Remove()
+        {
+            if (!DoRemove)
+            {
+                if (Engine.IsServer)
+                {
+                    foreach (var client in EnumerateSubscribedClients())
+                    {
+                        client.Send(new RemoveSceneMessage(this));
+                    }
+                    subscribedClients.Clear();
+                }
+
+                if (Engine.SceneHost.CurrentScene == this)
+                    Engine.SceneHost.Pop();
+
+                foreach (var listenerList in eventStrength)
+                    foreach (var listener in listenerList.Value)
+                        listener.Cancel();
+                eventStrength.Clear();
+
+                foreach (var listener in globalListeners)
+                    listener.Value.Cancel();
+                globalListeners.Clear();
+                
+                Engine.FreeId(Id);
+
+                DoRemove = true;
+
+                var current = Objects.First;
+                while (current != null)
+                {
+                    if (!current.Value.DoRemove)
+                        current.Value.ForceRemove();
+                    current = current.Next;
+                }
+
+                Objects.Clear();
+
+                DrawCells.Clear();
+                DrawCellMoveQueue.Clear();
+            }
+        }
+
         public void Clear()
         {
             var current = Objects.First;
-            do
+            while (current != null)
             {
                 if (!current.Value.DoRemove)
-                    current.Value.Remove();
+                    current.Value.ForceRemove();
+                current = current.Next;
             }
-            while (current != null);
 
             Objects.Clear();
+
+            DrawCells.Clear();
+            DrawCellMoveQueue.Clear();
         }
 
         public void Preload<T>()
@@ -501,7 +570,7 @@ namespace Cog.Scenes
                 eventStrength.Add(listener.Event.Identifier, listenerList);
 
                 // TODO: Move event registration to SceneManager
-                globalListeners.Add(listener.Event.Identifier, Engine.EventHost.RegisterEvent<T>(listener.Event.Identifier.UniqueIdentifier, 0, e => { if (Engine.SceneHost.CurrentScene == this) EventModule.GetEvent<T>(listener.Event.Identifier.UniqueIdentifier).Trigger(e); }));
+                globalListeners.Add(listener.Event.Identifier, Engine.EventHost.RegisterEvent<T>(listener.Event.Identifier.UniqueIdentifier, 0, e => { if (Engine.SceneHost.CurrentScene == this || SimulateInBackground) EventModule.GetEvent<T>(listener.Event.Identifier.UniqueIdentifier).Trigger(e); }));
             }
 
             listenerList.Add(listener);
@@ -524,6 +593,14 @@ namespace Cog.Scenes
         internal void AddSubscription(CogClient client)
         {
             subscribedClients.Add(client);
+        }
+
+        /// <summary>
+        /// Removes a client from this scene's subscription list
+        /// </summary>
+        internal void RemoveSubscription(CogClient client)
+        {
+            subscribedClients.Remove(client);
         }
 
         public IEnumerable<CogClient> EnumerateSubscribedClients()

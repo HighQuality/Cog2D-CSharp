@@ -66,10 +66,16 @@ namespace Cog.Scenes
         public Scene Pop()
         {
             var scene = sceneStack.Pop();
+
             if (sceneStack.Count > 0)
+            {
                 CurrentScene = sceneStack.Peek();
+                if (CurrentScene.DoRemove)
+                    Pop();
+            }
             else
                 CurrentScene = null;
+
             return scene;
         }
     }

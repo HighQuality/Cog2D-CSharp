@@ -12,8 +12,10 @@ namespace Cog.Interface
 {
     public interface IInterfaceElement
     {
+        IInterfaceElement UpperMostParent { get; }
         IInterfaceElement GenericParent { get; }
         Vector2 ScreenCoord { get; }
+        Rectangle ScreenBounds { get; }
         Vector2 Location { get; }
         Vector2 Size { get; }
         Rectangle Bounds { get; }
@@ -25,6 +27,9 @@ namespace Cog.Interface
         bool TriggerPress(Vector2 position, ButtonDownEvent ev);
         void OnPressed(Mouse.Button button, Vector2 position);
         void OnReleased(Mouse.Button button, Vector2 position);
+
+        IEnumerable<T> EnumerateChildrenRecursively<T>()
+            where T : IInterfaceElement;
 
         void TriggerUpdate(UpdateEvent ev);
         void TriggerDraw(DrawInterfaceEvent ev, Vector2 screenCoord);
@@ -47,7 +52,9 @@ namespace Cog.Interface
 
         public TParent Parent { get; private set; }
         public IInterfaceElement GenericParent { get { return (IInterfaceElement)Parent; } }
+        public IInterfaceElement UpperMostParent { get { if (Parent != null) return Parent.UpperMostParent; return this; } }
         public Vector2 ScreenCoord { get { if (Parent != null) return Parent.ScreenCoord + Location; return Location; } }
+        public Rectangle ScreenBounds { get { return new Rectangle(ScreenCoord, Size); } }
         private Vector2 _location;
         public Vector2 Location
         {
@@ -169,6 +176,21 @@ namespace Cog.Interface
             if (element.GenericParent != null)
                 throw new InvalidOperationException("This InterfaceElement already has a parent!");
             children.Add(element);
+        }
+
+        public IEnumerable<T> EnumerateChildrenRecursively<T>()
+            where T : IInterfaceElement
+        {
+            for (int i = children.Count - 1; i >= 0; i--)
+            {
+                var child = children[i];
+
+                foreach (var subChild in child.EnumerateChildrenRecursively<T>())
+                    yield return subChild;
+
+                if (child is T)
+                    yield return (T)children[i];
+            }
         }
 
         public IEnumerable<T> EnumerateChildren<T>()
