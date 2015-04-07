@@ -45,9 +45,6 @@ namespace Cog.Modules.Content
                     // If we had a parent but don't anymore
                     if (value == null)
                     {
-                        // We're now a base object
-                        Scene.BaseObjects.AddLast(this);
-
                         if (!IsScheduledForDrawCellMove)
                         {
                             IsScheduledForDrawCellMove = true;
@@ -61,17 +58,7 @@ namespace Cog.Modules.Content
                 }
                 else if (value != null)
                 {
-                    // If we got a parent now get rid of our base objects and draw entries
-                    var it = Scene.BaseObjects.Last;
-                    while (it != null)
-                    {
-                        if (it.Value == this)
-                        {
-                            Scene.BaseObjects.Remove(it);
-                            break;
-                        }
-                        it = it.Previous;
-                    }
+                    // If we got a parent now get rid of our draw entries
 
                     HashSet<GameObject> objectSet;
                     DrawCell cell;
@@ -288,8 +275,6 @@ namespace Cog.Modules.Content
                 {
                     if (Parent != null)
                         Parent.children.Remove(this);
-                    else
-                        Scene.BaseObjects.Remove(this);
 
                     if (OnRemovalComplete != null)
                         OnRemovalComplete();
@@ -477,6 +462,14 @@ namespace Cog.Modules.Content
         {
         }
 
+        public IEnumerable<T> EnumerateChildren<T>()
+            where T : GameObject
+        {
+            for (int i = 0; i < children.Count; i++)
+                if (children[i] is T)
+                    yield return (T)children[i];
+        }
+
         internal static Type TypeFromId(ushort id)
         {
             return objectsArray[(int)id];
@@ -486,7 +479,7 @@ namespace Cog.Modules.Content
         {
             return objectsDictionary[type];
         }
-
+        
         internal void Draw(DrawEvent ev, DrawTransformation transform, List<DrawOperation> drawList)
         {
             if (!IsVisible)

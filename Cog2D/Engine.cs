@@ -104,7 +104,7 @@ namespace Cog
             where TRenderer : RenderModule, new()
             where TAudioModule : IAudioModule, new()
         {
-            InnerInitialize<TRenderer, TAudioModule>(new Image("splash.png"));
+            InnerInitialize<TRenderer, TAudioModule>(new Image("cog_splash.png"));
         }
 
         /// <summary>
@@ -538,7 +538,7 @@ namespace Cog
             if (IsServer)
                 throw new InvalidOperationException("Only the client may use Engine.AssignID()");
             if (resolveDictionary.ContainsKey(id))
-                throw new InvalidOperationException("ID {0} is already in use!");
+                throw new InvalidOperationException(string.Format("ID {0} is already in use!", id.ToString()));
             obj.Id = id;
             resolveDictionary.Add(id, obj);
         }

@@ -143,6 +143,22 @@ namespace Cog.Modules.Networking
             scene.AddSubscription(this);
         }
 
+        public void UnsubscribeFrom(Scene scene)
+        {
+            if (scene.EnumerateSubscribedClients().Contains(this))
+            {
+                foreach (var obj in scene.EnumerateObjects<GameObject>())
+                {
+                    if (obj.IsGlobal)
+                    {
+                        obj.SubscribedClients.Remove(this);
+                    }
+                }
+                Send(new RemoveSceneMessage(scene));
+                scene.RemoveSubscription(this);
+            }
+        }
+
         public bool IsKeyDown(Keyboard.Key key)
         {
             return false;
