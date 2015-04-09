@@ -22,6 +22,7 @@ namespace Cog.Interface
         Rectangle ContentBounds { get; }
         Padding Padding { get; }
         bool DoRemove { get; set; }
+        int Depth { get; }
 
         bool PredicatePress(Mouse.Button button, Vector2 position);
         bool TriggerPress(Vector2 position, ButtonDownEvent ev);
@@ -146,9 +147,12 @@ namespace Cog.Interface
 
         private List<IEventListener> listeners = new List<IEventListener>();
 
-        public InterfaceElement(TParent parent, Vector2 location)
+        public int Depth { get; private set; }
+
+        public InterfaceElement(TParent parent, Vector2 location, int depth)
         {
             this.Location = location;
+            this.Depth = depth;
 
             if (parent != null)
             {
@@ -157,6 +161,12 @@ namespace Cog.Interface
             }
 
             OnRemoved += InterfaceElement_OnRemoved;
+        }
+
+
+        public InterfaceElement(TParent parent, Vector2 location)
+            : this(null, location, 0)
+        {
         }
 
         public InterfaceElement(Vector2 location)
@@ -175,7 +185,23 @@ namespace Cog.Interface
         {
             if (element.GenericParent != null)
                 throw new InvalidOperationException("This InterfaceElement already has a parent!");
-            children.Add(element);
+            if (children.Count == 0)
+            {
+                children.Add(element);
+            }
+            else
+            {
+                for (int i = 0; i < children.Count; i++)
+                {
+                    if (element.Depth < children[i].Depth)
+                    {
+                        children.Insert(i, element);
+                        return;
+                    }
+                }
+
+                children.Add(element);
+            }
         }
 
         public IEnumerable<T> EnumerateChildrenRecursively<T>()
@@ -312,13 +338,18 @@ namespace Cog.Interface
 
     public class InterfaceElement : InterfaceElement<IInterfaceElement>
     {
+        public InterfaceElement(IInterfaceElement parent, Vector2 location, int depth)
+            : base(parent, location, depth)
+        {
+        }
+
         public InterfaceElement(IInterfaceElement parent, Vector2 location)
-            : base(parent, location)
+            : base(parent, location, 0)
         {
         }
 
         public InterfaceElement(Vector2 location)
-            : base(null, location)
+            : base(null, location, 0)
         {
         }
     }

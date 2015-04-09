@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Input;
 
 namespace Cog.Modules.Renderer
 {
@@ -16,7 +15,6 @@ namespace Cog.Modules.Renderer
         public IntPtr Handle;
 
         private Dictionary<Keys, Action> keyUpEvents = new Dictionary<Keys, Action>();
-        private LinkedList<Keys> pressedKeys = new LinkedList<Keys>();
 
         private static Dictionary<Keys, Keyboard.Key> keymap = new Dictionary<Keys, Keyboard.Key>
         {
@@ -128,6 +126,7 @@ namespace Cog.Modules.Renderer
             window.GameControl.MouseUp += Window_MouseUp;
             window.GameControl.KeyPress += Window_KeyPress;
             window.GameControl.KeyDown += Window_KeyDown;
+            window.GameControl.KeyUp += new KeyEventHandler(Window_KeyUp);
             IsOpen = true;
 
             window.GameControl.Focus();
@@ -186,8 +185,16 @@ namespace Cog.Modules.Renderer
                 if (!Engine.EventHost.GetEvent<KeyDownEvent>(newKey).Trigger(keyParameters))
                     Engine.EventHost.GetEvent<KeyDownEvent>().Trigger(keyParameters);
                 keyUpEvents.Add(e.KeyCode, keyParameters.KeyUpEvent);
-                pressedKeys.AddLast(e.KeyCode);
             }
+        }
+
+        void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            Action action;
+            keyUpEvents.TryGetValue(e.KeyCode, out action);
+            if (action != null)
+                action();
+            keyUpEvents.Remove(e.KeyCode);
         }
 
         private void Window_KeyPress(object sender, KeyPressEventArgs e)
@@ -232,7 +239,7 @@ namespace Cog.Modules.Renderer
         {
             System.Windows.Forms.Application.DoEvents();
 
-            var node = pressedKeys.First;
+            /*var node = pressedKeys.First;
             while (node != null)
             {
                 bool isDown = false;
@@ -252,7 +259,7 @@ namespace Cog.Modules.Renderer
                     pressedKeys.Remove(node);
                 }
                 node = node.Next;
-            }
+            }*/
         }
         /// <summary>
         /// Commands the window to clear the back buffer to the specified color
