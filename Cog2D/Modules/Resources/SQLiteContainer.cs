@@ -9,7 +9,7 @@ using Cog.Extensions;
 
 namespace Cog.Modules.Resources
 {
-    class SQLiteContainer : ResourceContainer
+    public class SQLiteContainer : ResourceContainer
     {
         private SQLiteConnection database;
         public int Revision { get { return BitConverter.ToInt32(ReadMetaData("Revision"), 0); } private set { UpdateMetaData("Revision", BitConverter.GetBytes((Int32)value)); } }
@@ -78,7 +78,7 @@ namespace Cog.Modules.Resources
         {
             using (var cmd = new SQLiteCommand(database))
             {
-                cmd.CommandText = "INSERT INTO MetaData(Key, Data) VALUES(@Key, @Data)";
+                cmd.CommandText = "INSERT INTO MetaData (Key, Data) VALUES (@Key, @Data)";
                 cmd.Parameters.AddWithValue("@Key", key);
                 cmd.Parameters.AddWithValue("@Data", data);
                 cmd.ExecuteNonQuery();
@@ -87,6 +87,7 @@ namespace Cog.Modules.Resources
 
         public override byte[] ReadData(string file)
         {
+            file = file.Replace('\\', '/');
             using (var cmd = new SQLiteCommand(database))
             {
                 cmd.CommandText = "SELECT Data FROM Files WHERE File = @File LIMIT 1";
@@ -105,13 +106,22 @@ namespace Cog.Modules.Resources
 
         private void InsertData(string file, byte[] data)
         {
+            file = file.Replace('\\', '/');
             using (var cmd = new SQLiteCommand(database))
             {
-                cmd.CommandText = "INSERT INTO Data(File, Data) VALUES(@File, @Data)";
+                cmd.CommandText = "INSERT INTO Files (File, Data) VALUES (@File, @Data)";
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@File", file);
                 cmd.Parameters.AddWithValue("@Data", data);
                 cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void ImportDirectory(string directory)
+        {
+            foreach (var file in Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories))
+            {
+                Import(file.Substring(directory.Length + 1).Replace('\\', '/'), File.ReadAllBytes(file));
             }
         }
 
@@ -132,6 +142,7 @@ namespace Cog.Modules.Resources
 
         public override void Import(string file, byte[] data)
         {
+            file = file.Replace('\\', '/');
             using (var cmd = new SQLiteCommand(database))
             {
                 cmd.CommandText = "INSERT INTO Files(File, Data) VALUES(@File, @Data)";
@@ -144,6 +155,7 @@ namespace Cog.Modules.Resources
 
         public override void Update(string file, byte[] data)
         {
+            file = file.Replace('\\', '/');
             using (var cmd = new SQLiteCommand(database))
             {
                 cmd.CommandText = "UPDATE Files SET Data = @Data, WHERE File = @File";

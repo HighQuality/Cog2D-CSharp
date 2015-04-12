@@ -67,6 +67,10 @@ namespace Cog.Modules.Networking
                 }
             }
         }
+
+        public virtual void OnDisconnected()
+        {
+        }
         
         public void Send<T>(T message)
             where T : NetworkMessage

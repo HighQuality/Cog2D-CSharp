@@ -88,7 +88,6 @@ namespace Cog.Scenes
 
         private void Update(UpdateEvent args)
         {
-            int removed = 0;
             {
                 var current = Objects.First;
                 while (current != null)
@@ -98,14 +97,10 @@ namespace Cog.Scenes
                         var next = current.Next;
                         Objects.Remove(current);
                         current = next;
-                        removed++;
                     }
                     else
                         current = current.Next;
                 }
-
-                if (removed > 0)
-                    Debug.Info(removed.ToString());
             }
 
             eventStrengthUpdateTimer += args.DeltaTime;

@@ -236,6 +236,13 @@ namespace Cog.Modules.Content
         {
         }
 
+        public void AddDraw(Action<DrawEvent, DrawTransformation> action)
+        {
+            if (OnDraw == null)
+                OnDraw = new List<Action<DrawEvent, DrawTransformation>>();
+            OnDraw.Add(action);
+        }
+
         public void Remove()
         {
             if (Engine.IsClient && IsGlobal)

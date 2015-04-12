@@ -14,7 +14,7 @@ namespace Cog.Interface
     {
         IInterfaceElement UpperMostParent { get; }
         IInterfaceElement GenericParent { get; }
-        Vector2 ScreenCoord { get; }
+        Vector2 ScreenLocation { get; }
         Rectangle ScreenBounds { get; }
         Vector2 Location { get; }
         Vector2 Size { get; }
@@ -54,8 +54,8 @@ namespace Cog.Interface
         public TParent Parent { get; private set; }
         public IInterfaceElement GenericParent { get { return (IInterfaceElement)Parent; } }
         public IInterfaceElement UpperMostParent { get { if (Parent != null) return Parent.UpperMostParent; return this; } }
-        public Vector2 ScreenCoord { get { if (Parent != null) return Parent.ScreenCoord + Location; return Location; } }
-        public Rectangle ScreenBounds { get { return new Rectangle(ScreenCoord, Size); } }
+        public Vector2 ScreenLocation { get { if (Parent != null) return Parent.ScreenLocation + Location; return Location; } }
+        public Rectangle ScreenBounds { get { return new Rectangle(ScreenLocation, Size); } }
         private Vector2 _location;
         public Vector2 Location
         {
@@ -253,7 +253,7 @@ namespace Cog.Interface
                         return true;
 
             OnPressed(ev.Button, position);
-            ev.ButtonUpCallback = () => { OnReleased(ev.Button, Mouse.Location - ScreenCoord); };
+            ev.ButtonUpCallback = () => { OnReleased(ev.Button, Mouse.Location - ScreenLocation); };
             ev.Intercept = true;
             return true;
         }

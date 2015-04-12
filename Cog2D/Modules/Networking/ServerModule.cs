@@ -65,6 +65,7 @@ namespace Cog.Modules.Networking
 
                 if (clients[i].IsDisconnected)
                 {
+                    clients[i].OnDisconnected();
                     Debug.Event(clients[i].IpAddress + " disconnected!");
                     clients.RemoveAt(i);
                     continue;

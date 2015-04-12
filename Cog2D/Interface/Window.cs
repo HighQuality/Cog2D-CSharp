@@ -158,7 +158,7 @@ namespace Cog.Interface
                             resizeMode = ResizeMode.Bottom;
                     }
                     isDragging = true;
-                    oldMousePos = ScreenCoord + position;
+                    oldMousePos = ScreenLocation + position;
                 }
             }
 

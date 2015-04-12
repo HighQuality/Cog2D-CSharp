@@ -13,7 +13,7 @@ namespace Cog.Scenes
         internal GameInterface()
             : base(null, new Vector2(0f, 0f))
         {
-            MinimumSize = Engine.Resolution;
+            Size = Engine.Resolution;
         }
 
         internal bool Press(Vector2 position, ButtonDownEvent ev)
