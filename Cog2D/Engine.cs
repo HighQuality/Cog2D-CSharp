@@ -96,6 +96,8 @@ namespace Cog
 
         public static bool ServerSleepsEachFrame { get; set; }
 
+        private static Dictionary<string, Type> typeDictionary;
+
         /// <summary>
         /// Initializes Cog2D making it available for use showing the default splash screen while initializing
         /// </summary>
@@ -152,6 +154,8 @@ namespace Cog
             random = new Random();
             PhysicsTimeStep = 1f / 120f;
             Permissions = Permissions.FullPermissions;
+
+            typeDictionary = new Dictionary<string, Type>();
 
             nextGlobalId = 1;
             nextLocalId = -1;
@@ -493,6 +497,23 @@ namespace Cog
             lock (TimedEventHost)
                 TimedEventHost.Schedule(ev);
             return ev;
+        }
+
+        public static Type FindType(string type)
+        {
+            Type foundType = null;
+            if (!typeDictionary.TryGetValue(type, out foundType))
+            {
+                foreach (var assembly in loadedAssemblies.Values)
+                {
+                    foundType = assembly.GetType(type);
+                    if (foundType != null)
+                        break;
+                }
+                // Cache the result of this lookup
+                typeDictionary.Add(type, foundType);
+            }
+            return foundType;
         }
 
         /// <summary>

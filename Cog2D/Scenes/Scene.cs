@@ -318,7 +318,7 @@ namespace Cog.Scenes
             return obj;
         }
 
-        public GameObject CreateObjectFromType(Type type, GameObject parent, Vector2 localCoord)
+        public GameObject CreateObjectFromType(Type type, GameObject parent, Vector2 localCoord, params object[] creationData)
         {
             if (!typeof(GameObject).IsAssignableFrom(type))
                 throw new InvalidOperationException("type must inherit from GameObject!");
@@ -330,7 +330,7 @@ namespace Cog.Scenes
             obj.LocalCoord = localCoord;
 
             // Engine/Object Constructor
-            InitializeObject(obj, null);
+            InitializeObject(obj, creationData);
             // Object Initialization
             obj.Initialize();
 
