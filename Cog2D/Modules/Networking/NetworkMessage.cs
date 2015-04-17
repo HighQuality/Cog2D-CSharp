@@ -272,7 +272,9 @@ namespace Cog.Modules.Networking
             {
                 var type = GetType(typeId);
                 NetworkMessage ev = eventCreators[typeId]();
-                messageReaderCache[typeId](ev, reader, client);
+                var msgReader = messageReaderCache[typeId];
+                if (msgReader != null)
+                    msgReader(ev, reader, client);
                 ev.Client = client;
                 return ev;
             }

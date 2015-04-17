@@ -172,6 +172,8 @@ namespace Cog.Scenes
             }
         }
 
+        private List<DrawOperation> drawList = new List<DrawOperation>();
+
         public void Draw(DrawEvent ev)
         {
             DrawTransformation transform = new DrawTransformation();
@@ -185,7 +187,7 @@ namespace Cog.Scenes
                 x2 = x1 + (int)Math.Ceiling(cameraSize.X / (float)DrawCell.DrawCellSize),
                 y2 = y1 + (int)Math.Ceiling(cameraSize.Y / (float)DrawCell.DrawCellSize);
 
-            List<DrawOperation> drawList = new List<DrawOperation>();
+            drawList.Clear();
 
             for (int x = x1; x <= x2; x++)
             {
