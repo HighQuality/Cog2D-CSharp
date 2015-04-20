@@ -45,6 +45,27 @@ namespace Cog
                 (int)(((float)to.A - (float)A) * progress) + A);
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj.GetType() != typeof(Color))
+                return false;
+            Color c = (Color)obj;
+            return R == c.R &&
+                G == c.G &&
+                B == c.B &&
+                A == c.A;
+        }
+
+        public static bool operator ==(Color first, Color second)
+        {
+            return first.Equals(second);
+        }
+
+        public static bool operator !=(Color first, Color second)
+        {
+            return !first.Equals(second);
+        }
+
         public static Color operator*(Color first, float second)
         {
             return new Color(first.R, first.G, first.B, (int)((float)first.A * second));

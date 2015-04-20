@@ -37,6 +37,23 @@ namespace Cog
             this._size = size;
         }
 
+        public bool Contains(object input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Rectangle OverlayOf(Rectangle other)
+        {
+            var topLeft = new Vector2(Mathf.Max(Left, other.Left), Mathf.Max(Top, other.Top));
+            var bottomRight = new Vector2(Mathf.Min(Right, other.Right), Mathf.Min(Bottom, other.Bottom));
+            var size = bottomRight - topLeft;
+
+            topLeft.X -= Mathf.Min(Left, other.Left);
+            topLeft.Y -= Mathf.Min(Top, other.Top);
+            return new Rectangle(topLeft,
+                size);
+        }
+
         public bool Intersects(Rectangle other)
         {
             return (BottomRight.X >= other.TopLeft.X && BottomRight.Y >= other.TopLeft.Y) &&
@@ -45,8 +62,8 @@ namespace Cog
 
         public bool Contains(Rectangle other)
         {
-            return (other.TopLeft.X >= TopLeft.X && other.TopLeft.Y >= TopLeft.Y) &&
-                (other.BottomRight.X < BottomRight.X && other.BottomRight.Y < BottomRight.Y);
+            return (other.Left >= Left && other.Top >= Top) &&
+                (other.Right < Right && other.Bottom < Bottom);
         }
 
         public bool Contains(Vector2 point)

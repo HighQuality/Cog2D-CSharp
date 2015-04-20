@@ -60,9 +60,9 @@ namespace Cog.Modules.Renderer
                     {
                         var size = MeassureString(lines[i], fontSize);
                         if (horizontalAlignment == HAlign.Right)
-                            DrawString(renderTarget, text, fontSize, color, position - new Vector2(size.X, 0f), HAlign.Left, verticalAlignment);
+                            DrawString(renderTarget, lines[i], fontSize, color, position - new Vector2(size.X, 0f), HAlign.Left, verticalAlignment);
                         else
-                            DrawString(renderTarget, text, fontSize, color, position - new Vector2(size.X / 2f, 0f), HAlign.Left, verticalAlignment);
+                            DrawString(renderTarget, lines[i], fontSize, color, position - new Vector2(size.X / 2f, 0f), HAlign.Left, verticalAlignment);
                         position.Y += size.Y;
                     }
                 }

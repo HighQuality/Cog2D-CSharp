@@ -108,6 +108,19 @@ namespace Cog.Modules.Renderer
             window.Form.Hide();
             Visible = false;
             window.Form.Text = title;
+            switch (style)
+            {
+                case WindowStyle.Default:
+                    window.Form.FormBorderStyle = FormBorderStyle.Fixed3D;
+                    window.Form.MaximizeBox = false;
+                    break;
+                case WindowStyle.Resizable:
+                    window.Form.FormBorderStyle = FormBorderStyle.None;
+                    break;
+                case WindowStyle.Fullscreen:
+                    throw new NotImplementedException();
+                    break;
+            }
             window.Form.MinimumSize = new System.Drawing.Size((int)Engine.MinimumResolution.X, (int)Engine.MinimumResolution.Y);
             window.Form.ClientSize = new System.Drawing.Size(width, height);
             // window.FormBorderStyle = FormBorderStyle.Fixed3D;
@@ -281,13 +294,18 @@ namespace Cog.Modules.Renderer
         }
 
         public abstract void ResizeBackBuffer(Vector2 newResolution);
-        
+
         /// <summary>
         /// Checks whether a key is down or not.
         /// </summary>
         public bool IsKeyDown(Keyboard.Key key)
         {
-            throw new NotImplementedException();
+            Keys winKey;
+            if (reverseKeyMap.TryGetValue(key, out winKey))
+            {
+                return keyUpEvents.ContainsKey(winKey);
+            }
+            return false;
         }
     }
 }
