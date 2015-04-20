@@ -115,11 +115,10 @@ namespace Cog.Modules.Renderer
                     window.Form.MaximizeBox = false;
                     break;
                 case WindowStyle.Resizable:
-                    window.Form.FormBorderStyle = FormBorderStyle.None;
+                    window.Form.FormBorderStyle = FormBorderStyle.Sizable;
                     break;
                 case WindowStyle.Fullscreen:
                     throw new NotImplementedException();
-                    break;
             }
             window.Form.MinimumSize = new System.Drawing.Size((int)Engine.MinimumResolution.X, (int)Engine.MinimumResolution.Y);
             window.Form.ClientSize = new System.Drawing.Size(width, height);
