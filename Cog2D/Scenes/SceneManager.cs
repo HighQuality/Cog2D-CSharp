@@ -78,5 +78,11 @@ namespace Cog.Scenes
 
             return scene;
         }
+
+        public void PopAll()
+        {
+            sceneStack.Clear();
+            CurrentScene = null;
+        }
     }
 }
