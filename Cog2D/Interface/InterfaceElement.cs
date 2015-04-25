@@ -29,8 +29,7 @@ namespace Cog.Interface
         void OnPressed(Mouse.Button button, Vector2 position);
         void OnReleased(Mouse.Button button, Vector2 position);
 
-        IEnumerable<T> EnumerateChildrenRecursively<T>()
-            where T : IInterfaceElement;
+        IEnumerable<T> EnumerateChildrenRecursively<T>();
 
         void TriggerUpdate(UpdateEvent ev);
         void TriggerDraw(DrawInterfaceEvent ev, Vector2 screenCoord);
@@ -205,7 +204,6 @@ namespace Cog.Interface
         }
 
         public IEnumerable<T> EnumerateChildrenRecursively<T>()
-            where T : IInterfaceElement
         {
             for (int i = children.Count - 1; i >= 0; i--)
             {
@@ -220,7 +218,6 @@ namespace Cog.Interface
         }
 
         public IEnumerable<T> EnumerateChildren<T>()
-            where T : IInterfaceElement
         {
             for (int i = children.Count - 1; i >= 0; i--)
             {

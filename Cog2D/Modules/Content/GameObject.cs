@@ -185,6 +185,8 @@ namespace Cog.Modules.Content
         public long Id { get; set; }
         public bool IsGlobal { get { return Id > 0; } }
         public bool IsLocal { get { return Id < 0; } }
+        public bool IsRemotelyCreated { get; internal set; }
+
         private List<IEventListener> registeredEvents;
 
         private float _depth = 1f;

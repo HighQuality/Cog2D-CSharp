@@ -29,13 +29,14 @@ namespace Cog.Scenes
             nextSceneId++;
         }
 
-        internal static Scene CreateFromId(ushort typeId, long id)
+        internal static Scene CreateFromId(ushort typeId, long id, bool isRemotelyCreated)
         {
             if (typeId < 1 || typeId >= idToType.Count)
                 throw new ArgumentOutOfRangeException("Scene ID " + id.ToString() + " is not cached!");
 
             var type = idToType[(int)typeId];
             var scene = (Scene)FormatterServices.GetUninitializedObject(type);
+            scene.IsRemotelyCreated = isRemotelyCreated;
             Engine.AssignId(scene, id);
             type.GetConstructor(new Type[0]).Invoke(scene, new object[0]);
             return scene;

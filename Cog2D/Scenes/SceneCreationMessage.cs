@@ -27,7 +27,8 @@ namespace Cog.Scenes
             if (Engine.IsServer)
                 throw new Exception("Client sent server a SceneCreationMessage");
 
-            var scene = SceneCache.CreateFromId(TypeId, Id);
+            var scene = SceneCache.CreateFromId(TypeId, Id, true);
+            Engine.ClientModule.RemotelyCreatedScenes.Add(scene);
             scene.ReadSceneCreationData(Data);
             using (var stream = new MemoryStream(UserData))
             {

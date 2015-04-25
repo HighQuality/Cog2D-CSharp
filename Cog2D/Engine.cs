@@ -487,6 +487,15 @@ namespace Cog
             return null;
         }
 
+        public static void DisconnectServer()
+        {
+            if (ClientModule != null)
+            {
+                ClientModule.Disconnect();
+                ClientModule = null;
+            }
+        }
+
         /// <summary>
         /// Invokes the given action synchronized, in the main thread, after the given time has elapsed.
         /// Passes the time in seconds it missed by.

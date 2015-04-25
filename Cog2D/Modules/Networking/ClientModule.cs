@@ -1,4 +1,5 @@
 ﻿using Cog.Modules.EventHost;
+using Cog.Scenes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,8 @@ namespace Cog.Modules.Networking
         private IEventListener updateListener;
         public string Hostname { get; private set; }
         public int Port { get; private set; }
+
+        public List<Scene> RemotelyCreatedScenes = new List<Scene>();
 
         internal ClientModule(string hostname, int port)
         {
@@ -38,8 +41,11 @@ namespace Cog.Modules.Networking
             client.Send<T>(message);
         }
 
-        public void Disconnect()
+        internal void Disconnect()
         {
+            foreach (var scene in RemotelyCreatedScenes)
+                scene.Remove();
+            RemotelyCreatedScenes.Clear();
             client.Disconnect();
         }
     }

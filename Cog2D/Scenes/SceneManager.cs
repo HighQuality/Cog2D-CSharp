@@ -12,6 +12,7 @@ namespace Cog.Scenes
     public class SceneManager
     {
         public Scene CurrentScene { get; private set; }
+        public int StackSize { get { return sceneStack.Count; } }
         private Stack<Scene> sceneStack = new Stack<Scene>();
 
         public SceneManager()
@@ -34,6 +35,7 @@ namespace Cog.Scenes
             where T : Scene, new()
         {
             T scene = (T)FormatterServices.GetUninitializedObject(typeof(T));
+            scene.IsRemotelyCreated = false;
             Engine.GenerateLocalId(scene);
 
             // Invoke constructor
@@ -49,6 +51,7 @@ namespace Cog.Scenes
                 throw new InvalidOperationException("Can not create a global scene while connected to a server!");
 
             T scene = (T)FormatterServices.GetUninitializedObject(typeof(T));
+            scene.IsRemotelyCreated = false;
             Engine.GenerateGlobalId(scene);
 
             // Invoke constructor

@@ -60,6 +60,8 @@ namespace Cog.Scenes
         public bool IsGlobal { get { return Id > 0; } }
         public bool IsLocal { get { return Id < 0; } }
 
+        public bool IsRemotelyCreated { get; internal set; }
+
         public bool DoRemove { get; private set; }
 
         public Scene(string name)
@@ -267,7 +269,7 @@ namespace Cog.Scenes
                     {
                         ushort typeId = reader.ReadUInt16();
                         long id = reader.ReadInt64();
-                        objects[i] = CreateUninitializedObject(GameObject.TypeFromId(typeId), null, true);
+                        objects[i] = CreateUninitializedObject(GameObject.TypeFromId(typeId), null, true, true);
                         Engine.AssignId(objects[i], id);
                     }
 
@@ -308,7 +310,7 @@ namespace Cog.Scenes
             if (Engine.IsClient)
                 throw new Exception("Can not create global objects when connected to a server!");
 
-            T obj = (T)CreateUninitializedObject(typeof(T), parent, true);
+            T obj = (T)CreateUninitializedObject(typeof(T), parent, true, false);
             Engine.GenerateGlobalId(obj);
             obj.LocalCoord = localCoord;
 
@@ -327,7 +329,7 @@ namespace Cog.Scenes
             if (Engine.IsClient)
                 throw new Exception("Can not create global objects when connected to a server!");
 
-            GameObject obj = (GameObject)CreateUninitializedObject(type, parent, true);
+            GameObject obj = (GameObject)CreateUninitializedObject(type, parent, true, false);
             Engine.GenerateGlobalId(obj);
             obj.LocalCoord = localCoord;
 
@@ -339,7 +341,7 @@ namespace Cog.Scenes
             return obj;
         }
 
-        public GameObject CreateUninitializedObject(Type type, GameObject parent, bool isGlobal)
+        public GameObject CreateUninitializedObject(Type type, GameObject parent, bool isGlobal, bool isRemotelyCreated)
         {
             if (disableObjectCreation > 0 && isGlobal)
                 throw new InvalidOperationException("Global object creation may not occur in a constructor, please override GameObject.Initialize instead!");
@@ -362,6 +364,7 @@ namespace Cog.Scenes
             GameObject obj = (GameObject)FormatterServices.GetUninitializedObject(type);
             obj.Scene = this;
             obj.InitialSetParent(parent);
+            obj.IsRemotelyCreated = isRemotelyCreated;
 
             InitializationData data = new InitializationData();
             var synchronizedFields = GameObject.GetSynchronizedFields(type);
@@ -457,7 +460,7 @@ namespace Cog.Scenes
         public T InnerCreateLocalObject<T>(GameObject parent, Vector2 localCoord, object[] creationData)
             where T : GameObject, new()
         {
-            T obj = (T)CreateUninitializedObject(typeof(T), parent, false);
+            T obj = (T)CreateUninitializedObject(typeof(T), parent, false, false);
             Engine.GenerateLocalId(obj);
             obj.LocalCoord = localCoord;
 
