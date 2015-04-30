@@ -27,7 +27,7 @@ namespace XnaRenderer
 
         public override Texture TextureFromImage(Cog.Image image)
         {
-            throw new NotImplementedException();
+            return new XnaTexture(image);
         }
 
         public override Texture LoadTexture(string filename)
@@ -39,6 +39,16 @@ namespace XnaRenderer
         {
             AdditiveBlend = new AdditiveBlend();
             AlphaBlend = new AlphaBlend();
+        }
+
+        protected override void InitializeShaders()
+        {
+            DefaultShader = new XnaShader();
+        }
+
+        public override GlslShader LoadGlslShader(string vertexShaderSource, string fragmentShaderSource)
+        {
+            throw new NotSupportedException("XnaRenderer does not support GLSL shaders!");
         }
     }
 }

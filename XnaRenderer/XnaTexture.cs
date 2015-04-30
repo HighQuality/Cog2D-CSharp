@@ -22,6 +22,12 @@ namespace XnaRenderer
             InnerTexture = Texture2D.FromStream(XnaWindow.GraphicsDevice, new MemoryStream(data));
         }
 
+        public XnaTexture(Cog.Image image)
+        {
+            InnerTexture = new Texture2D(XnaWindow.GraphicsDevice, image.Width, image.Height);
+            InnerTexture.SetData<Cog.Color>(image.Data);
+        }
+
         public override void Dispose()
         {
             Dispose(true);

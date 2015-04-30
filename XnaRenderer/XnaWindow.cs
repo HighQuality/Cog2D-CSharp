@@ -78,7 +78,7 @@ namespace XnaRenderer
                 scale.Y *= -1f;
             }
 
-            spriteBatch.Draw(((XnaTexture)texture).InnerTexture, new Microsoft.Xna.Framework.Vector2(windowCoords.X, windowCoords.Y), new Microsoft.Xna.Framework.Rectangle((int)textureRect.Left, (int)textureRect.Top, (int)textureRect.Width, (int)textureRect.Height), new Microsoft.Xna.Framework.Color(color.R, color.G, color.B, color.A), rotation / 180f * Mathf.Pi, new Microsoft.Xna.Framework.Vector2(origin.X, origin.Y), new Microsoft.Xna.Framework.Vector2(scale.X, scale.Y), spriteEffects, 0f);
+            spriteBatch.Draw(((XnaTexture)texture).InnerTexture, new Microsoft.Xna.Framework.Vector2(windowCoords.X, windowCoords.Y), new Microsoft.Xna.Framework.Rectangle((int)textureRect.Left, (int)textureRect.Top, (int)textureRect.Width, (int)textureRect.Height), new Microsoft.Xna.Framework.Color((float)color.R / 255f, (float)color.G / 255f, (float)color.B / 255f, (float)color.A / 255f), rotation / 180f * Mathf.Pi, new Microsoft.Xna.Framework.Vector2(origin.X, origin.Y), new Microsoft.Xna.Framework.Vector2(scale.X, scale.Y), spriteEffects, 0f);
         }
 
         internal static void TryEnd()

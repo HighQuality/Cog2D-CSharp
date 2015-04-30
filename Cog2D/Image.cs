@@ -14,19 +14,19 @@ namespace Cog
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
-        private Color[] colors;
+        public Color[] Data;
 
         public Color this[int x, int y]
         {
-            get { if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x"); if (y < 0 || y >= Width) throw new ArgumentOutOfRangeException("y"); return colors[x + y * Width]; }
-            set { if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x"); if (y < 0 || y >= Width) throw new ArgumentOutOfRangeException("y"); colors[x + y * Height] = value; }
+            get { if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x"); if (y < 0 || y >= Width) throw new ArgumentOutOfRangeException("y"); return Data[x + y * Width]; }
+            set { if (x < 0 || x >= Width) throw new ArgumentOutOfRangeException("x"); if (y < 0 || y >= Width) throw new ArgumentOutOfRangeException("y"); Data[x + y * Height] = value; }
         }
 
         public Image(int width, int height)
         {
             Width = width;
             Height = height;
-            colors = new Color[Width * Height];
+            Data = new Color[Width * Height];
         }
 
         public Image(string filename)
@@ -42,7 +42,7 @@ namespace Cog
                 {
                     Width = bitmap.Width;
                     Height = bitmap.Height;
-                    colors = new Color[Width * Height];
+                    Data = new Color[Width * Height];
 
                     BitmapData bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
@@ -62,7 +62,7 @@ namespace Cog
                             int red = pixels[pixelPosition + 2];
                             int alpha = pixels[pixelPosition + 3];
 
-                            colors[x + y * Width] = new Color(red, green, blue, alpha);
+                            Data[x + y * Width] = new Color(red, green, blue, alpha);
                         }
                     }
 
@@ -77,7 +77,7 @@ namespace Cog
                 throw new ArgumentOutOfRangeException("x");
             if (y < 0 || y >= Height)
                 throw new ArgumentOutOfRangeException("y");
-            colors[x + y * Width] = color;
+            Data[x + y * Width] = color;
         }
 
         public Color GetColor(int x, int y)
@@ -86,7 +86,7 @@ namespace Cog
                 throw new ArgumentOutOfRangeException("x");
             if (y < 0 || y >= Height)
                 throw new ArgumentOutOfRangeException("y");
-            return colors[x + y * Width];
+            return Data[x + y * Width];
         }
 
         public Bitmap ToBitmap()
