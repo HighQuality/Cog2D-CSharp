@@ -58,7 +58,7 @@ namespace Cog.Modules.Renderer
                     var lines = text.Split('\n');
                     for (int i = 0; i < lines.Length; i++)
                     {
-                        var size = MeassureString(lines[i], fontSize);
+                        var size = MeasureString(lines[i], fontSize);
                         if (horizontalAlignment == HAlign.Right)
                             DrawString(renderTarget, lines[i], fontSize, color, position - new Vector2(size.X, 0f), HAlign.Left, verticalAlignment);
                         else
@@ -70,14 +70,13 @@ namespace Cog.Modules.Renderer
                 {
                     if (verticalAlignment != VAlign.Top)
                     {
-                        var verticalOffset = MeassureString(text, fontSize).Y;
+                        var verticalOffset = MeasureString(text, fontSize).Y;
                         if (verticalAlignment == VAlign.Center)
                             verticalOffset /= 2f;
                         position.Y -= verticalOffset;
                     }
                     float dx = (int)position.X;
                     float dy = (int)position.Y;
-                    float latestXAdvance = 0f;
 
                     foreach (char c in text)
                     {
@@ -91,15 +90,7 @@ namespace Cog.Modules.Renderer
                         {
                             renderTarget.DrawTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
 
-                            if (!char.IsWhiteSpace(c))
-                            {
-                                dx += fc.XAdvance * sizeFactor;
-                                latestXAdvance = fc.XAdvance * sizeFactor;
-                            }
-                            else
-                            {
-                                dx += latestXAdvance;
-                            }
+                            dx += fc.XAdvance * sizeFactor;
                         }
                     }
                 }
@@ -115,9 +106,7 @@ namespace Cog.Modules.Renderer
 
                 float dx = (int)rect.Left;
                 float dy = (int)rect.Top;
-                float wordWidth = 0f;
                 Action drawWord = null;
-                float latestXAdvance = 0f;
 
                 foreach (char c in text)
                 {
@@ -139,25 +128,6 @@ namespace Cog.Modules.Renderer
                                 drawWord = null;
                             }
                         }
-                        else if (char.IsWhiteSpace(c))
-                        {
-                            if (drawWord != null)
-                            {
-                                drawWord();
-                                drawWord = null;
-                            }
-
-                            renderTarget.DrawTexture(Texture, new Vector2(dx + fc.XOffset * sizeFactor, dy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
-
-                            if (fc.XAdvance > 0f)
-                            {
-                                dx += fc.XAdvance * sizeFactor;
-                            }
-                            else
-                            {
-                                dx += latestXAdvance;
-                            }
-                        }
                         else
                         {
                             float xx = dx;
@@ -167,12 +137,6 @@ namespace Cog.Modules.Renderer
                                 renderTarget.DrawTexture(Texture, new Vector2(xx + fc.XOffset * sizeFactor, yy + fc.YOffset * sizeFactor), color, new Vector2(sizeFactor, sizeFactor), Vector2.Zero, 0f, new Rectangle(fc.X, fc.Y, fc.Width, fc.Height));
                             };
                             dx += fc.XAdvance * sizeFactor;
-                            wordWidth += fc.XAdvance * sizeFactor;
-                        }
-
-                        if (fc.XAdvance > 0f)
-                        {
-                            latestXAdvance = fc.XAdvance * sizeFactor;
                         }
                     }
                 }
@@ -183,44 +147,34 @@ namespace Cog.Modules.Renderer
                 }
             }
 
-            public Vector2 MeassureString(string text, float fontSize)
+            public Vector2 MeasureString(string text, float fontSize)
             {
                 float sizeFactor = (fontSize / (float)FontFile.Info.Size);
                 float lineHeight = FontFile.Common.LineHeight * sizeFactor;
 
-                float maxWidth = 0f;
-                float maxHeight = 0f;
-                // Whitespaces count too, newline moves down by line height when rendering
-                if (text.Length > 0)
-                    maxHeight = lineHeight;
+                float dx = 0f,
+                    dy = 0f,
+                    maxDx = 0f;
 
-                float lineWidth = 0;
-                float latestXAdvance = 0f;
+                if (text.Length > 0)
+                    dy += lineHeight;
 
                 foreach (char c in text)
                 {
                     FontChar fc;
-
                     if (c == '\n')
                     {
-                        maxHeight += lineHeight;
-                        lineWidth = 0;
+                        dx = 0f;
+                        dy += lineHeight;
                     }
                     else if (CharacterMap.TryGetValue(c, out fc))
                     {
-                        if (fc.XAdvance > 0f)
-                        {
-                            latestXAdvance = (float)fc.XAdvance * sizeFactor;
-                            lineWidth += latestXAdvance;
-                        }
-                        else if (char.IsWhiteSpace(c))
-                            lineWidth += latestXAdvance;
-                        if (lineWidth > maxWidth)
-                            maxWidth = lineWidth;
+                        dx += fc.XAdvance * sizeFactor;
+                        if (dx > maxDx)
+                            maxDx = dx;
                     }
                 }
-
-                return new Vector2(maxWidth, maxHeight);
+                return new Vector2(maxDx, dy);
             }
         }
 
@@ -246,9 +200,9 @@ namespace Cog.Modules.Renderer
             Renderer.DrawString(target, text, fontSize, color, rect);
         }
 
-        public Vector2 MeassureString(string str, float fontSize)
+        public Vector2 MeasureString(string str, float fontSize)
         {
-            return Renderer.MeassureString(str, fontSize);
+            return Renderer.MeasureString(str, fontSize);
         }
 
         public override void Dispose()
