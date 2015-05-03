@@ -327,6 +327,10 @@ namespace Cog.Interface
             {
                 DoRemove = true;
 
+                foreach (var child in children)
+                    child.Remove();
+                children.Clear();
+
                 if (OnRemoved != null)
                     OnRemoved();
             }

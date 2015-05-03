@@ -511,6 +511,8 @@ namespace Cog.Scenes
 
                 Objects.Clear();
 
+                Interface.Remove();
+
                 DrawCells.Clear();
                 DrawCellMoveQueue.Clear();
             }
