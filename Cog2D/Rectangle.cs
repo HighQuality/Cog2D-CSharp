@@ -37,11 +37,6 @@ namespace Cog
             this._size = size;
         }
 
-        public bool Contains(object input)
-        {
-            throw new NotImplementedException();
-        }
-
         public Rectangle OverlayOf(Rectangle other)
         {
             var topLeft = new Vector2(Mathf.Max(Left, other.Left), Mathf.Max(Top, other.Top));

@@ -256,6 +256,7 @@ namespace Cog
 
             TypeSerializer.Register<Guid>((r, w) => w.Write(r.ReadBytes(16)), (v, w) => w.Write(v.ToByteArray()), r => new Guid(r.ReadBytes(16)));
 
+            TypeSerializer.Register<Angle>((r, w) => w.Write(r.ReadBytes(sizeof(Single))), (v, w) => w.Write((Single)v.Degree), r => new Angle(r.ReadSingle()));
             TypeSerializer.Register<Vector2>((r, w) => w.Write(r.ReadBytes(sizeof(float) * 2)), (v, w) => { w.Write((float)v.X); w.Write((float)v.Y); }, r => { Vector2 v; v.X = r.ReadSingle(); v.Y = r.ReadSingle(); return v; });
             TypeSerializer.Register<Rectangle>((r, w) => w.Write(r.ReadBytes(sizeof(float) * 4)), (v, w) => { w.Write((float)v.TopLeft.X); w.Write((float)v.TopLeft.Y); w.Write((float)v.Size.X); w.Write((float)v.Size.Y); }, r => { Vector2 topLeft, size; topLeft.X = r.ReadSingle(); topLeft.Y = r.ReadSingle(); size.X = r.ReadSingle(); size.Y = r.ReadSingle(); return new Rectangle(topLeft, size); });
             TypeSerializer.Register<Color>((r, w) => w.Write(r.ReadBytes(sizeof(byte) * 4)), (v, w) => { w.Write((byte)v.R); w.Write((byte)v.G); w.Write((byte)v.B); w.Write((byte)v.A); }, r => { Color v; v.R = r.ReadByte(); v.G = r.ReadByte(); v.B = r.ReadByte(); v.A = r.ReadByte(); return v; });
