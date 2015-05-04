@@ -34,11 +34,13 @@ namespace Cog.Modules.Audio
         float Panning { get; set; }
         */
 
+        /*
         /// <summary>
         /// Gets or sets the pitch of the sound.
         /// Default value is 1
         /// </summary>
         float Pitch { get; set; }
+        */
 
         /// <summary>
         /// Stops the sound from playing.

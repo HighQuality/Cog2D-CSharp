@@ -118,12 +118,13 @@ namespace Cog.Modules.Renderer
                     window.Form.FormBorderStyle = FormBorderStyle.Sizable;
                     break;
                 case WindowStyle.Fullscreen:
-                    throw new NotImplementedException();
+                    window.Form.TopMost = true;
+                    window.Form.FormBorderStyle = FormBorderStyle.None;
+                    window.Form.WindowState = FormWindowState.Maximized;
+                    break;
             }
             window.Form.MinimumSize = new System.Drawing.Size((int)Engine.MinimumResolution.X, (int)Engine.MinimumResolution.Y);
             window.Form.ClientSize = new System.Drawing.Size(width, height);
-            // window.FormBorderStyle = FormBorderStyle.Fixed3D;
-            // window.MaximizeBox = false;
             window.Form.FormClosed += (_, __) => IsOpen = false;
             window.GameControl.MouseMove += (s, par) =>
             {
@@ -153,8 +154,8 @@ namespace Cog.Modules.Renderer
 
         void GameControl_SizeChanged(object sender, EventArgs e)
         {
-            ResizeBackBuffer(new Vector2(window.GameControl.Size.Width, window.GameControl.Size.Height));
-            Engine.EventHost.GetEvent<ResolutionChangedEvent>().Trigger(new ResolutionChangedEvent(window.GameControl.Size.Width, window.GameControl.Size.Height));
+            ResizeBackBuffer(new Vector2(window.GameControl.ClientSize.Width, window.GameControl.ClientSize.Height));
+            Engine.EventHost.GetEvent<ResolutionChangedEvent>().Trigger(new ResolutionChangedEvent(window.GameControl.ClientSize.Width, window.GameControl.ClientSize.Height));
         }
 
         private void Window_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
