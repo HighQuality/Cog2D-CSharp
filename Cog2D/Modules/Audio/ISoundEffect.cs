@@ -19,5 +19,9 @@ namespace Cog.Modules.Audio
         /// Creates and plays an instance of the sound.
         /// </summary>
         public abstract ISoundInstance Play();
+        /// <summary>
+        /// Creates and loops an instance of the sound.
+        /// </summary>
+        public abstract ISoundInstance Loop();
     }
 }
