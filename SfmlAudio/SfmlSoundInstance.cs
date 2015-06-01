@@ -29,12 +29,17 @@ namespace Cog.SfmlAudio
         }
 
         internal SfmlSoundInstance(SfmlSoundEffect sfx)
+            : this(sfx, false)
+        {
+        }
+
+        internal SfmlSoundInstance(SfmlSoundEffect sfx, bool looped)
         {
             Sound = new SFML.Audio.Sound(sfx.Buffer);
+            Sound.Loop = looped;
 
             SoundEffect = sfx;
-            Volume = 1f;
-            
+            Volume = 1f;   
         }
 
         public void Stop()

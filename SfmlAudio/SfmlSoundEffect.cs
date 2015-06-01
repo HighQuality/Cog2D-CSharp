@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Cog.Modules.Audio;
 
 namespace Cog.SfmlAudio
 {
@@ -23,6 +24,13 @@ namespace Cog.SfmlAudio
         public override Cog.Modules.Audio.ISoundInstance Play()
         {
             var snd = CreateInstance();
+            snd.Paused = false;
+            return snd;
+        }
+
+        public override ISoundInstance Loop()
+        {
+            var snd = new SfmlSoundInstance(this, true);
             snd.Paused = false;
             return snd;
         }
