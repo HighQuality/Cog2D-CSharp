@@ -64,6 +64,8 @@ namespace Cog.Scenes
 
         public bool DoRemove { get; private set; }
 
+        public ResourceCollection Resources { get; private set; }
+
         public Scene(string name)
         {
             if (Id == 0)
@@ -86,6 +88,8 @@ namespace Cog.Scenes
             RegisterEvent<ResolutionChangedEvent>(0, e => { if (Interface != null) Interface.Size = new Vector2(e.Width, e.Height); });
             
             Camera = CreateLocalObject<Camera>(new Vector2());
+
+            Resources = Engine.ResourceHost.GetResourceCollection(GetType());
         }
 
         private void Update(UpdateEvent args)

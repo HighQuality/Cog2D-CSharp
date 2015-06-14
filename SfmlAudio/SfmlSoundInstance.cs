@@ -39,7 +39,7 @@ namespace Cog.SfmlAudio
             Sound.Loop = looped;
 
             SoundEffect = sfx;
-            Volume = 1f;   
+            Volume = 1f;
         }
 
         public void Stop()

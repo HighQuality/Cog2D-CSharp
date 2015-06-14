@@ -1,6 +1,7 @@
 ﻿using Cog;
 using Cog.Modules.EventHost;
 using Cog.Modules.Renderer;
+using Cog.Modules.Resources;
 using Cog.Scenes;
 using System;
 using System.Collections.Generic;
@@ -148,8 +149,12 @@ namespace Cog.Interface
 
         public int Depth { get; private set; }
 
+        public ResourceCollection Resources { get; private set; }
+
         public InterfaceElement(TParent parent, Vector2 location, int depth)
         {
+            Resources = Engine.ResourceHost.GetResourceCollection(GetType());
+
             this.Location = location;
             this.Depth = depth;
 
