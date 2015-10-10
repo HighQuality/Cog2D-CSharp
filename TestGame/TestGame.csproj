@@ -103,6 +103,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Cog2D-GamePad\Cog2D-GamePad.csproj">
+      <Project>{fb785332-bf19-4c36-b793-cb292dd56a29}</Project>
+      <Name>Cog2D-GamePad</Name>
+    </ProjectReference>
     <ProjectReference Include="..\D3DRenderer\D3DRenderer.csproj">
       <Project>{b126d090-a28f-44ad-899f-aea07f2ee95e}</Project>
       <Name>D3DRenderer</Name>

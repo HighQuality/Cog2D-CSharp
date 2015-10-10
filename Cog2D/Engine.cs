@@ -396,6 +396,7 @@ namespace Cog
                     TimedEventHost.Update();
 
                 Window.DispatchEvents();
+                EventHost.GetEvent<InputUpdateEvent>().Trigger(new InputUpdateEvent());
 
                 accumulator += deltaTime;
                 while (accumulator >= PhysicsTimeStep)

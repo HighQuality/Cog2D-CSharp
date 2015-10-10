@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22609.0
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cog2D", "Cog2D\Cog2D.csproj", "{5C56475F-F797-4C69-83F5-D5920C204E4A}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D3DRenderer", "D3DRenderer\D3DRenderer.csproj", "{B126D090-A28F-44AD-899F-AEA07F2EE95E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XnaRenderer", "XnaRenderer\XnaRenderer.csproj", "{C06E9138-2EA5-4DBE-933B-A1036CCE391D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cog2D-GamePad", "Cog2D-GamePad\Cog2D-GamePad.csproj", "{FB785332-BF19-4C36-B793-CB292DD56A29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,6 +135,22 @@ Global
 		{C06E9138-2EA5-4DBE-933B-A1036CCE391D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C06E9138-2EA5-4DBE-933B-A1036CCE391D}.Release|x64.ActiveCfg = Release|Any CPU
 		{C06E9138-2EA5-4DBE-933B-A1036CCE391D}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|x64.Build.0 = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Debug|x86.Build.0 = Debug|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|x64.ActiveCfg = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|x64.Build.0 = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB785332-BF19-4C36-B793-CB292DD56A29}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

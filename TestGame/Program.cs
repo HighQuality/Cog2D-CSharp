@@ -13,6 +13,7 @@ using Cog.Modules.Networking;
 using Cog.Interface;
 using System.IO;
 using Cog.SfmlAudio;
+using Cog2D.GamePad;
 
 namespace TestGame
 {
@@ -21,6 +22,9 @@ namespace TestGame
         static void Main(string[] args)
         {
             Engine.Initialize<XnaRenderer.XnaRenderer, SfmlAudioModule>();
+
+            GamePad.Initialize();
+
             float time = 0f;
 
             var container = Engine.ResourceHost.LoadDictionary("main", "resources");
@@ -28,6 +32,10 @@ namespace TestGame
             Texture texture = null;
 
             LoadingScene scene = null;
+
+            Engine.EventHost.RegisterEvent<GamePadConnectedEvent>(0, ev => { Debug.Success("GamePad {0} connected", ev.Index); });
+            Engine.EventHost.RegisterEvent<GamePadDisconnectedEvent>(0, ev => { Debug.Success("GamePad {0} disconnected", ev.Index); });
+            Engine.EventHost.RegisterEvent<GamePadUpdateEvent>(0, ev => { Debug.Success("{0}: {1}", ev.Index, ev.LeftStick); });
 
             Engine.EventHost.RegisterEvent<InitializeEvent>(0, e =>
             {
@@ -37,7 +45,7 @@ namespace TestGame
                 else
                     Debug.Success("Successfully connected to server @{0}:{1}!", Engine.ClientModule.Hostname, Engine.ClientModule.Port);
 
-                texture = Engine.Renderer.LoadTexture("splash.png");
+                texture = Engine.Renderer.LoadTexture("cog_splash.png");
 
                 scene = Engine.SceneHost.CreateLocal<LoadingScene>();
             });
