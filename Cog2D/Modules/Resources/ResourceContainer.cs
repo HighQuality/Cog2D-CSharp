@@ -43,7 +43,7 @@ namespace Cog.Modules.Resources
             }
             else if (extension == ".fnt")
             {
-                resource = new BitmapFont(data, p => (Texture)Load(System.IO.Path.GetDirectoryName(file) + "\\" + p));
+                resource = new BitmapFont(data, p => (Texture)Load(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(file), p)));
                 resourceType = "Bitmap Font";
             }
             else
