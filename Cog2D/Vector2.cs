@@ -57,7 +57,7 @@ namespace Cog
         {
             get
             {
-                return new Angle(this).Unit;
+                return this / Length;
             }
         }
 
